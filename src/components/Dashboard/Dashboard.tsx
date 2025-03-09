@@ -47,14 +47,14 @@ const Dashboard = () => {
         <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent="center">
           <Card sx={{ backgroundColor: '#e8f5e9', flex: 1, minWidth: 300, p: 2 }}>
             <CardContent>
-              <Typography variant='h6' fontWeight='bold'>Kari's Income</Typography>
-              <Typography variant='h3' color='primary'>€ {incomeData ? formatNumber(incomeData.kari_income) : '0,00'}</Typography>
+            <Typography variant="h6" fontWeight="bold">Kari&apos;s Income</Typography>
+            <Typography variant='h3' color='primary'>€ {incomeData ? formatNumber(incomeData.kari_income) : '0,00'}</Typography>
               <Typography variant='h6' color='textSecondary'>{incomeData ? formatNumber(incomeData.kari_percentage) : '0,00'}% of total</Typography>
             </CardContent>
           </Card>
           <Card sx={{ backgroundColor: '#e3f2fd', flex: 1, minWidth: 300, p: 2 }}>
             <CardContent>
-              <Typography variant='h6' fontWeight='bold'>Adolfo's Income</Typography>
+              <Typography variant='h6' fontWeight='bold'>Adolfo&apos;s Income</Typography>
               <Typography variant='h3' color='primary'>€ {incomeData ? formatNumber(incomeData.adolfo_income) : '0,00'}</Typography>
               <Typography variant='h6' color='textSecondary'>{incomeData ? formatNumber(incomeData.adolfo_percentage) : '0,00'}% of total</Typography>
             </CardContent>

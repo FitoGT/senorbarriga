@@ -1,5 +1,5 @@
-import { useAuth } from "../../context/Auth/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from '../../context/Auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -8,10 +8,12 @@ const Dashboard = () => {
   return (
     <div>
       <h2>Welcome, {user?.email}</h2>
-      <button onClick={() => {
-        logout();
-        navigate("/");
-      }}>
+      <button
+        onClick={() => {
+          logout();
+          navigate('/');
+        }}
+      >
         Logout
       </button>
     </div>

@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { createContext, useContext, useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL!;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY!;
@@ -57,18 +57,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, error, login, logout }}>{children}</AuthContext.Provider>;
 };
 
 // Custom hook to use AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

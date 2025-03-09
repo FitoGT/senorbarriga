@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../../services/Supabase/SupabaseService';
+import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Income } from '../../interfaces/Income';
 import { 
   Container, 
@@ -18,24 +18,18 @@ const Dashboard = () => {
   const [incomeData, setIncomeData] = useState<Income | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchIncome = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('income')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      console.error('Error fetching income:', error.message);
-    } else {
-      setIncomeData(data);
-    }
-    setLoading(false);
-  };  
-
   useEffect(() => {
+    const fetchIncome = async () => {
+      setLoading(true);
+      try {
+        const latestIncome = await supabaseService.getLatestIncome();
+        setIncomeData(latestIncome);
+      } catch (error) {
+        console.error('Error fetching income:', error);
+      }
+      setLoading(false);
+    };
+
     fetchIncome();
   }, []);
 
@@ -47,8 +41,8 @@ const Dashboard = () => {
         <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent="center">
           <Card sx={{ backgroundColor: '#e8f5e9', flex: 1, minWidth: 300, p: 2 }}>
             <CardContent>
-            <Typography variant="h6" fontWeight="bold">Kari&apos;s Income</Typography>
-            <Typography variant='h3' color='primary'>€ {incomeData ? formatNumber(incomeData.kari_income) : '0,00'}</Typography>
+              <Typography variant="h6" fontWeight="bold">Kari&apos;s Income</Typography>
+              <Typography variant='h3' color='primary'>€ {incomeData ? formatNumber(incomeData.kari_income) : '0,00'}</Typography>
               <Typography variant='h6' color='textSecondary'>{incomeData ? formatNumber(incomeData.kari_percentage) : '0,00'}% of total</Typography>
             </CardContent>
           </Card>

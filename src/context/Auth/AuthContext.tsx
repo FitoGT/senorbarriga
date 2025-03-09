@@ -1,30 +1,29 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../../services/Supabase/SupabaseService';
+import { supabaseService } from '../../services/Supabase/SupabaseService';
+import { User } from '@supabase/supabase-js';
 
-// Define the context type
 interface AuthContextType {
-  user: any;
+  user: User | null;
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
-// Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Auth Provider Component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check for authenticated user on mount
   useEffect(() => {
     const checkUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.user) {
-        setUser(data.session.user);
+      try {
+        const currentUser = await supabaseService.getSession();
+        setUser(currentUser);
+      } catch (err) {
+        console.error('Error fetching session:', err);
       }
       setLoading(false);
     };
@@ -32,31 +31,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkUser();
   }, []);
 
-  // Login function
   const login = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      setError(error.message);
-    } else {
-      setUser(data.user);
+    try {
+      const loggedInUser = await supabaseService.signInWithEmail(email, password);
+      setUser(loggedInUser);
+    } catch (err: any) {
+      setError(err.message);
     }
+
     setLoading(false);
   };
 
-  // Logout function
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    try {
+      await supabaseService.signOut();
+      setUser(null);
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
   };
 
-  return <AuthContext.Provider value={{ user, loading, error, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, error, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-// Custom hook to use AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

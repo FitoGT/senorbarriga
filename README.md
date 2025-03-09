@@ -46,36 +46,3 @@ SQL DB
 Backend Node Express TS
 React TS
 Deployed?
-
-
---------------------------------------------------------------------------------
-
-https://zonqnxedraksextmiqhq.supabase.co
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvbnFueGVkcmFrc2V4dG1pcWhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1MTQ4NTQsImV4cCI6MjA1NzA5MDg1NH0.UcPX5alf7CVqxjHFvKUCy6JZVxNwvdHdJ-zh6-l5gGU
-
-
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = 'https://zonqnxedraksextmiqhq.supabase.co'
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-
-
-------------------------------------------------------------------------------
-
-primer entregable
-user table con estos datos
-name & email
-
-api de query a esa tabla
-
-ui oauth a gmail y que cheke el mail de la tabla.
-
-hello name if success
-else img de don ramon
-
-build capacitor app
-
-
-

@@ -1,0 +1,2 @@
+# senorbarriga
+calcular gastos mensuales

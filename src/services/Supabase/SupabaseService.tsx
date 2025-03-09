@@ -1,4 +1,5 @@
-import { createClient, SupabaseClient, AuthResponse, AuthError, User } from '@supabase/supabase-js';
+/* eslint-disable camelcase */
+import { createClient, SupabaseClient, AuthResponse, User } from '@supabase/supabase-js';
 import { Income } from '../../interfaces/Income';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL!;
@@ -31,6 +32,7 @@ class SupabaseService {
     if (error) throw new Error(error.message);
     return data.session?.user || null;
   }
+
   async getLatestIncome(): Promise<Income | null> {
     const { data, error } = await this.client
       .from('income')
@@ -41,6 +43,37 @@ class SupabaseService {
 
     if (error) throw new Error(error.message);
     return data;
+  }
+
+  async updateIncome(person: 'kari' | 'adolfo', newIncome: number): Promise<void> {
+    const latestIncome = await this.getLatestIncome();
+    if (!latestIncome) throw new Error('No income record found.');
+
+    let updatedData: Partial<Income> = {};
+
+    if (person === 'kari') {
+      const totalIncome = newIncome + latestIncome.adolfo_income;
+      updatedData = {
+        kari_income: newIncome,
+        total_income: totalIncome,
+        kari_percentage: (newIncome / totalIncome) * 100,
+        adolfo_percentage: 100 - (newIncome / totalIncome) * 100,
+      };
+    } else if (person === 'adolfo') {
+      const totalIncome = newIncome + latestIncome.kari_income;
+      updatedData = {
+        adolfo_income: newIncome,
+        total_income: totalIncome,
+        adolfo_percentage: (newIncome / totalIncome) * 100,
+        kari_percentage: 100 - (newIncome / totalIncome) * 100,
+      };
+    } else {
+      throw new Error('Invalid person type. Use "kari" or "adolfo".');
+    }
+
+    const { error } = await this.client.from('income').update(updatedData).eq('id', latestIncome.id);
+
+    if (error) throw new Error(error.message);
   }
 }
 

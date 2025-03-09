@@ -36,13 +36,6 @@ Calculate expenses
 	3. Sum each result and substract by kari
 
 UI
-Login-Logout
 Income
 Expenses
 Totals
-
-INFRASTRUCTURE
-SQL DB
-Backend Node Express TS
-React TS
-Deployed?

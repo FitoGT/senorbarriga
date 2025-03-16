@@ -102,6 +102,22 @@ class SupabaseService {
     if (error) throw new Error(error.message);
   }
 
+  async getExpenseById(expenseId: number): Promise<Expense | null> {
+    const { data, error } = await this.client
+      .from('expenses')
+      .select('*')
+      .eq('id', expenseId)
+      .single();
+  
+    if (error) throw new Error(error.message);
+  
+    return data ? {
+      ...data,
+      category: data.category as ExpenseCategory,
+      type: data.type as ExpenseType,
+    } : null;
+  }
+
 }
 
 

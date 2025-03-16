@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Income } from '../../interfaces/Income';
 import { Expense } from '../../interfaces/Expenses';
-import { Container, CircularProgress, Stack, Typography } from '@mui/material';
+import { 
+  Container, 
+  CircularProgress, 
+  Stack, 
+  Typography, 
+  Box, 
+  IconButton 
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import IncomeCard from './IncomeCard';
 import ExpensesAccordion from './ExpensesAccordion';
 
@@ -11,6 +20,7 @@ const formatNumber = (value: number): string => {
 };
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [incomeData, setIncomeData] = useState<Income | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +36,6 @@ const Dashboard = () => {
 
         setIncomeData(latestIncome);
         setExpenses(expensesData);
-
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -63,8 +72,17 @@ const Dashboard = () => {
             />
           </Stack>
 
+          {/* Expenses Title with IconButton */}
           <Stack spacing={2} sx={{ mt: 4 }}>
-            <Typography variant="h6" fontWeight="bold">Expenses</Typography>
+            <Box display="flex" alignItems="center" justifyContent="space-between">
+              <Typography variant="h6" fontWeight="bold">
+                Expenses
+              </Typography>
+              <IconButton color="primary" onClick={() => navigate('/expense')}>
+                <AddIcon />
+              </IconButton>
+            </Box>
+
             {expenses.length === 0 ? (
               <Typography color="textSecondary">No expenses recorded.</Typography>
             ) : (

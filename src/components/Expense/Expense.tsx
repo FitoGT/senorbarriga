@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { 
   Container, 
   TextField, 
-  Button, 
   Typography, 
   CircularProgress, 
   Box, 
@@ -13,7 +12,9 @@ import {
   InputLabel, 
   Select, 
   Switch, 
-  FormControlLabel 
+  FormControlLabel, 
+  IconButton,
+  FormHelperText
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -22,13 +23,35 @@ import dayjs from 'dayjs';
 import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 const formSchema = z.object({
-  date: z.string().min(1, 'Date is required'), // Cambiado a string en vez de z.date()
-  description: z.string().min(3, 'Description must be at least 3 characters'),
-  amount: z.string().min(1, 'Amount is required'),
-  category: z.nativeEnum(ExpenseCategory),
-  type: z.nativeEnum(ExpenseType),
+  date: z.string()
+    .min(1, 'Date is required')
+    .refine((value) => dayjs(value, 'YYYY-MM-DD', true).isValid(), {
+      message: 'Invalid date format (YYYY-MM-DD required)',
+    }),
+  
+  description: z.string()
+    .min(3, 'Description must be at least 3 characters')
+    .max(100, 'Description must be at most 100 characters'),
+
+  amount: z.string()
+    .min(1, 'Amount is required')
+    .refine((value) => !isNaN(parseFloat(value)) && parseFloat(value) > 0, {
+      message: 'Amount must be a valid number greater than 0',
+    }),
+
+  category: z.nativeEnum(ExpenseCategory, {
+    errorMap: () => ({ message: 'Category is required' }),
+  }),
+
+  type: z.nativeEnum(ExpenseType, {
+    errorMap: () => ({ message: 'Type is required' }),
+  }),
+
   isPaidByKari: z.boolean(),
 });
 
@@ -36,6 +59,7 @@ type ExpenseFormData = z.infer<typeof formSchema>;
 
 const Expense = () => {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   
   const { 
     register, 
@@ -43,11 +67,12 @@ const Expense = () => {
     setValue,
     watch,
     control,
+    reset,
     formState: { errors } 
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      date: dayjs().format('YYYY-MM-DD'), // Valor inicial en string
+      date: dayjs().format('YYYY-MM-DD'),
       isPaidByKari: false,
     }
   });
@@ -56,20 +81,25 @@ const Expense = () => {
     setLoading(true);
     try {
       await supabaseService.insertExpense({
-        date: data.date, // Ya es string con formato 'YYYY-MM-DD'
+        date: data.date,
         description: data.description,
         category: data.category,
         amount: parseFloat(data.amount),
         type: data.type,
         isPaidByKari: data.isPaidByKari,
       });
-
-      alert('Expense added successfully!');
+      reset(); 
+      navigate('/dashboard');
     } catch (error) {
-      console.error('Error adding expense:', error);
+      alert('Error adding expense');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    reset(); 
+    navigate('/dashboard');
   };
 
   return (
@@ -81,7 +111,6 @@ const Expense = () => {
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)} width="100%">
           
-          {/* Date Picker */}
           <Controller
             name="date"
             control={control}
@@ -89,7 +118,7 @@ const Expense = () => {
               <DatePicker
                 {...field}
                 label="Date"
-                value={field.value ? dayjs(field.value) : null} // Convierte el string en Dayjs
+                value={field.value ? dayjs(field.value) : null}
                 onChange={(newDate) => setValue('date', newDate ? newDate.format('YYYY-MM-DD') : '')}
                 format="YYYY-MM-DD"
                 slotProps={{
@@ -126,28 +155,38 @@ const Expense = () => {
             helperText={errors.amount?.message}
           />
 
-          <FormControl fullWidth margin="normal">
+          {/* Category Select con validación */}
+          <FormControl fullWidth margin="normal" error={!!errors.category}>
             <InputLabel>Category</InputLabel>
-            <Select
-              {...register('category')}
-              onChange={(e) => setValue('category', e.target.value as ExpenseCategory)}
-            >
-              {Object.values(ExpenseCategory).map((cat) => (
-                <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-              ))}
-            </Select>
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <Select {...field} onChange={(e) => setValue('category', e.target.value as ExpenseCategory)}>
+                  {Object.values(ExpenseCategory).map((cat) => (
+                    <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+            <FormHelperText>{errors.category?.message}</FormHelperText>
           </FormControl>
 
-          <FormControl fullWidth margin="normal">
+          {/* Type Select con validación */}
+          <FormControl fullWidth margin="normal" error={!!errors.type}>
             <InputLabel>Type</InputLabel>
-            <Select
-              {...register('type')}
-              onChange={(e) => setValue('type', e.target.value as ExpenseType)}
-            >
-              {Object.values(ExpenseType).map((t) => (
-                <MenuItem key={t} value={t}>{t}</MenuItem>
-              ))}
-            </Select>
+            <Controller
+              name="type"
+              control={control}
+              render={({ field }) => (
+                <Select {...field} onChange={(e) => setValue('type', e.target.value as ExpenseType)}>
+                  {Object.values(ExpenseType).map((t) => (
+                    <MenuItem key={t} value={t}>{t}</MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+            <FormHelperText>{errors.type?.message}</FormHelperText>
           </FormControl>
 
           <FormControlLabel
@@ -161,17 +200,25 @@ const Expense = () => {
             label="Paid by Kari"
           />
 
-          <Box mt={2}>
-            <Button 
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              disabled={loading}
+          {/* Botones de Confirmar y Cancelar al final del formulario */}
+          <Box mt={3} display="flex" gap={2}>
+            <IconButton 
+              color="success" 
+              onClick={handleSubmit(onSubmit)} 
+              disabled={loading} 
+              sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Add Expense'}
-            </Button>
+              {loading ? <CircularProgress size={24} color="inherit" /> : <CheckIcon />}
+            </IconButton>
+            <IconButton 
+              color="error" 
+              onClick={handleCancel} 
+              sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
+            >
+              <CloseIcon />
+            </IconButton>
           </Box>
+
         </Box>
       </Container>
     </LocalizationProvider>

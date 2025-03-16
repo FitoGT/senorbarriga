@@ -92,6 +92,15 @@ class SupabaseService {
       type: expense.type as ExpenseType,
     }));
   }
+
+  async insertExpense(expense: Omit<Expense, 'id' | 'created_at'>): Promise<void> {
+    const { error } = await this.client
+      .from('expenses')
+      .insert([expense]);
+  
+    if (error) throw new Error(error.message);
+  }
+
 }
 
 

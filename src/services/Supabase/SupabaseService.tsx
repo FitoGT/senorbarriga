@@ -20,6 +20,7 @@ class SupabaseService {
   async signInWithEmail(email: string, password: string): Promise<User> {
     const { data, error }: AuthResponse = await this.client.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return data.user!;
   }
 
@@ -81,7 +82,7 @@ class SupabaseService {
     const { data, error } = await this.client
       .from('expenses')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('date', { ascending: false });
   
     if (error) throw new Error(error.message);
   

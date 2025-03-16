@@ -7,9 +7,13 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
+  Chip,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SellIcon from '@mui/icons-material/Sell';
 import { Expense } from '../../interfaces/Expenses';
+import PaymentIcon from '@mui/icons-material/Payment';
+import CalculateIcon from '@mui/icons-material/Calculate';
 
 interface ExpensesAccordionProps {
   expense: Expense;
@@ -66,9 +70,11 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
         </Stack>
       </AccordionSummary>
       <AccordionDetails>
-        <Typography variant="body2"><strong>Category:</strong> {expense.category}</Typography>
-        <Typography variant="body2"><strong>Type:</strong> {expense.type}</Typography>
-        <Typography variant="body2"><strong>Paid by:</strong> {expense.isPaidByKari ? 'Kari' : 'Adolfo'}</Typography>
+        <Stack direction="row" spacing={1} flexWrap="wrap">
+          <Chip icon={<SellIcon />} label={expense.category} color="primary" variant="outlined" />
+          <Chip icon={<CalculateIcon/>} label={expense.type} color="secondary" variant="outlined" />
+          <Chip icon={<PaymentIcon/>} label={`${expense.isPaidByKari ? 'Kari' : 'Adolfo'}`} color="success" variant="outlined" />
+        </Stack>
         <Divider sx={{ mt: 2 }} />
       </AccordionDetails>
     </Accordion>

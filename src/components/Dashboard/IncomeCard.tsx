@@ -29,7 +29,7 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
   tempValue,
 }) => {
   return (
-    <Card sx={{ backgroundColor, flex: 1, minWidth: 300, p: 2 }}>
+    <Card sx={{ backgroundColor, flex: 1, minWidth: 250, p: 1 }}>
       <CardContent>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h6" fontWeight="bold">{title}</Typography>
@@ -62,9 +62,9 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
             size="small"
           />
         ) : (
-          <Typography variant='h3' color='primary'>€ {amount}</Typography>
+          <Typography variant='h6' color='primary'>€ {amount}</Typography>
         )}
-        <Typography variant='h6' color='textSecondary'>{percentage}% of total</Typography>
+        <Typography variant='body1' color='textSecondary'>{percentage}% of total</Typography>
       </CardContent>
     </Card>
   );

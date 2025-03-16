@@ -1,9 +1,10 @@
 /* eslint-disable camelcase */
 import { createClient, SupabaseClient, AuthResponse, User } from '@supabase/supabase-js';
 import { Income } from '../../interfaces/Income';
+import {ExpenseCategory, ExpenseType, Expense} from '../../interfaces/Expenses';
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL!;
-const supabaseKey = process.env.REACT_APP_SUPABASE_KEY!;
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || '';
 
 class SupabaseService {
   private client: SupabaseClient;
@@ -75,6 +76,23 @@ class SupabaseService {
 
     if (error) throw new Error(error.message);
   }
+
+  async getAllExpenses(): Promise<Expense[]> {
+    const { data, error } = await this.client
+      .from('expenses')
+      .select('*')
+      .order('created_at', { ascending: false });
+  
+    if (error) throw new Error(error.message);
+  
+    return (data || []).map(expense => ({
+      ...expense,
+      category: expense.category as ExpenseCategory,
+      type: expense.type as ExpenseType,
+    }));
+  }
 }
+
+
 
 export const supabaseService = new SupabaseService();

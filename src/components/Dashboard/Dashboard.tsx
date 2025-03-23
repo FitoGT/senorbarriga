@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabaseService } from '../../services/Supabase/SupabaseService';
-import { Income, Expense } from '../../interfaces';
 import { 
   Container, 
   CircularProgress, 
   Stack, 
   Typography, 
   Box, 
-  IconButton 
+  IconButton,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import IncomeCard from './IncomeCard';
+import AddIcon from '@mui/icons-material/Add';
 import ExpensesAccordion from './ExpensesAccordion';
+import { supabaseService } from '../../services/Supabase/SupabaseService';
+import { Income, Expense } from '../../interfaces';
 
 const formatNumber = (value: number): string => {
   return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
@@ -31,7 +31,6 @@ const Dashboard = () => {
         supabaseService.getLatestIncome(),
         supabaseService.getAllExpenses(),
       ]);
-
       setIncomeData(latestIncome);
       setExpenses(expensesData);
     } catch (error) {
@@ -55,38 +54,40 @@ const Dashboard = () => {
               title="Kari's Income"
               amount={incomeData ? formatNumber(incomeData.kari_income) : '0,00'}
               percentage={incomeData ? formatNumber(incomeData.kari_percentage) : '0,00'}
-              backgroundColor="#e8f5e9"
+              color="success"
             />
             <IncomeCard
               title="Adolfo's Income"
               amount={incomeData ? formatNumber(incomeData.adolfo_income) : '0,00'}
               percentage={incomeData ? formatNumber(incomeData.adolfo_percentage) : '0,00'}
-              backgroundColor="#e3f2fd"
+              color="info"
             />
             <IncomeCard
               title="Total Income"
               amount={incomeData ? formatNumber(incomeData.total_income) : '0,00'}
               percentage="100,00"
-              backgroundColor="#f5f5f5"
+              color="primary"
             />
           </Stack>
-
-          {/* Expenses Title with IconButton */}
           <Stack spacing={2} sx={{ mt: 4 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between">
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="h6" fontWeight="bold" color="text.primary">
                 Expenses
               </Typography>
               <IconButton color="primary" onClick={() => navigate('/expense')}>
                 <AddIcon />
               </IconButton>
             </Box>
-
             {expenses.length === 0 ? (
-              <Typography color="textSecondary">No expenses recorded.</Typography>
+              <Typography color="text.secondary">No expenses recorded.</Typography>
             ) : (
               expenses.map((expense) => (
-                <ExpensesAccordion key={expense.id} expense={expense} formatNumber={formatNumber} refreshExpenses={fetchData}/>
+                <ExpensesAccordion 
+                  key={expense.id} 
+                  expense={expense} 
+                  formatNumber={formatNumber} 
+                  refreshExpenses={fetchData}
+                />
               ))
             )}
           </Stack>

@@ -16,7 +16,8 @@ import {
   Switch, 
   FormControlLabel, 
   IconButton,
-  FormHelperText
+  FormHelperText,
+  useTheme
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -24,34 +25,19 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
+import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
 
 const formSchema = z.object({
-  date: z.string()
-    .min(1, 'Date is required')
-    .refine((value) => dayjs(value, 'YYYY-MM-DD', true).isValid(), {
-      message: 'Invalid date format (YYYY-MM-DD required)',
-    }),
-  
-  description: z.string()
-    .min(3, 'Description must be at least 3 characters')
-    .max(100, 'Description must be at most 100 characters'),
-
-  amount: z.string()
-    .min(1, 'Amount is required')
-    .refine((value) => !isNaN(parseFloat(value)) && parseFloat(value) > 0, {
-      message: 'Amount must be a valid number greater than 0',
-    }),
-
-  category: z.nativeEnum(ExpenseCategory, {
-    errorMap: () => ({ message: 'Category is required' }),
+  date: z.string().min(1, 'Date is required').refine((value) => dayjs(value, 'YYYY-MM-DD', true).isValid(), {
+    message: 'Invalid date format (YYYY-MM-DD required)',
   }),
-
-  type: z.nativeEnum(ExpenseType, {
-    errorMap: () => ({ message: 'Type is required' }),
+  description: z.string().min(3, 'Description must be at least 3 characters').max(100, 'Description must be at most 100 characters'),
+  amount: z.string().min(1, 'Amount is required').refine((value) => !isNaN(parseFloat(value)) && parseFloat(value) > 0, {
+    message: 'Amount must be a valid number greater than 0',
   }),
-
+  category: z.nativeEnum(ExpenseCategory, { errorMap: () => ({ message: 'Category is required' }) }),
+  type: z.nativeEnum(ExpenseType, { errorMap: () => ({ message: 'Type is required' }) }),
   isPaidByKari: z.boolean(),
 });
 
@@ -59,10 +45,11 @@ type ExpenseFormData = z.infer<typeof formSchema>;
 
 const Expense = () => {
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const { id } = useParams();
   const [fetching, setFetching] = useState(true);
-  
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const { id } = useParams();
+
   const { 
     register, 
     handleSubmit, 
@@ -85,7 +72,6 @@ const Expense = () => {
         setFetching(false);
         return;
       }
-
       try {
         const expense = await supabaseService.getExpenseById(Number(id));
         if (expense) {
@@ -107,7 +93,6 @@ const Expense = () => {
         setFetching(false);
       }
     };
-
     fetchExpense();
   }, [id, navigate, setValue]);
 
@@ -143,7 +128,7 @@ const Expense = () => {
   };
 
   const handleCancel = () => {
-    reset(); 
+    reset();
     navigate('/dashboard');
   };
 
@@ -157,13 +142,21 @@ const Expense = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Container maxWidth="xs" sx={{ mt: 5 }}>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
-          Add Expense
+      <Container 
+        maxWidth="xs" 
+        sx={{ 
+          mt: 5, 
+          backgroundColor: theme.palette.background.paper, 
+          padding: 3, 
+          borderRadius: 2, 
+          boxShadow: 3 
+        }}
+      >
+        <Typography variant="h5" fontWeight="bold" gutterBottom color="text.primary">
+          {id ? 'Edit Expense' : 'Add Expense'}
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)} width="100%">
-          
           <Controller
             name="date"
             control={control}
@@ -195,6 +188,14 @@ const Expense = () => {
             {...register('description')}
             error={!!errors.description}
             helperText={errors.description?.message}
+            sx={{
+              input: { color: theme.palette.text.primary },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: theme.palette.divider },
+                '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
+              },
+            }}
           />
 
           <TextField
@@ -206,16 +207,23 @@ const Expense = () => {
             {...register('amount')}
             error={!!errors.amount}
             helperText={errors.amount?.message}
+            sx={{
+              input: { color: theme.palette.text.primary },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: theme.palette.divider },
+                '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
+              },
+            }}
           />
 
-          {/* Category Select con validación */}
           <FormControl fullWidth margin="normal" error={!!errors.category}>
             <InputLabel>Category</InputLabel>
             <Controller
               name="category"
               control={control}
               render={({ field }) => (
-                <Select {...field} onChange={(e) => setValue('category', e.target.value as ExpenseCategory)}>
+                <Select {...field}>
                   {Object.values(ExpenseCategory).map((cat) => (
                     <MenuItem key={cat} value={cat}>{cat}</MenuItem>
                   ))}
@@ -225,14 +233,13 @@ const Expense = () => {
             <FormHelperText>{errors.category?.message}</FormHelperText>
           </FormControl>
 
-          {/* Type Select con validación */}
           <FormControl fullWidth margin="normal" error={!!errors.type}>
             <InputLabel>Type</InputLabel>
             <Controller
               name="type"
               control={control}
               render={({ field }) => (
-                <Select {...field} onChange={(e) => setValue('type', e.target.value as ExpenseType)}>
+                <Select {...field}>
                   {Object.values(ExpenseType).map((t) => (
                     <MenuItem key={t} value={t}>{t}</MenuItem>
                   ))}
@@ -253,7 +260,6 @@ const Expense = () => {
             label="Paid by Kari"
           />
 
-          {/* Botones de Confirmar y Cancelar al final del formulario */}
           <Box mt={3} display="flex" gap={2}>
             <IconButton 
               color="success" 
@@ -271,7 +277,6 @@ const Expense = () => {
               <CloseIcon />
             </IconButton>
           </Box>
-
         </Box>
       </Container>
     </LocalizationProvider>

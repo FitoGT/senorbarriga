@@ -16,9 +16,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PaymentIcon from '@mui/icons-material/Payment';
 import CalculateIcon from '@mui/icons-material/Calculate';
-import { Expense } from '../../interfaces/Expenses';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
-
+import { Expense } from '../../interfaces/Expenses';
 
 interface ExpensesAccordionProps {
   expense: Expense;
@@ -58,10 +57,20 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
     navigate(`/expense/${expenseId}`);
   };
   
-
   return (
-    <Accordion>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ backgroundColor: '#f9f9f9' }}>
+    <Accordion 
+      sx={{ 
+        backgroundColor: theme.palette.background.paper, 
+        color: theme.palette.text.primary 
+      }}
+    >
+      <AccordionSummary 
+        expandIcon={<ExpandMoreIcon sx={{ color: theme.palette.text.primary }} />}
+        sx={{ 
+          backgroundColor: theme.palette.grey[900],
+          color: theme.palette.text.primary 
+        }}
+      >
         <Stack
           direction="row"
           spacing={2}
@@ -69,7 +78,7 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
           alignItems="center"
           justifyContent="space-between"
         >
-          <Typography variant="body1" noWrap sx={{ width: '90px' }}>
+          <Typography variant="body1" noWrap sx={{ width: '90px', color: theme.palette.text.primary }}>
             {expense.date}
           </Typography>
 
@@ -81,18 +90,23 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
               width: descriptionWidth,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              color: theme.palette.text.primary
             }}
           >
             {expense.description}
           </Typography>
-
-          <Typography variant="body1" color="primary" noWrap sx={{ width: '80px', textAlign: 'right' }}>
+          <Typography 
+            variant="body1" 
+            color="primary" 
+            noWrap 
+            sx={{ width: '80px', textAlign: 'right', color: theme.palette.primary.main }}
+          >
             € {formatNumber(expense.amount)}
           </Typography>
         </Stack>
       </AccordionSummary>
       <AccordionDetails>
-      <Stack
+        <Stack
           direction="row"
           spacing={1}
           flexWrap="wrap"
@@ -100,9 +114,27 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
           justifyContent="space-between"
         >
           <Stack direction="row" spacing={1} flexWrap="wrap">
-            <Chip icon={<SellIcon />} label={expense.category} color="primary" variant="outlined" />
-            <Chip icon={<CalculateIcon />} label={expense.type} color="secondary" variant="outlined" />
-            <Chip icon={<PaymentIcon />} label={`${expense.isPaidByKari ? 'Kari' : 'Adolfo'}`} color="success" variant="outlined" />
+            <Chip 
+              icon={<SellIcon />} 
+              label={expense.category} 
+              color="primary" 
+              variant="outlined"
+              sx={{ color: theme.palette.text.primary }}
+            />
+            <Chip 
+              icon={<CalculateIcon />} 
+              label={expense.type} 
+              color="secondary" 
+              variant="outlined"
+              sx={{ color: theme.palette.text.primary }}
+            />
+            <Chip 
+              icon={<PaymentIcon />} 
+              label={`${expense.isPaidByKari ? 'Kari' : 'Adolfo'}`} 
+              color="success" 
+              variant="outlined"
+              sx={{ color: theme.palette.text.primary }}
+            />
           </Stack>
           <Stack direction="row" spacing={1}>
             <IconButton

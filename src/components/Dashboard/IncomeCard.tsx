@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Stack, IconButton, TextField } from '@mui/material';
+import { Card, CardContent, Typography, Stack, IconButton, TextField, useTheme } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -7,7 +7,7 @@ interface IncomeCardProps {
   title: string;
   amount: string;
   percentage: string;
-  backgroundColor: string;
+  color?: 'primary' | 'secondary' | 'success' | 'info' | 'warning';
   editing?: boolean;
   onEdit?: () => void;
   onSave?: () => void;
@@ -20,7 +20,7 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
   title,
   amount,
   percentage,
-  backgroundColor,
+  color = 'primary',
   editing = false,
   onEdit,
   onSave,
@@ -28,13 +28,23 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
   onChange,
   tempValue,
 }) => {
+  const theme = useTheme();
   return (
-    <Card sx={{ backgroundColor, flex: 1, minWidth: 250, p: 1 }}>
+    <Card 
+      sx={{ 
+        backgroundColor: theme.palette.grey[900], 
+        color: theme.palette.text.primary, 
+        flex: 1, 
+        minWidth: 250, 
+        p: 1 
+      }}
+      elevation={3}
+    >
       <CardContent>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h6" fontWeight="bold">{title}</Typography>
           {onEdit && !editing && (
-            <IconButton onClick={onEdit}>
+            <IconButton onClick={onEdit} sx={{ color: theme.palette.text.primary }}>
               <EditIcon />
             </IconButton>
           )}
@@ -60,11 +70,23 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
             onChange={onChange}
             variant="outlined"
             size="small"
+            sx={{
+              input: { color: theme.palette.text.primary },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: theme.palette.divider,
+                },
+              },
+            }}
           />
         ) : (
-          <Typography variant='h6' color='primary'>€ {amount}</Typography>
+          <Typography variant='h6' color={theme.palette[color].main}>
+            € {amount}
+          </Typography>
         )}
-        <Typography variant='body1' color='textSecondary'>{percentage}% of total</Typography>
+        <Typography variant='body2' color="text.secondary">
+          {percentage}% of total
+        </Typography>
       </CardContent>
     </Card>
   );

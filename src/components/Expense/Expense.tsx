@@ -25,6 +25,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
 import { useNotifications } from '../../context';
@@ -150,7 +151,7 @@ const Expense = () => {
         }}
       >
         {fetching ? (
-          <CircularProgress />
+          <FullLoader />
         ) : (
           <>
             <Typography variant="h5" fontWeight="bold" gutterBottom color="text.primary">

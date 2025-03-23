@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Container, 
-  CircularProgress, 
   Stack, 
   Typography, 
   Box, 
@@ -11,6 +10,7 @@ import {
 import IncomeCard from './IncomeCard';
 import AddIcon from '@mui/icons-material/Add';
 import ExpensesAccordion from './ExpensesAccordion';
+import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Income, Expense } from '../../interfaces';
 import { useNotifications } from '../../context';
@@ -82,7 +82,7 @@ const Dashboard = () => {
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       {loading ? (
-        <CircularProgress />
+        <FullLoader/>
       ) : (
         <>
           <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent="center">

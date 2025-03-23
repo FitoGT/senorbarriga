@@ -23,6 +23,8 @@ const Dashboard = () => {
   const [incomeData, setIncomeData] = useState<Income | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<'kari' | 'adolfo' | null>(null);
+  const [tempValue, setTempValue] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -37,6 +39,41 @@ const Dashboard = () => {
       console.error('Error fetching data:', error);
     }
     setLoading(false);
+  };
+
+  const handleCancel = () => {
+    setEditing(null);
+    setTempValue(null);
+  };
+
+  const handleSave = async () => {
+    if (!editing || tempValue === null) return;
+
+    const newValue = parseFloat(tempValue.replace(',', '.'));
+
+    try {
+      await supabaseService.updateIncome(editing, newValue);
+      const latestIncome = await supabaseService.getLatestIncome();
+      setIncomeData(latestIncome);
+    } catch (error) {
+      console.error('Error updating income:', error);
+    }
+
+    setEditing(null);
+    setTempValue(null);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+
+    value = value.replace(/[^0-9,]/g, '');
+
+    const commaCount = (value.match(/,/g) || []).length;
+    if (commaCount > 1) {
+      return;
+    }
+
+    setTempValue(value);
   };
 
   useEffect(() => {
@@ -55,12 +92,30 @@ const Dashboard = () => {
               amount={incomeData ? formatNumber(incomeData.kari_income) : '0,00'}
               percentage={incomeData ? formatNumber(incomeData.kari_percentage) : '0,00'}
               color="success"
+              editing={editing === 'kari'}
+              onEdit={() => {
+                setEditing('kari');
+                setTempValue(incomeData ? incomeData.kari_income.toString().replace('.', ',') : '');
+              }}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              onChange={handleInputChange}
+              tempValue={tempValue}
             />
             <IncomeCard
               title="Adolfo's Income"
               amount={incomeData ? formatNumber(incomeData.adolfo_income) : '0,00'}
               percentage={incomeData ? formatNumber(incomeData.adolfo_percentage) : '0,00'}
               color="info"
+              editing={editing === 'adolfo'}
+              onEdit={() => {
+                setEditing('adolfo');
+                setTempValue(incomeData ? incomeData.adolfo_income.toString().replace('.', ',') : '');
+              }}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              onChange={handleInputChange}
+              tempValue={tempValue}
             />
             <IncomeCard
               title="Total Income"

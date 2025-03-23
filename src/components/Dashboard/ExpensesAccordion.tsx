@@ -30,26 +30,18 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
   const navigate = useNavigate();
   const theme = useTheme();
   const { showNotification } = useNotifications();
-  const isXs = useMediaQuery(theme.breakpoints.only('xs')); 
-  const isSm = useMediaQuery(theme.breakpoints.only('sm')); 
-  const isMd = useMediaQuery(theme.breakpoints.only('md')); 
-  const isLg = useMediaQuery(theme.breakpoints.up('lg')); 
+  const isXs = useMediaQuery(theme.breakpoints.only('xs'));
+  const isSm = useMediaQuery(theme.breakpoints.only('sm'));
+  const isMd = useMediaQuery(theme.breakpoints.only('md'));
+  const isLg = useMediaQuery(theme.breakpoints.up('lg'));
 
-  const descriptionWidth = isXs
-    ? '100px'
-    : isSm
-    ? '200px'
-    : isMd
-    ? '300px'
-    : isLg
-    ? '400px'
-    : '100%';
+  const descriptionWidth = isXs ? '100px' : isSm ? '200px' : isMd ? '300px' : isLg ? '400px' : '100%';
 
   const handleDelete = async (expenseId: number) => {
     try {
       await supabaseService.deleteExpense(expenseId);
       refreshExpenses();
-      showNotification('Expense deleted', 'success')
+      showNotification('Expense deleted', 'success');
     } catch (error) {
       console.error('Failed to delete the expense', error);
       showNotification(`Failed to delete the expense ${error}`, 'error');
@@ -59,49 +51,43 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
   const handleEdit = (expenseId: number) => {
     navigate(`/expense/${expenseId}`);
   };
-  
+
   return (
-    <Accordion 
-      sx={{ 
-        backgroundColor: theme.palette.background.paper, 
-        color: theme.palette.text.primary 
+    <Accordion
+      sx={{
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
       }}
     >
-      <AccordionSummary 
+      <AccordionSummary
         expandIcon={<ExpandMoreIcon sx={{ color: theme.palette.text.primary }} />}
-        sx={{ 
+        sx={{
           backgroundColor: theme.palette.grey[900],
-          color: theme.palette.text.primary 
+          color: theme.palette.text.primary,
         }}
       >
-        <Stack
-          direction="row"
-          spacing={2}
-          width="100%"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Typography variant="body1" noWrap sx={{ width: '90px', color: theme.palette.text.primary }}>
+        <Stack direction='row' spacing={2} width='100%' alignItems='center' justifyContent='space-between'>
+          <Typography variant='body1' noWrap sx={{ width: '90px', color: theme.palette.text.primary }}>
             {expense.date}
           </Typography>
 
           <Typography
-            variant="body1"
-            fontWeight="bold"
+            variant='body1'
+            fontWeight='bold'
             noWrap
             sx={{
               width: descriptionWidth,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              color: theme.palette.text.primary
+              color: theme.palette.text.primary,
             }}
           >
             {expense.description}
           </Typography>
-          <Typography 
-            variant="body1" 
-            color="primary" 
-            noWrap 
+          <Typography
+            variant='body1'
+            color='primary'
+            noWrap
             sx={{ width: '80px', textAlign: 'right', color: theme.palette.primary.main }}
           >
             € {formatNumber(expense.amount)}
@@ -109,51 +95,35 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
         </Stack>
       </AccordionSummary>
       <AccordionDetails>
-        <Stack
-          direction="row"
-          spacing={1}
-          flexWrap="wrap"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Stack direction="row" spacing={1} flexWrap="wrap">
-            <Chip 
-              icon={<SellIcon />} 
-              label={expense.category} 
-              color="primary" 
-              variant="outlined"
+        <Stack direction='row' spacing={1} flexWrap='wrap' alignItems='center' justifyContent='space-between'>
+          <Stack direction='row' spacing={1} flexWrap='wrap'>
+            <Chip
+              icon={<SellIcon />}
+              label={expense.category}
+              color='primary'
+              variant='outlined'
               sx={{ color: theme.palette.text.primary }}
             />
-            <Chip 
-              icon={<CalculateIcon />} 
-              label={expense.type} 
-              color="secondary" 
-              variant="outlined"
+            <Chip
+              icon={<CalculateIcon />}
+              label={expense.type}
+              color='secondary'
+              variant='outlined'
               sx={{ color: theme.palette.text.primary }}
             />
-            <Chip 
-              icon={<PaymentIcon />} 
-              label={`${expense.isPaidByKari ? 'Kari' : 'Adolfo'}`} 
-              color="success" 
-              variant="outlined"
+            <Chip
+              icon={<PaymentIcon />}
+              label={`${expense.isPaidByKari ? 'Kari' : 'Adolfo'}`}
+              color='success'
+              variant='outlined'
               sx={{ color: theme.palette.text.primary }}
             />
           </Stack>
-          <Stack direction="row" spacing={1}>
-            <IconButton
-              color="primary"
-              onClick={() => handleEdit(expense.id)}
-              aria-label="edit"
-              size="small"
-            >
+          <Stack direction='row' spacing={1}>
+            <IconButton color='primary' onClick={() => handleEdit(expense.id)} aria-label='edit' size='small'>
               <EditIcon />
             </IconButton>
-            <IconButton
-              color="error"
-              onClick={() => handleDelete(expense.id)}
-              aria-label="delete"
-              size="small"
-            >
+            <IconButton color='error' onClick={() => handleDelete(expense.id)} aria-label='delete' size='small'>
               <DeleteIcon />
             </IconButton>
           </Stack>

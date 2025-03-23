@@ -3,21 +3,21 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
-  Container, 
-  TextField, 
-  Typography, 
-  CircularProgress, 
-  Box, 
-  MenuItem, 
-  FormControl, 
-  InputLabel, 
-  Select, 
-  Switch, 
-  FormControlLabel, 
+import {
+  Container,
+  TextField,
+  Typography,
+  CircularProgress,
+  Box,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  Switch,
+  FormControlLabel,
   IconButton,
   FormHelperText,
-  useTheme
+  useTheme,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -31,13 +31,22 @@ import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
 import { useNotifications } from '../../context';
 
 const formSchema = z.object({
-  date: z.string().min(1, 'Date is required').refine((value) => dayjs(value, 'YYYY-MM-DD', true).isValid(), {
-    message: 'Invalid date format (YYYY-MM-DD required)',
-  }),
-  description: z.string().min(3, 'Description must be at least 3 characters').max(100, 'Description must be at most 100 characters'),
-  amount: z.string().min(1, 'Amount is required').refine((value) => !isNaN(parseFloat(value)) && parseFloat(value) > 0, {
-    message: 'Amount must be a valid number greater than 0',
-  }),
+  date: z
+    .string()
+    .min(1, 'Date is required')
+    .refine((value) => dayjs(value, 'YYYY-MM-DD', true).isValid(), {
+      message: 'Invalid date format (YYYY-MM-DD required)',
+    }),
+  description: z
+    .string()
+    .min(3, 'Description must be at least 3 characters')
+    .max(100, 'Description must be at most 100 characters'),
+  amount: z
+    .string()
+    .min(1, 'Amount is required')
+    .refine((value) => !isNaN(parseFloat(value)) && parseFloat(value) > 0, {
+      message: 'Amount must be a valid number greater than 0',
+    }),
   category: z.nativeEnum(ExpenseCategory, { errorMap: () => ({ message: 'Category is required' }) }),
   type: z.nativeEnum(ExpenseType, { errorMap: () => ({ message: 'Type is required' }) }),
   isPaidByKari: z.boolean(),
@@ -52,21 +61,21 @@ const Expense = () => {
   const theme = useTheme();
   const { id } = useParams();
   const { showNotification } = useNotifications();
-  
-  const { 
-    register, 
-    handleSubmit, 
+
+  const {
+    register,
+    handleSubmit,
     setValue,
     watch,
     control,
     reset,
-    formState: { errors } 
+    formState: { errors },
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       date: dayjs().format('YYYY-MM-DD'),
       isPaidByKari: false,
-    }
+    },
   });
 
   useEffect(() => {
@@ -111,7 +120,7 @@ const Expense = () => {
           type: data.type,
           isPaidByKari: data.isPaidByKari,
         });
-        showNotification('Expense updated', 'success')
+        showNotification('Expense updated', 'success');
       } else {
         await supabaseService.insertExpense({
           date: data.date,
@@ -121,12 +130,12 @@ const Expense = () => {
           type: data.type,
           isPaidByKari: data.isPaidByKari,
         });
-        showNotification('Expense added', 'success')
+        showNotification('Expense added', 'success');
       }
       reset();
       navigate('/dashboard');
     } catch (error) {
-      console.log('Error saving expense', error)
+      console.log('Error saving expense', error);
       showNotification(`Error saving expense: ${error}`, 'error');
     } finally {
       setLoading(false);
@@ -140,34 +149,34 @@ const Expense = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Container 
-        maxWidth="xs" 
-        sx={{ 
-          mt: 5, 
-          backgroundColor: theme.palette.background.paper, 
-          padding: 3, 
-          borderRadius: 2, 
-          boxShadow: 3 
+      <Container
+        maxWidth='xs'
+        sx={{
+          mt: 5,
+          backgroundColor: theme.palette.background.paper,
+          padding: 3,
+          borderRadius: 2,
+          boxShadow: 3,
         }}
       >
         {fetching ? (
           <FullLoader />
         ) : (
           <>
-            <Typography variant="h5" fontWeight="bold" gutterBottom color="text.primary">
+            <Typography variant='h5' fontWeight='bold' gutterBottom color='text.primary'>
               {id ? 'Edit Expense' : 'Add Expense'}
             </Typography>
-            <Box component="form" onSubmit={handleSubmit(onSubmit)} width="100%">
+            <Box component='form' onSubmit={handleSubmit(onSubmit)} width='100%'>
               <Controller
-                name="date"
+                name='date'
                 control={control}
                 render={({ field }) => (
                   <DatePicker
                     {...field}
-                    label="Date"
+                    label='Date'
                     value={field.value ? dayjs(field.value) : null}
                     onChange={(newDate) => setValue('date', newDate ? newDate.format('YYYY-MM-DD') : '')}
-                    format="YYYY-MM-DD"
+                    format='YYYY-MM-DD'
                     slotProps={{
                       textField: {
                         variant: 'outlined',
@@ -175,17 +184,17 @@ const Expense = () => {
                         margin: 'normal',
                         error: !!errors.date,
                         helperText: errors.date?.message,
-                      }
+                      },
                     }}
                   />
                 )}
               />
 
               <TextField
-                label="Description"
-                variant="outlined"
+                label='Description'
+                variant='outlined'
                 fullWidth
-                margin="normal"
+                margin='normal'
                 {...register('description')}
                 error={!!errors.description}
                 helperText={errors.description?.message}
@@ -199,11 +208,11 @@ const Expense = () => {
                 }}
               />
               <TextField
-                label="Amount"
-                variant="outlined"
+                label='Amount'
+                variant='outlined'
                 fullWidth
-                margin="normal"
-                type="number"
+                margin='normal'
+                type='number'
                 {...register('amount')}
                 error={!!errors.amount}
                 helperText={errors.amount?.message}
@@ -216,30 +225,34 @@ const Expense = () => {
                   },
                 }}
               />
-              <FormControl fullWidth margin="normal" error={!!errors.category}>
+              <FormControl fullWidth margin='normal' error={!!errors.category}>
                 <InputLabel>Category</InputLabel>
                 <Controller
-                  name="category"
+                  name='category'
                   control={control}
                   render={({ field }) => (
                     <Select {...field}>
                       {Object.values(ExpenseCategory).map((cat) => (
-                        <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                        <MenuItem key={cat} value={cat}>
+                          {cat}
+                        </MenuItem>
                       ))}
                     </Select>
                   )}
                 />
                 <FormHelperText>{errors.category?.message}</FormHelperText>
               </FormControl>
-              <FormControl fullWidth margin="normal" error={!!errors.type}>
+              <FormControl fullWidth margin='normal' error={!!errors.type}>
                 <InputLabel>Type</InputLabel>
                 <Controller
-                  name="type"
+                  name='type'
                   control={control}
                   render={({ field }) => (
                     <Select {...field}>
                       {Object.values(ExpenseType).map((t) => (
-                        <MenuItem key={t} value={t}>{t}</MenuItem>
+                        <MenuItem key={t} value={t}>
+                          {t}
+                        </MenuItem>
                       ))}
                     </Select>
                   )}
@@ -254,20 +267,20 @@ const Expense = () => {
                     onChange={(e) => setValue('isPaidByKari', e.target.checked)}
                   />
                 }
-                label="Paid by Kari"
+                label='Paid by Kari'
               />
-              <Box mt={3} display="flex" gap={2}>
-                <IconButton 
-                  color="success" 
-                  onClick={handleSubmit(onSubmit)} 
-                  disabled={loading} 
+              <Box mt={3} display='flex' gap={2}>
+                <IconButton
+                  color='success'
+                  onClick={handleSubmit(onSubmit)}
+                  disabled={loading}
                   sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
                 >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : <CheckIcon />}
+                  {loading ? <CircularProgress size={24} color='inherit' /> : <CheckIcon />}
                 </IconButton>
-                <IconButton 
-                  color="error" 
-                  onClick={handleCancel} 
+                <IconButton
+                  color='error'
+                  onClick={handleCancel}
                   sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
                 >
                   <CloseIcon />

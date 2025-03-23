@@ -13,19 +13,19 @@ function App() {
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <NotificationsProvider>
-            <AuthProvider>
-              <Router>
-                <Routes>
-                  <Route path="/" element={<Auth />} />
-                  <Route element={<PrivateRoute />}>
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/expense/:id?" element={<Expense />} />
-                  </Route>
-                </Routes>
-              </Router>
-            </AuthProvider>
-          </NotificationsProvider>
+        <NotificationsProvider>
+          <AuthProvider>
+            <Router>
+              <Routes>
+                <Route path='/' element={<Auth />} />
+                <Route element={<PrivateRoute />}>
+                  <Route path='/dashboard' element={<Dashboard />} />
+                  <Route path='/expense/:id?' element={<Expense />} />
+                </Route>
+              </Routes>
+            </Router>
+          </AuthProvider>
+        </NotificationsProvider>
       </LocalizationProvider>
     </ThemeProvider>
   );

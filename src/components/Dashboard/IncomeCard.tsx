@@ -30,19 +30,21 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
 }) => {
   const theme = useTheme();
   return (
-    <Card 
-      sx={{ 
-        backgroundColor: theme.palette.grey[900], 
-        color: theme.palette.text.primary, 
-        flex: 1, 
-        minWidth: 250, 
-        p: 1 
+    <Card
+      sx={{
+        backgroundColor: theme.palette.grey[900],
+        color: theme.palette.text.primary,
+        flex: 1,
+        minWidth: 250,
+        p: 1,
       }}
       elevation={3}
     >
       <CardContent>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h6" fontWeight="bold">{title}</Typography>
+        <Stack direction='row' alignItems='center' justifyContent='space-between'>
+          <Typography variant='h6' fontWeight='bold'>
+            {title}
+          </Typography>
           {onEdit && !editing && (
             <IconButton onClick={onEdit} sx={{ color: theme.palette.text.primary }}>
               <EditIcon />
@@ -51,12 +53,12 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
           {editing && (
             <>
               {onSave && (
-                <IconButton color="success" onClick={onSave}>
+                <IconButton color='success' onClick={onSave}>
                   <CheckIcon />
                 </IconButton>
               )}
               {onCancel && (
-                <IconButton color="error" onClick={onCancel}>
+                <IconButton color='error' onClick={onCancel}>
                   <CloseIcon />
                 </IconButton>
               )}
@@ -68,8 +70,8 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
             fullWidth
             value={tempValue || ''}
             onChange={onChange}
-            variant="outlined"
-            size="small"
+            variant='outlined'
+            size='small'
             sx={{
               input: { color: theme.palette.text.primary },
               '& .MuiOutlinedInput-root': {
@@ -84,7 +86,7 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
             € {amount}
           </Typography>
         )}
-        <Typography variant='body2' color="text.secondary">
+        <Typography variant='body2' color='text.secondary'>
           {percentage}% of total
         </Typography>
       </CardContent>

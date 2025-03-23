@@ -36,10 +36,10 @@
     "build": "react-scripts build",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "lint": "eslint src//*.{ts,tsx}",
-    "lint:fix": "eslint src//*.{ts,tsx} --fix",
-    "format": "prettier --config .prettierrc src//*.{ts,tsx} --check",
-    "format:fix": "prettier --config .prettierrc src//*.{ts,tsx} --write"
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "format": "prettier --config .prettierrc \"src/**/*.{ts,tsx}\" --check",
+    "format:fix": "prettier --config .prettierrc \"src/**/*.{ts,tsx}\" --write"
   },
   "eslintConfig": {
     "extends": [

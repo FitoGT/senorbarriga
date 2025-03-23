@@ -18,9 +18,9 @@ class SupabaseService {
 
   async signInWithEmail(email: string, password: string): Promise<User> {
     try {
-      console.log(email, password)
+      console.log(email, password);
       const { data }: AuthResponse = await this.client.auth.signInWithPassword({ email, password });
-      console.log(data)
+      console.log(data);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return data.user!;
     } catch (error) {
@@ -101,7 +101,7 @@ class SupabaseService {
         .order('date', { ascending: false })
         .order('created_at', { ascending: false });
 
-      return (data || []).map(expense => ({
+      return (data || []).map((expense) => ({
         ...expense,
         category: expense.category as ExpenseCategory,
         type: expense.type as ExpenseType,
@@ -113,10 +113,7 @@ class SupabaseService {
 
   async insertExpense(expense: Omit<Expense, 'id' | 'created_at'>): Promise<void> {
     try {
-      await this.client
-        .from('expenses')
-        .insert([expense]);
-
+      await this.client.from('expenses').insert([expense]);
     } catch (error) {
       throw new Error(`Inserting expense failed: ${error}`);
     }
@@ -124,17 +121,15 @@ class SupabaseService {
 
   async getExpenseById(expenseId: number): Promise<Expense | null> {
     try {
-      const { data } = await this.client
-        .from('expenses')
-        .select('*')
-        .eq('id', expenseId)
-        .single();
+      const { data } = await this.client.from('expenses').select('*').eq('id', expenseId).single();
 
-      return data ? {
-        ...data,
-        category: data.category as ExpenseCategory,
-        type: data.type as ExpenseType,
-      } : null;
+      return data
+        ? {
+            ...data,
+            category: data.category as ExpenseCategory,
+            type: data.type as ExpenseType,
+          }
+        : null;
     } catch (error) {
       throw new Error(`Fetching expense by ID failed: ${error}`);
     }
@@ -142,11 +137,7 @@ class SupabaseService {
 
   async updateExpense(expenseId: number, updates: Partial<Omit<Expense, 'id' | 'created_at'>>): Promise<void> {
     try {
-      await this.client
-        .from('expenses')
-        .update(updates)
-        .eq('id', expenseId);
-
+      await this.client.from('expenses').update(updates).eq('id', expenseId);
     } catch (error) {
       throw new Error(`Updating expense failed: ${error}`);
     }
@@ -154,11 +145,7 @@ class SupabaseService {
 
   async deleteExpense(expenseId: number): Promise<void> {
     try {
-      await this.client
-        .from('expenses')
-        .delete()
-        .eq('id', expenseId);
-
+      await this.client.from('expenses').delete().eq('id', expenseId);
     } catch (error) {
       throw new Error(`Deleting expense failed: ${error}`);
     }

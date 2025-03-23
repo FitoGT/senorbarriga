@@ -4,15 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
-  Container, 
-  TextField, 
-  Button, 
-  Typography, 
-  CircularProgress, 
-  Box, 
-  useTheme
-} from '@mui/material';
+import { Container, TextField, Button, Typography, CircularProgress, Box, useTheme } from '@mui/material';
 
 const formSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
@@ -25,11 +17,11 @@ const Auth = () => {
   const theme = useTheme();
   const { login, user, error, loading } = useAuth();
   const navigate = useNavigate();
-  
-  const { 
-    register, 
-    handleSubmit, 
-    formState: { errors } 
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
@@ -45,12 +37,12 @@ const Auth = () => {
   };
 
   return (
-    <Container 
-      maxWidth='xs' 
-      sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
+    <Container
+      maxWidth='xs'
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
         mt: 5,
         backgroundColor: theme.palette.background.paper,
         padding: 3,
@@ -58,7 +50,7 @@ const Auth = () => {
         boxShadow: 3,
       }}
     >
-      <Typography variant='h5' fontWeight='bold' gutterBottom color="text.primary">
+      <Typography variant='h5' fontWeight='bold' gutterBottom color='text.primary'>
         Login
       </Typography>
       {error && (
@@ -106,13 +98,7 @@ const Auth = () => {
           }}
         />
         <Box mt={2}>
-          <Button 
-            type='submit'
-            variant='contained' 
-            color='primary' 
-            fullWidth 
-            disabled={loading}
-          >
+          <Button type='submit' variant='contained' color='primary' fullWidth disabled={loading}>
             {loading ? <CircularProgress size={24} color='inherit' /> : 'Login'}
           </Button>
         </Box>

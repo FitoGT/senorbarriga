@@ -15,7 +15,7 @@ const PrivateRoute = () => {
 
   return (
     <>
-      <Navbar/>
+      <Navbar />
       <Outlet />
     </>
   );

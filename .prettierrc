@@ -7,5 +7,4 @@
     "bracketSpacing": true,
     "singleQuote": true,
     "endOfLine": "auto",
-    "editor.formatOnSave": true
 }

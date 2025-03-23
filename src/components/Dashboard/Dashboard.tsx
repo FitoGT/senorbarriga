@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Container, 
-  Stack, 
-  Typography, 
-  Box, 
-  IconButton,
-} from '@mui/material';
+import { Container, Stack, Typography, Box, IconButton } from '@mui/material';
 import IncomeCard from './IncomeCard';
 import AddIcon from '@mui/icons-material/Add';
 import ExpensesAccordion from './ExpensesAccordion';
@@ -39,7 +33,7 @@ const Dashboard = () => {
       setExpenses(expensesData);
     } catch (error) {
       console.error('Error fetching data:', error);
-      showNotification(`Error fetching data: ${error}`, 'error')
+      showNotification(`Error fetching data: ${error}`, 'error');
     }
     setLoading(false);
   };
@@ -56,10 +50,10 @@ const Dashboard = () => {
       await supabaseService.updateIncome(editing, newValue);
       const latestIncome = await supabaseService.getLatestIncome();
       setIncomeData(latestIncome);
-      showNotification('Income updated', 'success')
+      showNotification('Income updated', 'success');
     } catch (error) {
       console.error('Error updating income:', error);
-      showNotification(`Error updating income ${error}`, 'error')
+      showNotification(`Error updating income ${error}`, 'error');
     }
     setEditing(null);
     setTempValue(null);
@@ -80,17 +74,17 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
+    <Container maxWidth='md' sx={{ mt: 4 }}>
       {loading ? (
-        <FullLoader/>
+        <FullLoader />
       ) : (
         <>
-          <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent="center">
+          <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
             <IncomeCard
               title="Kari's Income"
               amount={incomeData ? formatNumber(incomeData.kari_income) : '0,00'}
               percentage={incomeData ? formatNumber(incomeData.kari_percentage) : '0,00'}
-              color="success"
+              color='success'
               editing={editing === 'kari'}
               onEdit={() => {
                 setEditing('kari');
@@ -105,7 +99,7 @@ const Dashboard = () => {
               title="Adolfo's Income"
               amount={incomeData ? formatNumber(incomeData.adolfo_income) : '0,00'}
               percentage={incomeData ? formatNumber(incomeData.adolfo_percentage) : '0,00'}
-              color="info"
+              color='info'
               editing={editing === 'adolfo'}
               onEdit={() => {
                 setEditing('adolfo');
@@ -117,29 +111,29 @@ const Dashboard = () => {
               tempValue={tempValue}
             />
             <IncomeCard
-              title="Total Income"
+              title='Total Income'
               amount={incomeData ? formatNumber(incomeData.total_income) : '0,00'}
-              percentage="100,00"
-              color="primary"
+              percentage='100,00'
+              color='primary'
             />
           </Stack>
           <Stack spacing={2} sx={{ mt: 4 }}>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
-              <Typography variant="h6" fontWeight="bold" color="text.primary">
+            <Box display='flex' alignItems='center' justifyContent='space-between'>
+              <Typography variant='h6' fontWeight='bold' color='text.primary'>
                 Expenses
               </Typography>
-              <IconButton color="primary" onClick={() => navigate('/expense')}>
+              <IconButton color='primary' onClick={() => navigate('/expense')}>
                 <AddIcon />
               </IconButton>
             </Box>
             {expenses.length === 0 ? (
-              <Typography color="text.secondary">No expenses recorded.</Typography>
+              <Typography color='text.secondary'>No expenses recorded.</Typography>
             ) : (
               expenses.map((expense) => (
-                <ExpensesAccordion 
-                  key={expense.id} 
-                  expense={expense} 
-                  formatNumber={formatNumber} 
+                <ExpensesAccordion
+                  key={expense.id}
+                  expense={expense}
+                  formatNumber={formatNumber}
                   refreshExpenses={fetchData}
                 />
               ))

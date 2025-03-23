@@ -35,7 +35,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
         autoHideDuration={3000}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert severity={severity} onClose={handleClose} variant="filled">
+        <Alert severity={severity} onClose={handleClose} variant='filled'>
           {message}
         </Alert>
       </Snackbar>

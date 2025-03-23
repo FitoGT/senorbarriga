@@ -7,32 +7,29 @@ const Navbar = () => {
   const theme = useTheme();
 
   return (
-    <AppBar 
-      position='static' 
-      sx={{ 
-        backgroundColor: theme.palette.background.paper, 
-        color: theme.palette.text.primary, 
-        boxShadow: 3 
+    <AppBar
+      position='static'
+      sx={{
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
+        boxShadow: 3,
       }}
     >
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography 
-          variant='h6' 
-          component='div' 
-          sx={{ 
-            flexGrow: 1, 
-            fontWeight: 'bold', 
+        <Typography
+          variant='h6'
+          component='div'
+          sx={{
+            flexGrow: 1,
+            fontWeight: 'bold',
             whiteSpace: 'nowrap',
-            color: theme.palette.text.primary 
+            color: theme.palette.text.primary,
           }}
         >
           Señor Barriga App
         </Typography>
         <Box>
-          <IconButton 
-            onClick={logout} 
-            sx={{ color: theme.palette.text.primary }}
-          >
+          <IconButton onClick={logout} sx={{ color: theme.palette.text.primary }}>
             <LogoutIcon />
           </IconButton>
         </Box>

@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(currentUser);
       } catch (err) {
         console.error('Error fetching session:', err);
-        showNotification(`Error fetching session: ${err}`, 'error')
+        showNotification(`Error fetching session: ${err}`, 'error');
       }
       setLoading(false);
     };
@@ -39,10 +39,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const loggedInUser = await supabaseService.signInWithEmail(email, password);
       setUser(loggedInUser);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
-      showNotification(`Error in login: ${err.message}`, 'error')
+      showNotification(`Error in login: ${err.message}`, 'error');
     }
     setLoading(false);
   };
@@ -53,15 +53,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
     } catch (err) {
       console.error('Logout error:', err);
-      showNotification(`Error in logout: ${err}`, 'error')
+      showNotification(`Error in logout: ${err}`, 'error');
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, error, login, logout }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

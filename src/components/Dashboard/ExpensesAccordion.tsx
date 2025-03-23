@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
   Accordion,
   AccordionSummary,
@@ -12,10 +13,12 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SellIcon from '@mui/icons-material/Sell';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Expense } from '../../interfaces/Expenses';
+import EditIcon from '@mui/icons-material/Edit';
 import PaymentIcon from '@mui/icons-material/Payment';
 import CalculateIcon from '@mui/icons-material/Calculate';
+import { Expense } from '../../interfaces/Expenses';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
+
 
 interface ExpensesAccordionProps {
   expense: Expense;
@@ -24,6 +27,7 @@ interface ExpensesAccordionProps {
 }
 
 const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNumber, refreshExpenses }) => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.only('xs')); 
   const isSm = useMediaQuery(theme.breakpoints.only('sm')); 
@@ -49,6 +53,11 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
       alert('Failed to delete the expense');
     }
   };
+
+  const handleEdit = (expenseId: number) => {
+    navigate(`/expense/${expenseId}`);
+  };
+  
 
   return (
     <Accordion>
@@ -95,14 +104,24 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
             <Chip icon={<CalculateIcon />} label={expense.type} color="secondary" variant="outlined" />
             <Chip icon={<PaymentIcon />} label={`${expense.isPaidByKari ? 'Kari' : 'Adolfo'}`} color="success" variant="outlined" />
           </Stack>
-          <IconButton
-            color="error"
-            onClick={() => handleDelete(expense.id)}
-            aria-label="delete"
-            size="small"
-          >
-            <DeleteIcon />
-          </IconButton>
+          <Stack direction="row" spacing={1}>
+            <IconButton
+              color="primary"
+              onClick={() => handleEdit(expense.id)}
+              aria-label="edit"
+              size="small"
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              color="error"
+              onClick={() => handleDelete(expense.id)}
+              aria-label="delete"
+              size="small"
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Stack>
         </Stack>
       </AccordionDetails>
     </Accordion>

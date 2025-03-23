@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,12 +22,10 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
-import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
-import { supabaseService } from '../../services/Supabase/SupabaseService';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
+import { supabaseService } from '../../services/Supabase/SupabaseService';
 
 const formSchema = z.object({
   date: z.string()
@@ -60,6 +60,8 @@ type ExpenseFormData = z.infer<typeof formSchema>;
 const Expense = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [fetching, setFetching] = useState(true);
   
   const { 
     register, 
@@ -77,21 +79,64 @@ const Expense = () => {
     }
   });
 
+  useEffect(() => {
+    const fetchExpense = async () => {
+      if (!id) {
+        setFetching(false);
+        return;
+      }
+
+      try {
+        const expense = await supabaseService.getExpenseById(Number(id));
+        if (expense) {
+          setValue('date', expense.date);
+          setValue('description', expense.description);
+          setValue('amount', expense.amount.toString());
+          setValue('category', expense.category);
+          setValue('type', expense.type);
+          setValue('isPaidByKari', expense.isPaidByKari);
+        } else {
+          alert('Expense not found');
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Failed to fetch expense');
+        navigate('/dashboard');
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchExpense();
+  }, [id, navigate, setValue]);
+
   const onSubmit = async (data: ExpenseFormData) => {
     setLoading(true);
     try {
-      await supabaseService.insertExpense({
-        date: data.date,
-        description: data.description,
-        category: data.category,
-        amount: parseFloat(data.amount),
-        type: data.type,
-        isPaidByKari: data.isPaidByKari,
-      });
-      reset(); 
+      if (id) {
+        await supabaseService.updateExpense(Number(id), {
+          date: data.date,
+          description: data.description,
+          category: data.category,
+          amount: parseFloat(data.amount),
+          type: data.type,
+          isPaidByKari: data.isPaidByKari,
+        });
+      } else {
+        await supabaseService.insertExpense({
+          date: data.date,
+          description: data.description,
+          category: data.category,
+          amount: parseFloat(data.amount),
+          type: data.type,
+          isPaidByKari: data.isPaidByKari,
+        });
+      }
+      reset();
       navigate('/dashboard');
     } catch (error) {
-      alert('Error adding expense');
+      alert('Error saving expense');
     } finally {
       setLoading(false);
     }
@@ -101,6 +146,14 @@ const Expense = () => {
     reset(); 
     navigate('/dashboard');
   };
+
+  if (fetching) {
+    return (
+      <Container maxWidth="xs" sx={{ mt: 5 }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>

@@ -13,6 +13,7 @@ import AddIcon from '@mui/icons-material/Add';
 import ExpensesAccordion from './ExpensesAccordion';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Income, Expense } from '../../interfaces';
+import { useNotifications } from '../../context';
 
 const formatNumber = (value: number): string => {
   return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
@@ -20,6 +21,7 @@ const formatNumber = (value: number): string => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { showNotification } = useNotifications();
   const [incomeData, setIncomeData] = useState<Income | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +39,7 @@ const Dashboard = () => {
       setExpenses(expensesData);
     } catch (error) {
       console.error('Error fetching data:', error);
+      showNotification(`Error fetching data: ${error}`, 'error')
     }
     setLoading(false);
   };
@@ -48,31 +51,27 @@ const Dashboard = () => {
 
   const handleSave = async () => {
     if (!editing || tempValue === null) return;
-
     const newValue = parseFloat(tempValue.replace(',', '.'));
-
     try {
       await supabaseService.updateIncome(editing, newValue);
       const latestIncome = await supabaseService.getLatestIncome();
       setIncomeData(latestIncome);
+      showNotification('Income updated', 'success')
     } catch (error) {
       console.error('Error updating income:', error);
+      showNotification(`Error updating income ${error}`, 'error')
     }
-
     setEditing(null);
     setTempValue(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
-
     value = value.replace(/[^0-9,]/g, '');
-
     const commaCount = (value.match(/,/g) || []).length;
     if (commaCount > 1) {
       return;
     }
-
     setTempValue(value);
   };
 

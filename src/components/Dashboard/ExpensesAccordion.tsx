@@ -18,6 +18,7 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Expense } from '../../interfaces/Expenses';
+import { useNotifications } from '../../context';
 
 interface ExpensesAccordionProps {
   expense: Expense;
@@ -28,6 +29,7 @@ interface ExpensesAccordionProps {
 const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNumber, refreshExpenses }) => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { showNotification } = useNotifications();
   const isXs = useMediaQuery(theme.breakpoints.only('xs')); 
   const isSm = useMediaQuery(theme.breakpoints.only('sm')); 
   const isMd = useMediaQuery(theme.breakpoints.only('md')); 
@@ -47,9 +49,10 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
     try {
       await supabaseService.deleteExpense(expenseId);
       refreshExpenses();
+      showNotification('Expense deleted', 'success')
     } catch (error) {
-      console.error(error);
-      alert('Failed to delete the expense');
+      console.error('Failed to delete the expense', error);
+      showNotification(`Failed to delete the expense ${error}`, 'error');
     }
   };
 

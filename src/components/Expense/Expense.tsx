@@ -27,6 +27,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
+import { useNotifications } from '../../context';
 
 const formSchema = z.object({
   date: z.string().min(1, 'Date is required').refine((value) => dayjs(value, 'YYYY-MM-DD', true).isValid(), {
@@ -49,7 +50,8 @@ const Expense = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { id } = useParams();
-
+  const { showNotification } = useNotifications();
+  
   const { 
     register, 
     handleSubmit, 
@@ -82,12 +84,12 @@ const Expense = () => {
           setValue('type', expense.type);
           setValue('isPaidByKari', expense.isPaidByKari);
         } else {
-          alert('Expense not found');
+          showNotification('Expense not found', 'error');
           navigate('/dashboard');
         }
       } catch (error) {
-        console.error(error);
-        alert('Failed to fetch expense');
+        console.error('Failed to fetch expense', error);
+        showNotification(`Failed to fetch expense: ${error}`, 'error');
         navigate('/dashboard');
       } finally {
         setFetching(false);
@@ -108,6 +110,7 @@ const Expense = () => {
           type: data.type,
           isPaidByKari: data.isPaidByKari,
         });
+        showNotification('Expense updated', 'success')
       } else {
         await supabaseService.insertExpense({
           date: data.date,
@@ -117,11 +120,13 @@ const Expense = () => {
           type: data.type,
           isPaidByKari: data.isPaidByKari,
         });
+        showNotification('Expense added', 'success')
       }
       reset();
       navigate('/dashboard');
     } catch (error) {
-      alert('Error saving expense');
+      console.log('Error saving expense', error)
+      showNotification(`Error saving expense: ${error}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -131,14 +136,6 @@ const Expense = () => {
     reset();
     navigate('/dashboard');
   };
-
-  if (fetching) {
-    return (
-      <Container maxWidth="xs" sx={{ mt: 5 }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -152,132 +149,132 @@ const Expense = () => {
           boxShadow: 3 
         }}
       >
-        <Typography variant="h5" fontWeight="bold" gutterBottom color="text.primary">
-          {id ? 'Edit Expense' : 'Add Expense'}
-        </Typography>
+        {fetching ? (
+          <CircularProgress />
+        ) : (
+          <>
+            <Typography variant="h5" fontWeight="bold" gutterBottom color="text.primary">
+              {id ? 'Edit Expense' : 'Add Expense'}
+            </Typography>
+            <Box component="form" onSubmit={handleSubmit(onSubmit)} width="100%">
+              <Controller
+                name="date"
+                control={control}
+                render={({ field }) => (
+                  <DatePicker
+                    {...field}
+                    label="Date"
+                    value={field.value ? dayjs(field.value) : null}
+                    onChange={(newDate) => setValue('date', newDate ? newDate.format('YYYY-MM-DD') : '')}
+                    format="YYYY-MM-DD"
+                    slotProps={{
+                      textField: {
+                        variant: 'outlined',
+                        fullWidth: true,
+                        margin: 'normal',
+                        error: !!errors.date,
+                        helperText: errors.date?.message,
+                      }
+                    }}
+                  />
+                )}
+              />
 
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} width="100%">
-          <Controller
-            name="date"
-            control={control}
-            render={({ field }) => (
-              <DatePicker
-                {...field}
-                label="Date"
-                value={field.value ? dayjs(field.value) : null}
-                onChange={(newDate) => setValue('date', newDate ? newDate.format('YYYY-MM-DD') : '')}
-                format="YYYY-MM-DD"
-                slotProps={{
-                  textField: {
-                    variant: 'outlined',
-                    fullWidth: true,
-                    margin: 'normal',
-                    error: !!errors.date,
-                    helperText: errors.date?.message,
-                  }
+              <TextField
+                label="Description"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                {...register('description')}
+                error={!!errors.description}
+                helperText={errors.description?.message}
+                sx={{
+                  input: { color: theme.palette.text.primary },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: theme.palette.divider },
+                    '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                    '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
+                  },
                 }}
               />
-            )}
-          />
-
-          <TextField
-            label="Description"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            {...register('description')}
-            error={!!errors.description}
-            helperText={errors.description?.message}
-            sx={{
-              input: { color: theme.palette.text.primary },
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: theme.palette.divider },
-                '&:hover fieldset': { borderColor: theme.palette.primary.main },
-                '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
-              },
-            }}
-          />
-
-          <TextField
-            label="Amount"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            type="number"
-            {...register('amount')}
-            error={!!errors.amount}
-            helperText={errors.amount?.message}
-            sx={{
-              input: { color: theme.palette.text.primary },
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: theme.palette.divider },
-                '&:hover fieldset': { borderColor: theme.palette.primary.main },
-                '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
-              },
-            }}
-          />
-
-          <FormControl fullWidth margin="normal" error={!!errors.category}>
-            <InputLabel>Category</InputLabel>
-            <Controller
-              name="category"
-              control={control}
-              render={({ field }) => (
-                <Select {...field}>
-                  {Object.values(ExpenseCategory).map((cat) => (
-                    <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-            <FormHelperText>{errors.category?.message}</FormHelperText>
-          </FormControl>
-
-          <FormControl fullWidth margin="normal" error={!!errors.type}>
-            <InputLabel>Type</InputLabel>
-            <Controller
-              name="type"
-              control={control}
-              render={({ field }) => (
-                <Select {...field}>
-                  {Object.values(ExpenseType).map((t) => (
-                    <MenuItem key={t} value={t}>{t}</MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-            <FormHelperText>{errors.type?.message}</FormHelperText>
-          </FormControl>
-
-          <FormControlLabel
-            control={
-              <Switch
-                {...register('isPaidByKari')}
-                checked={watch('isPaidByKari')}
-                onChange={(e) => setValue('isPaidByKari', e.target.checked)}
+              <TextField
+                label="Amount"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                type="number"
+                {...register('amount')}
+                error={!!errors.amount}
+                helperText={errors.amount?.message}
+                sx={{
+                  input: { color: theme.palette.text.primary },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: theme.palette.divider },
+                    '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                    '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
+                  },
+                }}
               />
-            }
-            label="Paid by Kari"
-          />
-
-          <Box mt={3} display="flex" gap={2}>
-            <IconButton 
-              color="success" 
-              onClick={handleSubmit(onSubmit)} 
-              disabled={loading} 
-              sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : <CheckIcon />}
-            </IconButton>
-            <IconButton 
-              color="error" 
-              onClick={handleCancel} 
-              sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </Box>
+              <FormControl fullWidth margin="normal" error={!!errors.category}>
+                <InputLabel>Category</InputLabel>
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <Select {...field}>
+                      {Object.values(ExpenseCategory).map((cat) => (
+                        <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+                <FormHelperText>{errors.category?.message}</FormHelperText>
+              </FormControl>
+              <FormControl fullWidth margin="normal" error={!!errors.type}>
+                <InputLabel>Type</InputLabel>
+                <Controller
+                  name="type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select {...field}>
+                      {Object.values(ExpenseType).map((t) => (
+                        <MenuItem key={t} value={t}>{t}</MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+                <FormHelperText>{errors.type?.message}</FormHelperText>
+              </FormControl>
+              <FormControlLabel
+                control={
+                  <Switch
+                    {...register('isPaidByKari')}
+                    checked={watch('isPaidByKari')}
+                    onChange={(e) => setValue('isPaidByKari', e.target.checked)}
+                  />
+                }
+                label="Paid by Kari"
+              />
+              <Box mt={3} display="flex" gap={2}>
+                <IconButton 
+                  color="success" 
+                  onClick={handleSubmit(onSubmit)} 
+                  disabled={loading} 
+                  sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
+                >
+                  {loading ? <CircularProgress size={24} color="inherit" /> : <CheckIcon />}
+                </IconButton>
+                <IconButton 
+                  color="error" 
+                  onClick={handleCancel} 
+                  sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+            </Box>
+          </>
+        )}
       </Container>
     </LocalizationProvider>
   );

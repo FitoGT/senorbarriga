@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { User } from '@supabase/supabase-js';
+import { supabaseService } from '../../services/Supabase/SupabaseService';
+import { useNotifications } from '../../context';
 
 interface AuthContextType {
   user: User | null;
@@ -13,6 +14,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const { showNotification } = useNotifications();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,25 +26,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(currentUser);
       } catch (err) {
         console.error('Error fetching session:', err);
+        showNotification(`Error fetching session: ${err}`, 'error')
       }
       setLoading(false);
     };
-
     checkUser();
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
-
     try {
       const loggedInUser = await supabaseService.signInWithEmail(email, password);
       setUser(loggedInUser);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
+      showNotification(`Error in login: ${err.message}`, 'error')
     }
-
     setLoading(false);
   };
 
@@ -52,6 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
     } catch (err) {
       console.error('Logout error:', err);
+      showNotification(`Error in logout: ${err}`, 'error')
     }
   };
 

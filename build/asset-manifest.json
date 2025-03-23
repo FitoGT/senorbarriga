@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.js": "/senorbarriga/static/js/main.0a6de9a8.js",
+    "main.js": "/senorbarriga/static/js/main.26396473.js",
     "static/js/952.8f8f4199.chunk.js": "/senorbarriga/static/js/952.8f8f4199.chunk.js",
     "static/js/453.1d2da851.chunk.js": "/senorbarriga/static/js/453.1d2da851.chunk.js",
     "index.html": "/senorbarriga/index.html",
-    "main.0a6de9a8.js.map": "/senorbarriga/static/js/main.0a6de9a8.js.map",
+    "main.26396473.js.map": "/senorbarriga/static/js/main.26396473.js.map",
     "952.8f8f4199.chunk.js.map": "/senorbarriga/static/js/952.8f8f4199.chunk.js.map",
     "453.1d2da851.chunk.js.map": "/senorbarriga/static/js/453.1d2da851.chunk.js.map"
   },
   "entrypoints": [
-    "static/js/main.0a6de9a8.js"
+    "static/js/main.26396473.js"
   ]
 }

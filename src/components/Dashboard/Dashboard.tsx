@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
-import { Income } from '../../interfaces/Income';
-import { Expense } from '../../interfaces/Expenses';
+import { Income, Expense } from '../../interfaces';
 import { 
   Container, 
   CircularProgress, 
@@ -25,23 +24,23 @@ const Dashboard = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [latestIncome, expensesData] = await Promise.all([
+        supabaseService.getLatestIncome(),
+        supabaseService.getAllExpenses(),
+      ]);
+
+      setIncomeData(latestIncome);
+      setExpenses(expensesData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [latestIncome, expensesData] = await Promise.all([
-          supabaseService.getLatestIncome(),
-          supabaseService.getAllExpenses(),
-        ]);
-
-        setIncomeData(latestIncome);
-        setExpenses(expensesData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-      setLoading(false);
-    };
-
     fetchData();
   }, []);
 
@@ -87,7 +86,7 @@ const Dashboard = () => {
               <Typography color="textSecondary">No expenses recorded.</Typography>
             ) : (
               expenses.map((expense) => (
-                <ExpensesAccordion key={expense.id} expense={expense} formatNumber={formatNumber} />
+                <ExpensesAccordion key={expense.id} expense={expense} formatNumber={formatNumber} refreshExpenses={fetchData}/>
               ))
             )}
           </Stack>

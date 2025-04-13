@@ -150,6 +150,16 @@ class SupabaseService {
       throw new Error(`Deleting expense failed: ${error}`);
     }
   }
+
+  async getTotalExpenses(): Promise<void> {
+    try {
+      const { data } = await this.client.rpc('get_total_expenses');
+      console.log(data);
+      return data;
+    } catch (error) {
+      throw new Error(`Get total expense failed: ${error}`);
+    }
+  }
 }
 
 export const supabaseService = new SupabaseService();

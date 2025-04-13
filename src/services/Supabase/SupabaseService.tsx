@@ -170,7 +170,8 @@ class SupabaseService {
 
   async upsertTotalExpenses(expenses: TotalExpenses): Promise<void> {
     try {
-      await this.client.from('total_expenses').upsert([
+      await this.client.from('total_expenses').delete().neq('id', 0);
+      await this.client.from('total_expenses').insert([
         {
           total: expenses.total,
           adolfo_total: expenses.adolfo,

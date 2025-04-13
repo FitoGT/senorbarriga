@@ -45,3 +45,26 @@ BEGIN
   FROM income_data, total_expenses, percentage_expenses, shared_expenses, kari_expenses;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_kari_balance()
+RETURNS TABLE (
+  kari_balance float
+) AS $$
+BEGIN
+  RETURN QUERY
+  WITH kari_expense AS (
+    SELECT kari_total
+    FROM total_expenses
+    ORDER BY created_at DESC
+    LIMIT 1
+  ),
+  paid_by_kari AS (
+    SELECT SUM(amount) AS total_kari
+    FROM expenses
+    WHERE "isPaidByKari" = true
+  )
+  SELECT
+    ROUND((kari_expense.kari_total - paid_by_kari.total_kari)::numeric, 2)::float AS kari_balance
+  FROM kari_expense, paid_by_kari;
+END;
+$$ LANGUAGE plpgsql;

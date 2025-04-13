@@ -28,7 +28,6 @@ const Dashboard = () => {
       const [latestIncome, expensesData] = await Promise.all([
         supabaseService.getLatestIncome(),
         supabaseService.getAllExpenses(),
-        supabaseService.getTotalExpenses(),
       ]);
       setIncomeData(latestIncome);
       setExpenses(expensesData);

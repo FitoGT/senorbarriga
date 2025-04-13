@@ -1,21 +1,21 @@
 export enum ExpenseCategory {
-  RENT = 'Rent',
-  CELLPHONE = 'Cellphone',
-  SUBSCRIPTIONS = 'Subscriptions',
-  PHARMACY = 'Pharmacy',
-  PET = 'Pet',
-  SUPERMARKET = 'Supermarket',
-  PURCHASES = 'Purchases',
-  FOOD = 'Food',
-  HEALTH_INSURANCE = 'Health Insurance',
-  TRANSPORTATION = 'Transportation',
-  OTHER = 'Other',
+  RENT = 'rent',
+  CELLPHONE = 'cellphone',
+  SUBSCRIPTIONS = 'subscriptions',
+  PHARMACY = 'pharmacy',
+  PET = 'pet',
+  SUPERMARKET = 'supermarket',
+  PURCHASES = 'purchases',
+  FOOD = 'food',
+  HEALTH_INSURANCE = 'health insurance',
+  TRANSPORTATION = 'transportation',
+  OTHER = 'other',
 }
 
 export enum ExpenseType {
-  PERCENTAGE = 'Percentage',
-  SHARED = 'Shared',
-  KARI = 'Kari',
+  PERCENTAGE = 'percentage',
+  SHARED = 'shared',
+  KARI = 'kari',
 }
 
 export interface Expense {

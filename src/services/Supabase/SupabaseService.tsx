@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { createClient, SupabaseClient, AuthResponse, User } from '@supabase/supabase-js';
-import { ExpenseCategory, ExpenseType, Expense, Income } from '../../interfaces';
+import { ExpenseCategory, ExpenseType, Expense, Income, TotalExpenses } from '../../interfaces';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || '';
@@ -88,6 +88,8 @@ class SupabaseService {
       }
 
       await this.client.from('income').update(updatedData).eq('id', latestIncome.id);
+      const expenses = await this.getTotalExpenses();
+      await this.upsertTotalExpenses(expenses);
     } catch (error) {
       throw new Error(`Updating income failed: ${error}`);
     }
@@ -114,6 +116,8 @@ class SupabaseService {
   async insertExpense(expense: Omit<Expense, 'id' | 'created_at'>): Promise<void> {
     try {
       await this.client.from('expenses').insert([expense]);
+      const expenses = await this.getTotalExpenses();
+      await this.upsertTotalExpenses(expenses);
     } catch (error) {
       throw new Error(`Inserting expense failed: ${error}`);
     }
@@ -138,6 +142,8 @@ class SupabaseService {
   async updateExpense(expenseId: number, updates: Partial<Omit<Expense, 'id' | 'created_at'>>): Promise<void> {
     try {
       await this.client.from('expenses').update(updates).eq('id', expenseId);
+      const expenses = await this.getTotalExpenses();
+      await this.upsertTotalExpenses(expenses);
     } catch (error) {
       throw new Error(`Updating expense failed: ${error}`);
     }
@@ -146,18 +152,33 @@ class SupabaseService {
   async deleteExpense(expenseId: number): Promise<void> {
     try {
       await this.client.from('expenses').delete().eq('id', expenseId);
+      const expenses = await this.getTotalExpenses();
+      await this.upsertTotalExpenses(expenses);
     } catch (error) {
       throw new Error(`Deleting expense failed: ${error}`);
     }
   }
 
-  async getTotalExpenses(): Promise<void> {
+  async getTotalExpenses(): Promise<TotalExpenses> {
     try {
       const { data } = await this.client.rpc('get_total_expenses');
-      console.log(data);
-      return data;
+      return data[0];
     } catch (error) {
       throw new Error(`Get total expense failed: ${error}`);
+    }
+  }
+
+  async upsertTotalExpenses(expenses: TotalExpenses): Promise<void> {
+    try {
+      await this.client.from('total_expenses').upsert([
+        {
+          total: expenses.total,
+          adolfo_total: expenses.adolfo,
+          kari_total: expenses.kari,
+        },
+      ]);
+    } catch (error) {
+      throw new Error(`Upsert total expense failed: ${error}`);
     }
   }
 }

@@ -1,8 +1,8 @@
 CREATE OR REPLACE FUNCTION get_total_expenses()
 RETURNS TABLE (
   total float,
-  adolfo_total float,
-  kari_total float
+  adolfo float,
+  kari float
 ) AS $$
 BEGIN
   RETURN QUERY

@@ -28,3 +28,9 @@ export interface Expense {
   type: ExpenseType;
   isPaidByKari: boolean;
 }
+
+export interface TotalExpenses {
+  total: number;
+  adolfo: number;
+  kari: number;
+}

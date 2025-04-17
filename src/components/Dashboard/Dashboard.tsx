@@ -48,7 +48,7 @@ const Dashboard = () => {
     const newValue = parseFloat(tempValue.replace(',', '.'));
     try {
       await supabaseService.updateIncome(editing, newValue);
-      fetchData();
+      await fetchData();
       showNotification('Income updated', 'success');
     } catch (error) {
       console.error('Error updating income:', error);
@@ -72,7 +72,7 @@ const Dashboard = () => {
     try {
       await supabaseService.resetMonth();
       showNotification('Month has been reset successfully', 'success');
-      fetchData();
+      await fetchData();
     } catch (error) {
       console.error('Error resetting month:', error);
       showNotification(`Error resetting month: ${error}`, 'error');

@@ -98,7 +98,7 @@ class SupabaseService {
       }
 
       await this.client.from('income').update(updatedData).eq('id', latestIncome.id);
-      this.syncBalance();
+      await this.syncBalance();
     } catch (error) {
       throw new Error(`Updating income failed: ${error}`);
     }
@@ -324,7 +324,7 @@ class SupabaseService {
     const debtByMonth = await this.getDebtByMonth(month);
 
     if (debtByMonth?.length) {
-      this.updateDebt(debtByMonth[0], kariBalance);
+      await this.updateDebt(debtByMonth[0], kariBalance);
     } else {
       await this.insertDebt(kariBalance, month);
     }

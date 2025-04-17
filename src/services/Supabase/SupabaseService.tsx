@@ -238,10 +238,35 @@ class SupabaseService {
 
   async getKariBalance(): Promise<number> {
     try {
-      const { data } = await this.client.rpc('get_kari_balance');
-      return data[0].kari_balance || 0;
+      const { data: kariExpenseData, error: kariExpenseError } = await this.client
+        .from('total_expenses')
+        .select('kari_total')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (kariExpenseError || !kariExpenseData) {
+        throw new Error(`Fetching kari_total failed: ${kariExpenseError?.message}`);
+      }
+
+      const kariTotal = kariExpenseData.kari_total || 0;
+
+      const { data: paidByKariData, error: paidByKariError } = await this.client
+        .from('expenses')
+        .select('amount')
+        .eq('isPaidByKari', true);
+
+      if (paidByKariError || !paidByKariData) {
+        throw new Error(`Fetching paid by Kari expenses failed: ${paidByKariError?.message}`);
+      }
+
+      const totalPaidByKari = paidByKariData.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+
+      const kariBalance = Number((kariTotal - totalPaidByKari).toFixed(2));
+
+      return kariBalance;
     } catch (error) {
-      throw new Error(`Get total expense failed: ${error}`);
+      throw new Error(`Fetching Kari balance failed: ${error}`);
     }
   }
 

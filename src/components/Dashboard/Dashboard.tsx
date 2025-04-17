@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Container, Stack } from '@mui/material';
+import { Container, Stack, IconButton, Tooltip } from '@mui/material';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import DisplayCard from './DisplayCard';
 import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
@@ -47,12 +48,7 @@ const Dashboard = () => {
     const newValue = parseFloat(tempValue.replace(',', '.'));
     try {
       await supabaseService.updateIncome(editing, newValue);
-      const [latestIncome, totalExpenses] = await Promise.all([
-        supabaseService.getLatestIncome(),
-        supabaseService.getTotalExpenses(),
-      ]);
-      setIncomeData(latestIncome);
-      setExpensesData(totalExpenses);
+      fetchData();
       showNotification('Income updated', 'success');
     } catch (error) {
       console.error('Error updating income:', error);
@@ -72,6 +68,17 @@ const Dashboard = () => {
     setTempValue(value);
   };
 
+  const handleResetMonth = async () => {
+    try {
+      await supabaseService.resetMonth();
+      showNotification('Month has been reset successfully', 'success');
+      fetchData();
+    } catch (error) {
+      console.error('Error resetting month:', error);
+      showNotification(`Error resetting month: ${error}`, 'error');
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -82,6 +89,14 @@ const Dashboard = () => {
         <FullLoader />
       ) : (
         <>
+          {/* Reset Month Button */}
+          <Stack direction='row' justifyContent='end' alignItems='center' sx={{ mb: 2 }}>
+            <Tooltip title='Reset Month'>
+              <IconButton onClick={handleResetMonth} color='error'>
+                <RestartAltIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
           {/* Incomes */}
           <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
             <DisplayCard

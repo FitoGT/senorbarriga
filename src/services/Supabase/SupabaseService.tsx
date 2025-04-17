@@ -167,10 +167,57 @@ class SupabaseService {
 
   async getTotalExpenses(): Promise<TotalExpenses> {
     try {
-      const { data } = await this.client.rpc('get_total_expenses');
-      return data[0];
+      const { data: incomeData, error: incomeError } = await this.client
+        .from('income')
+        .select('adolfo_percentage, kari_percentage')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (incomeError || !incomeData) {
+        throw new Error(`Fetching latest income failed: ${incomeError?.message}`);
+      }
+
+      const { data: expensesData, error: expensesError } = await this.client.from('expenses').select('amount, type');
+
+      if (expensesError || !expensesData) {
+        throw new Error(`Fetching expenses failed: ${expensesError?.message}`);
+      }
+
+      let totalExpenses = 0;
+      let percentageExpenses = 0;
+      let sharedExpenses = 0;
+      let kariExpenses = 0;
+
+      for (const expense of expensesData) {
+        totalExpenses += expense.amount || 0;
+
+        switch (expense.type) {
+          case 'percentage':
+            percentageExpenses += expense.amount || 0;
+            break;
+          case 'shared':
+            sharedExpenses += expense.amount || 0;
+            break;
+          case 'kari':
+            kariExpenses += expense.amount || 0;
+            break;
+          default:
+            break;
+        }
+      }
+
+      const adolfoTotal = percentageExpenses * (incomeData.adolfo_percentage / 100) + sharedExpenses / 2;
+
+      const kariTotal = percentageExpenses * (incomeData.kari_percentage / 100) + sharedExpenses / 2 + kariExpenses;
+
+      return {
+        total: Number(totalExpenses.toFixed(2)),
+        adolfo: Number(adolfoTotal.toFixed(2)),
+        kari: Number(kariTotal.toFixed(2)),
+      };
     } catch (error) {
-      throw new Error(`Get total expense failed: ${error}`);
+      throw new Error(`Fetching total expenses failed: ${error}`);
     }
   }
 
@@ -248,10 +295,7 @@ class SupabaseService {
     await this.upsertTotalExpenses(expenses);
     const kariBalance = await this.getKariBalance();
     const today = new Date();
-    // TODO: Remplazar cuando carguemos abril
-    // const month = today.toLocaleString('en-US', { month: 'long' });
-    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1);
-    const month = lastMonthDate.toLocaleString('en-US', { month: 'long' });
+    const month = today.toLocaleString('en-US', { month: 'long' });
     const debtByMonth = await this.getDebtByMonth(month);
 
     if (debtByMonth?.length) {

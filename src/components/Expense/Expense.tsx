@@ -95,12 +95,12 @@ const Expense = () => {
           setValue('isPaidByKari', expense.isPaidByKari);
         } else {
           showNotification('Expense not found', 'error');
-          navigate('/dashboard');
+          navigate('/expenses');
         }
       } catch (error) {
         console.error('Failed to fetch expense', error);
         showNotification(`Failed to fetch expense: ${error}`, 'error');
-        navigate('/dashboard');
+        navigate('/expenses');
       } finally {
         setFetching(false);
       }
@@ -144,7 +144,7 @@ const Expense = () => {
 
   const handleCancel = () => {
     reset();
-    navigate('/dashboard');
+    navigate('/expenses');
   };
 
   return (

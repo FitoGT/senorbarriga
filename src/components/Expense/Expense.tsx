@@ -29,6 +29,7 @@ import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
 import { useNotifications } from '../../context';
+import { ROUTES } from '../../constants/routes';
 
 const formSchema = z.object({
   date: z
@@ -95,12 +96,12 @@ const Expense = () => {
           setValue('isPaidByKari', expense.isPaidByKari);
         } else {
           showNotification('Expense not found', 'error');
-          navigate('/expenses');
+          navigate(ROUTES.EXPENSES);
         }
       } catch (error) {
         console.error('Failed to fetch expense', error);
         showNotification(`Failed to fetch expense: ${error}`, 'error');
-        navigate('/expenses');
+        navigate(ROUTES.EXPENSES);
       } finally {
         setFetching(false);
       }
@@ -135,7 +136,7 @@ const Expense = () => {
         showNotification('Expense added', 'success');
       }
       reset();
-      navigate('/expenses');
+      navigate(ROUTES.EXPENSES);
     } catch (error) {
       console.log('Error saving expense', error);
       showNotification(`Error saving expense: ${error}`, 'error');
@@ -146,7 +147,7 @@ const Expense = () => {
 
   const handleCancel = () => {
     reset();
-    navigate('/expenses');
+    navigate(ROUTES.EXPENSES);
   };
 
   return (

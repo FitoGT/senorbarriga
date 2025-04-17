@@ -19,6 +19,7 @@ import CalculateIcon from '@mui/icons-material/Calculate';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Expense } from '../../interfaces/Expenses';
 import { useNotifications } from '../../context';
+import { ROUTES } from '../../constants/routes';
 
 interface ExpensesAccordionProps {
   expense: Expense;
@@ -49,7 +50,7 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
   };
 
   const handleEdit = (expenseId: number) => {
-    navigate(`/expense/${expenseId}`);
+    navigate(`${ROUTES.EXPENSES}${expenseId}`);
   };
 
   return (

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Container, TextField, Button, Typography, CircularProgress, Box, useTheme } from '@mui/material';
+import { ROUTES } from '../../constants/routes';
 
 const formSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
@@ -28,7 +29,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigate(ROUTES.DASHBOARD);
     }
   }, [user, navigate]);
 

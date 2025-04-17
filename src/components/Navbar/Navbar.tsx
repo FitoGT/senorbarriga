@@ -18,6 +18,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../context/Auth/AuthContext';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
 
 const Navbar = () => {
   const { logout } = useAuth();
@@ -65,14 +66,14 @@ const Navbar = () => {
       <Drawer anchor='right' open={drawerOpen} onClose={toggleDrawer(false)}>
         <Box sx={{ width: 250 }} role='presentation' onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)}>
           <List>
-            <ListItemButton onClick={() => handleNavigation('/dashboard')}>
+            <ListItemButton onClick={() => handleNavigation(ROUTES.DASHBOARD)}>
               <ListItemIcon>
                 <DashboardIcon />
               </ListItemIcon>
               <ListItemText primary='Dashboard' />
             </ListItemButton>
 
-            <ListItemButton onClick={() => handleNavigation('/expenses')}>
+            <ListItemButton onClick={() => handleNavigation(ROUTES.EXPENSES)}>
               <ListItemIcon>
                 <ReceiptIcon />
               </ListItemIcon>

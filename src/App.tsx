@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { ThemeProvider, CssBaseline } from '@mui/material';
@@ -8,6 +8,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import Expenses from './components/Expenses/Expenses';
 import Expense from './components/Expense/Expense';
 import PrivateRoute from './routes/PrivateRoute/PrivateRoute';
+import { ROUTES } from './constants/routes';
 
 function App() {
   return (
@@ -18,11 +19,13 @@ function App() {
           <AuthProvider>
             <Router>
               <Routes>
-                <Route path='/' element={<Auth />} />
+                <Route path='*' element={<Navigate to={ROUTES.AUTH} replace />} />
+
+                <Route path={ROUTES.AUTH} element={<Auth />} />
                 <Route element={<PrivateRoute />}>
-                  <Route path='/dashboard' element={<Dashboard />} />
-                  <Route path='/expenses' element={<Expenses />} />
-                  <Route path='/expense/:id?' element={<Expense />} />
+                  <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+                  <Route path={ROUTES.EXPENSES} element={<Expenses />} />
+                  <Route path={ROUTES.EXPENSES + ':id?'} element={<Expense />} />
                 </Route>
               </Routes>
             </Router>

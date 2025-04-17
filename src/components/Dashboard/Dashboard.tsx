@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { Container, Stack } from '@mui/material';
 import IncomeCard from './IncomeCard';
 import ExpenseCard from './ExpenseCard';
+import DebtCard from './DebtCard';
 import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
-import { Income, TotalExpenses } from '../../interfaces';
+import { Income, TotalExpenses, TotalDebt } from '../../interfaces';
 import { useNotifications } from '../../context';
 
 const formatNumber = (value: number): string => {
@@ -15,6 +16,7 @@ const Dashboard = () => {
   const { showNotification } = useNotifications();
   const [incomeData, setIncomeData] = useState<Income | null>(null);
   const [expensesData, setExpensesData] = useState<TotalExpenses | null>(null);
+  const [debtData, setDebtData] = useState<TotalDebt | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<'kari' | 'adolfo' | null>(null);
   const [tempValue, setTempValue] = useState<string | null>(null);
@@ -22,12 +24,14 @@ const Dashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [latestIncome, totalExpenses] = await Promise.all([
+      const [latestIncome, totalExpenses, totalDebt] = await Promise.all([
         supabaseService.getLatestIncome(),
         supabaseService.getTotalExpenses(),
+        supabaseService.getTotalDebt(),
       ]);
       setIncomeData(latestIncome);
       setExpensesData(totalExpenses);
+      setDebtData(totalDebt);
     } catch (error) {
       console.error('Error fetching data:', error);
       showNotification(`Error fetching data: ${error}`, 'error');
@@ -130,6 +134,10 @@ const Dashboard = () => {
               amount={expensesData ? formatNumber(expensesData.total) : '0,00'}
               color='primary'
             />
+          </Stack>
+          <Stack sx={{ mt: 4 }} spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
+            <DebtCard title="Kari's Debt" amount={debtData ? formatNumber(debtData.kari) : '0,00'} color='success' />
+            <DebtCard title="Adolfo's Debt" amount={debtData ? formatNumber(debtData.adolfo) : '0,00'} color='info' />
           </Stack>
         </>
       )}

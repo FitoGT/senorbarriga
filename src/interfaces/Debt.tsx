@@ -11,3 +11,8 @@ export interface RequestDebtDto {
   kari_debt: number;
   adolfo_debt: number;
 }
+
+export interface TotalDebt {
+  kari: number;
+  adolfo: number;
+}

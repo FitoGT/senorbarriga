@@ -1,6 +1,15 @@
 /* eslint-disable camelcase */
 import { createClient, SupabaseClient, AuthResponse, User } from '@supabase/supabase-js';
-import { ExpenseCategory, ExpenseType, Expense, Income, TotalExpenses, Debt, RequestDebtDto } from '../../interfaces';
+import {
+  ExpenseCategory,
+  ExpenseType,
+  Expense,
+  Income,
+  TotalExpenses,
+  Debt,
+  RequestDebtDto,
+  TotalDebt,
+} from '../../interfaces';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || '';
@@ -248,6 +257,24 @@ class SupabaseService {
       this.updateDebt(debtByMonth[0], kariBalance);
     } else {
       await this.insertDebt(kariBalance, month);
+    }
+  }
+
+  async getTotalDebt(): Promise<TotalDebt> {
+    try {
+      const { data } = await this.client.from('debt').select('adolfo_debt, kari_debt');
+
+      let adolfo = 0;
+      let kari = 0;
+
+      (data || []).forEach((debt) => {
+        adolfo += debt.adolfo_debt || 0;
+        kari += debt.kari_debt || 0;
+      });
+
+      return { adolfo, kari };
+    } catch (error) {
+      throw new Error(`Fetching all debt failed: ${error}`);
     }
   }
 }

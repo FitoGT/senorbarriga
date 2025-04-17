@@ -264,15 +264,15 @@ class SupabaseService {
     try {
       const { data } = await this.client.from('debt').select('adolfo_debt, kari_debt');
 
-      let adolfo = 0;
-      let kari = 0;
+      const totals = (data || []).reduce(
+        (acc, debt) => ({
+          adolfo: acc.adolfo + (debt.adolfo_debt || 0),
+          kari: acc.kari + (debt.kari_debt || 0),
+        }),
+        { adolfo: 0, kari: 0 },
+      );
 
-      (data || []).forEach((debt) => {
-        adolfo += debt.adolfo_debt || 0;
-        kari += debt.kari_debt || 0;
-      });
-
-      return { adolfo, kari };
+      return totals;
     } catch (error) {
       throw new Error(`Fetching all debt failed: ${error}`);
     }

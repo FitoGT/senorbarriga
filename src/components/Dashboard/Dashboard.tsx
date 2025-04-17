@@ -47,7 +47,12 @@ const Dashboard = () => {
     const newValue = parseFloat(tempValue.replace(',', '.'));
     try {
       await supabaseService.updateIncome(editing, newValue);
-      await fetchData();
+      const [latestIncome, totalExpenses] = await Promise.all([
+        supabaseService.getLatestIncome(),
+        supabaseService.getTotalExpenses(),
+      ]);
+      setIncomeData(latestIncome);
+      setExpensesData(totalExpenses);
       showNotification('Income updated', 'success');
     } catch (error) {
       console.error('Error updating income:', error);

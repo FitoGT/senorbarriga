@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Container, Stack } from '@mui/material';
 import IncomeCard from './IncomeCard';
+import ExpenseCard from './ExpenseCard';
 import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
-import { Income } from '../../interfaces';
+import { Income, TotalExpenses } from '../../interfaces';
 import { useNotifications } from '../../context';
 
 const formatNumber = (value: number): string => {
@@ -13,6 +14,7 @@ const formatNumber = (value: number): string => {
 const Dashboard = () => {
   const { showNotification } = useNotifications();
   const [incomeData, setIncomeData] = useState<Income | null>(null);
+  const [expensesData, setExpensesData] = useState<TotalExpenses | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<'kari' | 'adolfo' | null>(null);
   const [tempValue, setTempValue] = useState<string | null>(null);
@@ -20,8 +22,12 @@ const Dashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [latestIncome] = await Promise.all([supabaseService.getLatestIncome()]);
+      const [latestIncome, totalExpenses] = await Promise.all([
+        supabaseService.getLatestIncome(),
+        supabaseService.getTotalExpenses(),
+      ]);
       setIncomeData(latestIncome);
+      setExpensesData(totalExpenses);
     } catch (error) {
       console.error('Error fetching data:', error);
       showNotification(`Error fetching data: ${error}`, 'error');
@@ -105,6 +111,23 @@ const Dashboard = () => {
               title='Total Income'
               amount={incomeData ? formatNumber(incomeData.total_income) : '0,00'}
               percentage='100,00'
+              color='primary'
+            />
+          </Stack>
+          <Stack sx={{ mt: 4 }} spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
+            <ExpenseCard
+              title="Kari's Expenses"
+              amount={expensesData ? formatNumber(expensesData.kari) : '0,00'}
+              color='success'
+            />
+            <ExpenseCard
+              title="Adolfo's Expenses"
+              amount={expensesData ? formatNumber(expensesData.adolfo) : '0,00'}
+              color='info'
+            />
+            <ExpenseCard
+              title='Total Expenses'
+              amount={expensesData ? formatNumber(expensesData.total) : '0,00'}
               color='primary'
             />
           </Stack>

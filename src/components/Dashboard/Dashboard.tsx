@@ -47,8 +47,7 @@ const Dashboard = () => {
     const newValue = parseFloat(tempValue.replace(',', '.'));
     try {
       await supabaseService.updateIncome(editing, newValue);
-      const latestIncome = await supabaseService.getLatestIncome();
-      setIncomeData(latestIncome);
+      await fetchData();
       showNotification('Income updated', 'success');
     } catch (error) {
       console.error('Error updating income:', error);

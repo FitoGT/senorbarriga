@@ -87,7 +87,7 @@ const DisplayCard: React.FC<DisplayCardProps> = ({
           />
         ) : (
           <Typography variant='h6' color={theme.palette[color].main}>
-            € {amount}
+            $ {amount}
           </Typography>
         )}
 

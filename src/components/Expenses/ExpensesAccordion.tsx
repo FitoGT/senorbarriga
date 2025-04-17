@@ -90,7 +90,7 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
             noWrap
             sx={{ width: '80px', textAlign: 'right', color: theme.palette.primary.main }}
           >
-            € {formatNumber(expense.amount)}
+            $ {formatNumber(expense.amount)}
           </Typography>
         </Stack>
       </AccordionSummary>

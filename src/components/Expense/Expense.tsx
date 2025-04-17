@@ -133,7 +133,7 @@ const Expense = () => {
         showNotification('Expense added', 'success');
       }
       reset();
-      navigate('/dashboard');
+      navigate('/expenses');
     } catch (error) {
       console.log('Error saving expense', error);
       showNotification(`Error saving expense: ${error}`, 'error');

@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Container, Stack } from '@mui/material';
-import IncomeCard from './IncomeCard';
-import ExpenseCard from './ExpenseCard';
-import DebtCard from './DebtCard';
+import DisplayCard from './DisplayCard';
 import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Income, TotalExpenses, TotalDebt } from '../../interfaces';
@@ -80,8 +78,9 @@ const Dashboard = () => {
         <FullLoader />
       ) : (
         <>
+          {/* Incomes */}
           <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
-            <IncomeCard
+            <DisplayCard
               title="Kari's Income"
               amount={incomeData ? formatNumber(incomeData.kari_income) : '0,00'}
               percentage={incomeData ? formatNumber(incomeData.kari_percentage) : '0,00'}
@@ -96,7 +95,7 @@ const Dashboard = () => {
               onChange={handleInputChange}
               tempValue={tempValue}
             />
-            <IncomeCard
+            <DisplayCard
               title="Adolfo's Income"
               amount={incomeData ? formatNumber(incomeData.adolfo_income) : '0,00'}
               percentage={incomeData ? formatNumber(incomeData.adolfo_percentage) : '0,00'}
@@ -111,33 +110,41 @@ const Dashboard = () => {
               onChange={handleInputChange}
               tempValue={tempValue}
             />
-            <IncomeCard
+            <DisplayCard
               title='Total Income'
               amount={incomeData ? formatNumber(incomeData.total_income) : '0,00'}
               percentage='100,00'
               color='primary'
             />
           </Stack>
+
+          {/* Expenses */}
           <Stack sx={{ mt: 4 }} spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
-            <ExpenseCard
+            <DisplayCard
               title="Kari's Expenses"
               amount={expensesData ? formatNumber(expensesData.kari) : '0,00'}
               color='success'
             />
-            <ExpenseCard
+            <DisplayCard
               title="Adolfo's Expenses"
               amount={expensesData ? formatNumber(expensesData.adolfo) : '0,00'}
               color='info'
             />
-            <ExpenseCard
+            <DisplayCard
               title='Total Expenses'
               amount={expensesData ? formatNumber(expensesData.total) : '0,00'}
               color='primary'
             />
           </Stack>
+
+          {/* Debts */}
           <Stack sx={{ mt: 4 }} spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
-            <DebtCard title="Kari's Debt" amount={debtData ? formatNumber(debtData.kari) : '0,00'} color='success' />
-            <DebtCard title="Adolfo's Debt" amount={debtData ? formatNumber(debtData.adolfo) : '0,00'} color='info' />
+            <DisplayCard title="Kari's Debt" amount={debtData ? formatNumber(debtData.kari) : '0,00'} color='success' />
+            <DisplayCard
+              title="Adolfo's Debt"
+              amount={debtData ? formatNumber(debtData.adolfo) : '0,00'}
+              color='info'
+            />
           </Stack>
         </>
       )}

@@ -3,11 +3,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 
-interface IncomeCardProps {
+interface DisplayCardProps {
   title: string;
   amount: string;
-  percentage: string;
   color?: 'primary' | 'secondary' | 'success' | 'info' | 'warning';
+  percentage?: string; // optional
   editing?: boolean;
   onEdit?: () => void;
   onSave?: () => void;
@@ -16,11 +16,11 @@ interface IncomeCardProps {
   tempValue?: string | null;
 }
 
-const IncomeCard: React.FC<IncomeCardProps> = ({
+const DisplayCard: React.FC<DisplayCardProps> = ({
   title,
   amount,
-  percentage,
   color = 'primary',
+  percentage,
   editing = false,
   onEdit,
   onSave,
@@ -29,6 +29,7 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
   tempValue,
 }) => {
   const theme = useTheme();
+
   return (
     <Card
       sx={{
@@ -45,6 +46,7 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
           <Typography variant='h6' fontWeight='bold'>
             {title}
           </Typography>
+          {/* Show edit icon if editable */}
           {onEdit && !editing && (
             <IconButton onClick={onEdit} sx={{ color: theme.palette.text.primary }}>
               <EditIcon />
@@ -65,6 +67,8 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
             </>
           )}
         </Stack>
+
+        {/* Amount or Editable Input */}
         {editing && onChange ? (
           <TextField
             fullWidth
@@ -86,12 +90,16 @@ const IncomeCard: React.FC<IncomeCardProps> = ({
             € {amount}
           </Typography>
         )}
-        <Typography variant='body2' color='text.secondary'>
-          {percentage}% of total
-        </Typography>
+
+        {/* Show percentage if available */}
+        {percentage && (
+          <Typography variant='body2' color='text.secondary'>
+            {percentage}% of total
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );
 };
 
-export default IncomeCard;
+export default DisplayCard;

@@ -26,6 +26,7 @@ function App() {
                   <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
                   <Route path={ROUTES.EXPENSES} element={<Expenses />} />
                   <Route path={ROUTES.EXPENSES + ':id?'} element={<Expense />} />
+                  <Route path={ROUTES.EXPENSE} element={<Expense />} />
                 </Route>
               </Routes>
             </Router>

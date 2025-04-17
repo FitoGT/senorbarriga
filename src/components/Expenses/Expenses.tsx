@@ -7,6 +7,7 @@ import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Expense } from '../../interfaces';
 import { useNotifications } from '../../context';
+import { ROUTES } from '../../constants/routes';
 
 const formatNumber = (value: number): string => {
   return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
@@ -45,7 +46,7 @@ const Expenses = () => {
               <Typography variant='h6' fontWeight='bold' color='text.primary'>
                 Expenses
               </Typography>
-              <IconButton color='primary' onClick={() => navigate('/expense')}>
+              <IconButton color='primary' onClick={() => navigate(ROUTES.EXPENSE)}>
                 <AddIcon />
               </IconButton>
             </Box>

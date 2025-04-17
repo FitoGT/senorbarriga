@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import { createClient, SupabaseClient, AuthResponse, User } from '@supabase/supabase-js';
+import { addMonths, parseISO, format } from 'date-fns';
 import {
   ExpenseCategory,
   ExpenseType,
@@ -275,6 +276,38 @@ class SupabaseService {
       return totals;
     } catch (error) {
       throw new Error(`Fetching all debt failed: ${error}`);
+    }
+  }
+
+  async resetMonth(): Promise<void> {
+    try {
+      const { data: expenses } = await this.client.from('expenses').select('*');
+
+      if (!expenses) {
+        return;
+      }
+
+      const defaultExpenses = expenses.filter((expense) => expense.is_default);
+      const nonDefaultExpenses = expenses.filter((expense) => !expense.is_default);
+
+      if (nonDefaultExpenses.length > 0) {
+        const idsToDelete = nonDefaultExpenses.map((expense) => expense.id);
+
+        await this.client.from('expenses').delete().in('id', idsToDelete);
+      }
+
+      if (defaultExpenses.length > 0) {
+        for (const expense of defaultExpenses) {
+          const originalDate = parseISO(expense.date);
+          const newDate = addMonths(originalDate, 1);
+          const formattedDate = format(newDate, 'yyyy-MM-dd');
+
+          await this.client.from('expenses').update({ date: formattedDate }).eq('id', expense.id);
+        }
+      }
+      this.syncBalance();
+    } catch (error) {
+      throw new Error(`Reset month failed: ${error}`);
     }
   }
 }

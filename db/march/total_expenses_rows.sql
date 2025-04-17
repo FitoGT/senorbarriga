@@ -1,0 +1,1 @@
+INSERT INTO "public"."total_expenses" ("id", "created_at", "total", "adolfo_total", "kari_total") VALUES ('48', '2025-04-17 09:57:53.021965+00', '3517.83', '1754.64', '1763.19');

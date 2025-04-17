@@ -1,0 +1,1 @@
+INSERT INTO "public"."income" ("id", "created_at", "kari_income", "adolfo_income", "total_income", "kari_percentage", "adolfo_percentage", "total_percentage") VALUES ('1', '2025-03-09 16:28:42.783594+00', '2640', '3476.59', '6116.59', '43.1613039291501', '56.8386960708499', '100');

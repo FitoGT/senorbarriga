@@ -27,6 +27,7 @@ export interface Expense {
   amount: number;
   type: ExpenseType;
   isPaidByKari: boolean;
+  is_default: boolean;
 }
 
 export interface TotalExpenses {

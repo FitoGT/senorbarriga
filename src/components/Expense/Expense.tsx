@@ -129,6 +129,8 @@ const Expense = () => {
           amount: parseFloat(data.amount),
           type: data.type,
           isPaidByKari: data.isPaidByKari,
+          // eslint-disable-next-line camelcase
+          is_default: false,
         });
         showNotification('Expense added', 'success');
       }

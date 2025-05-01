@@ -20,6 +20,8 @@ import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Expense } from '../../interfaces/Expenses';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
+import ExpensesDeleteModal from './ExpensesDeleteModal';
+import { useState } from 'react';
 
 interface ExpensesAccordionProps {
   expense: Expense;
@@ -35,6 +37,7 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
   const isSm = useMediaQuery(theme.breakpoints.only('sm'));
   const isMd = useMediaQuery(theme.breakpoints.only('md'));
   const isLg = useMediaQuery(theme.breakpoints.up('lg'));
+  const [open, setOpen] = useState(false);
 
   const descriptionWidth = isXs ? '100px' : isSm ? '200px' : isMd ? '300px' : isLg ? '400px' : '100%';
 
@@ -48,6 +51,8 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
       showNotification(`Failed to delete the expense ${error}`, 'error');
     }
   };
+
+  const handleClose = () => setOpen(false);
 
   const handleEdit = (expenseId: number) => {
     navigate(`${ROUTES.EXPENSES}${expenseId}`);
@@ -124,12 +129,13 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
             <IconButton color='primary' onClick={() => handleEdit(expense.id)} aria-label='edit' size='small'>
               <EditIcon />
             </IconButton>
-            <IconButton color='error' onClick={() => handleDelete(expense.id)} aria-label='delete' size='small'>
+            <IconButton color='error' onClick={() => setOpen(true)} aria-label='delete' size='small'>
               <DeleteIcon />
             </IconButton>
           </Stack>
         </Stack>
       </AccordionDetails>
+      <ExpensesDeleteModal open={open} handleClose={handleClose} handleDelete={handleDelete} expenseId={expense.id} />
     </Accordion>
   );
 };

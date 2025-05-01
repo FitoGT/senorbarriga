@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { data, useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,7 +40,7 @@ const formSchema = z.object({
     }),
   description: z
     .string()
-    .min(3, 'Description must be at least 3 characters')
+    .min(1, 'Description must be at least 1 character')
     .max(100, 'Description must be at most 100 characters'),
   amount: z
     .string()
@@ -109,41 +109,44 @@ const Expense = () => {
     fetchExpense();
   }, [id, navigate, setValue]);
 
-  const onSubmit = async (data: ExpenseFormData) => {
-    setLoading(true);
-    try {
-      if (id) {
-        await supabaseService.updateExpense(Number(id), {
-          date: data.date,
-          description: data.description,
-          category: data.category,
-          amount: parseFloat(data.amount),
-          type: data.type,
-          isPaidByKari: data.isPaidByKari,
-        });
-        showNotification('Expense updated', 'success');
-      } else {
-        await supabaseService.insertExpense({
-          date: data.date,
-          description: data.description,
-          category: data.category,
-          amount: parseFloat(data.amount),
-          type: data.type,
-          isPaidByKari: data.isPaidByKari,
-          // eslint-disable-next-line camelcase
-          is_default: false,
-        });
-        showNotification('Expense added', 'success');
+  const onSubmit = useCallback(
+    async (data: ExpenseFormData) => {
+      setLoading(true);
+      try {
+        if (id) {
+          await supabaseService.updateExpense(Number(id), {
+            date: data.date,
+            description: data.description,
+            category: data.category,
+            amount: parseFloat(data.amount),
+            type: data.type,
+            isPaidByKari: data.isPaidByKari,
+          });
+          showNotification('Expense updated', 'success');
+        } else {
+          await supabaseService.insertExpense({
+            date: data.date,
+            description: data.description,
+            category: data.category,
+            amount: parseFloat(data.amount),
+            type: data.type,
+            isPaidByKari: data.isPaidByKari,
+            // eslint-disable-next-line camelcase
+            is_default: false,
+          });
+          showNotification('Expense added', 'success');
+        }
+        reset();
+        navigate(ROUTES.EXPENSES);
+      } catch (error) {
+        console.log('Error saving expense', error);
+        showNotification(`Error saving expense: ${error}`, 'error');
+      } finally {
+        setLoading(false);
       }
-      reset();
-      navigate(ROUTES.EXPENSES);
-    } catch (error) {
-      console.log('Error saving expense', error);
-      showNotification(`Error saving expense: ${error}`, 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [data, id],
+  );
 
   const handleCancel = () => {
     reset();

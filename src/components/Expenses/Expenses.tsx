@@ -4,10 +4,9 @@ import { Container, Stack, Typography, Box, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ExpensesAccordion from '../Expenses/ExpensesAccordion';
 import FullLoader from '../Loader/FullLoader';
-import { supabaseService } from '../../services/Supabase/SupabaseService';
-import { Expense } from '../../interfaces';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
+import { useGetAllExpenses } from '../../api/expenses/expenses';
 
 const formatNumber = (value: number): string => {
   return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
@@ -16,28 +15,16 @@ const formatNumber = (value: number): string => {
 const Expenses = () => {
   const navigate = useNavigate();
   const { showNotification } = useNotifications();
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [expensesData] = await Promise.all([supabaseService.getAllExpenses()]);
-      setExpenses(expensesData);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      showNotification(`Error fetching data: ${error}`, 'error');
-    }
-    setLoading(false);
-  };
+  const { data: expenses, isLoading, error } = useGetAllExpenses();
 
   useEffect(() => {
-    fetchData();
-  }, []);
-
+    if (error) {
+      showNotification(`Error retrieving expenses: ${error}`, 'error');
+    }
+  }, [error, showNotification]);
   return (
     <Container maxWidth='md' sx={{ mt: 4 }}>
-      {loading ? (
+      {isLoading ? (
         <FullLoader />
       ) : (
         <>
@@ -50,7 +37,7 @@ const Expenses = () => {
                 <AddIcon />
               </IconButton>
             </Box>
-            {expenses.length === 0 ? (
+            {!expenses || expenses.length === 0 ? (
               <Typography color='text.secondary'>No expenses recorded.</Typography>
             ) : (
               expenses.map((expense) => (
@@ -58,7 +45,7 @@ const Expenses = () => {
                   key={expense.id}
                   expense={expense}
                   formatNumber={formatNumber}
-                  refreshExpenses={fetchData}
+                  refreshExpenses={() => console.log('ya')}
                 />
               ))
             )}

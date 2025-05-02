@@ -11,6 +11,14 @@ export const useGetAllExpenses = () => {
     })
 }
 
+export const useGetExpenseById = (expenseId: number) => {
+    return useQuery({
+      queryKey: [EXPENSES_QUERY_KEYS.EXPENSE, expenseId],
+      queryFn: () => supabaseService.getExpenseById(expenseId),
+      enabled: Number.isFinite(expenseId),
+    });
+  };
+
 export const useInsertEpenseMutation = () => {
     const queryClient = useQueryClient();
     const { showNotification } = useNotifications();

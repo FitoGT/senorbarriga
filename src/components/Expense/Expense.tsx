@@ -26,11 +26,10 @@ import dayjs from 'dayjs';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import FullLoader from '../Loader/FullLoader';
-import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
-import { useInsertEpenseMutation, useUpdateExpenseMutation } from '../../api/expenses/expenses';
+import { useInsertEpenseMutation, useUpdateExpenseMutation, useGetExpenseById } from '../../api/expenses/expenses';
 
 const formSchema = z.object({
   date: z
@@ -61,11 +60,15 @@ const Expense = () => {
   const { mutate: updateExpense } = useUpdateExpenseMutation();
 
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(true);
   const navigate = useNavigate();
   const theme = useTheme();
   const { id } = useParams();
   const { showNotification } = useNotifications();
+  const expenseId = Number(id);
+  const shouldFetch = Number.isFinite(expenseId);
+
+  const { data: expense, isPending } = useGetExpenseById(expenseId);
+  const showLoader = shouldFetch && isPending;
 
   const {
     register,
@@ -80,38 +83,23 @@ const Expense = () => {
     defaultValues: {
       date: dayjs().format('YYYY-MM-DD'),
       isPaidByKari: false,
+      category: ExpenseCategory.RENT, // valor inicial válido
+      type: ExpenseType.PERCENTAGE,
     },
   });
 
   useEffect(() => {
-    const fetchExpense = async () => {
-      if (!id) {
-        setFetching(false);
-        return;
-      }
-      try {
-        const expense = await supabaseService.getExpenseById(Number(id));
-        if (expense) {
-          setValue('date', expense.date);
-          setValue('description', expense.description);
-          setValue('amount', expense.amount.toString());
-          setValue('category', expense.category);
-          setValue('type', expense.type);
-          setValue('isPaidByKari', expense.isPaidByKari);
-        } else {
-          showNotification('Expense not found', 'error');
-          navigate(ROUTES.EXPENSES);
-        }
-      } catch (error) {
-        console.error('Failed to fetch expense', error);
-        showNotification(`Failed to fetch expense: ${error}`, 'error');
-        navigate(ROUTES.EXPENSES);
-      } finally {
-        setFetching(false);
-      }
-    };
-    fetchExpense();
-  }, [id, navigate, setValue]);
+    if (expense) {
+      reset({
+        date: expense.date,
+        description: expense.description,
+        amount: expense.amount.toString(),
+        category: expense.category,
+        type: expense.type,
+        isPaidByKari: expense.isPaidByKari,
+      });
+    }
+  }, [expense, reset]);
 
   const onSubmit = useCallback(
     async (data: ExpenseFormData) => {
@@ -171,7 +159,7 @@ const Expense = () => {
           boxShadow: 3,
         }}
       >
-        {fetching ? (
+        {showLoader ? (
           <FullLoader />
         ) : (
           <>

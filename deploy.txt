@@ -1,0 +1,8 @@
+deploy process
+git branch -D gh-pages  
+git checkout -b gh-pages 
+npm run build  
+cp -r ./build/* . 
+git add . 
+git commit -am "deploy"   
+git push origin gh-pages -f 

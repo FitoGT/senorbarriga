@@ -16,23 +16,23 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PaymentIcon from '@mui/icons-material/Payment';
 import CalculateIcon from '@mui/icons-material/Calculate';
-import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Expense } from '../../interfaces/Expenses';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
 import ExpensesDeleteModal from './ExpensesDeleteModal';
 import { useState } from 'react';
+import { useDeleteExpenseMutation } from '../../api/expenses/expenses';
 
 interface ExpensesAccordionProps {
   expense: Expense;
   formatNumber: (value: number) => string;
-  refreshExpenses: () => void;
 }
 
-const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNumber, refreshExpenses }) => {
+const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNumber }) => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { showNotification } = useNotifications();
+  const { mutate: deleteExpense } = useDeleteExpenseMutation();
   const isXs = useMediaQuery(theme.breakpoints.only('xs'));
   const isSm = useMediaQuery(theme.breakpoints.only('sm'));
   const isMd = useMediaQuery(theme.breakpoints.only('md'));
@@ -43,9 +43,8 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
 
   const handleDelete = async (expenseId: number) => {
     try {
-      await supabaseService.deleteExpense(expenseId);
-      refreshExpenses();
-      showNotification('Expense deleted', 'success');
+      deleteExpense(expenseId);
+      setOpen(false);
     } catch (error) {
       console.error('Failed to delete the expense', error);
       showNotification(`Failed to delete the expense ${error}`, 'error');

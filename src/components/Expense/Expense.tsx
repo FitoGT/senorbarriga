@@ -30,6 +30,7 @@ import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
+import { useInsertEpenseMutation, useUpdateExpenseMutation } from '../../api/expenses/expenses';
 
 const formSchema = z.object({
   date: z
@@ -56,6 +57,9 @@ const formSchema = z.object({
 type ExpenseFormData = z.infer<typeof formSchema>;
 
 const Expense = () => {
+  const { mutate: insertExpense } = useInsertEpenseMutation();
+  const { mutate: updateExpense } = useUpdateExpenseMutation();
+
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const navigate = useNavigate();
@@ -114,17 +118,20 @@ const Expense = () => {
       setLoading(true);
       try {
         if (id) {
-          await supabaseService.updateExpense(Number(id), {
-            date: data.date,
-            description: data.description,
-            category: data.category,
-            amount: parseFloat(data.amount),
-            type: data.type,
-            isPaidByKari: data.isPaidByKari,
-          });
-          showNotification('Expense updated', 'success');
+          const updateObj = {
+            expenseId: Number(id),
+            updates: {
+              date: data.date,
+              description: data.description,
+              category: data.category,
+              amount: parseFloat(data.amount),
+              type: data.type,
+              isPaidByKari: data.isPaidByKari,
+            },
+          };
+          updateExpense(updateObj);
         } else {
-          await supabaseService.insertExpense({
+          insertExpense({
             date: data.date,
             description: data.description,
             category: data.category,
@@ -134,7 +141,6 @@ const Expense = () => {
             // eslint-disable-next-line camelcase
             is_default: false,
           });
-          showNotification('Expense added', 'success');
         }
         reset();
         navigate(ROUTES.EXPENSES);

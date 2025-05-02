@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Stack, Typography, Box, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -41,12 +41,7 @@ const Expenses = () => {
               <Typography color='text.secondary'>No expenses recorded.</Typography>
             ) : (
               expenses.map((expense) => (
-                <ExpensesAccordion
-                  key={expense.id}
-                  expense={expense}
-                  formatNumber={formatNumber}
-                  refreshExpenses={() => console.log('ya')}
-                />
+                <ExpensesAccordion key={expense.id} expense={expense} formatNumber={formatNumber} />
               ))
             )}
           </Stack>

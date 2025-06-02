@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Container, Stack, IconButton, Tooltip } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import DownloadIcon from '@mui/icons-material/Download';
 import DisplayCard from './DisplayCard';
 import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Income, TotalExpenses, TotalDebt } from '../../interfaces';
 import { useNotifications } from '../../context';
+import { useExportDatabaseMutation } from '../../api/db/db';
 
 const formatNumber = (value: number): string => {
   return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
@@ -19,6 +21,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<'kari' | 'adolfo' | null>(null);
   const [tempValue, setTempValue] = useState<string | null>(null);
+  const { mutate: exportDB, isPending } = useExportDatabaseMutation();
 
   const fetchData = async () => {
     setLoading(true);
@@ -95,6 +98,13 @@ const Dashboard = () => {
               <IconButton onClick={handleResetMonth} color='error'>
                 <RestartAltIcon />
               </IconButton>
+            </Tooltip>
+            <Tooltip title='Download DB as CSV'>
+              <span>
+                <IconButton onClick={() => exportDB()} color='primary' disabled={isPending}>
+                  <DownloadIcon />
+                </IconButton>
+              </span>
             </Tooltip>
           </Stack>
           {/* Incomes */}

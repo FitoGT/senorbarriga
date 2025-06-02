@@ -125,7 +125,8 @@ class SupabaseService {
   async insertExpense(expense: Omit<Expense, 'id' | 'created_at'>): Promise<void> {
     try {
       await this.client.from('expenses').insert([expense]);
-      this.syncBalance();
+      const date = new Date(expense.date);
+      await this.syncBalance(date);
     } catch (error) {
       throw new Error(`Inserting expense failed: ${error}`);
     }
@@ -149,8 +150,12 @@ class SupabaseService {
 
   async updateExpense(expenseId: number, updates: Partial<Omit<Expense, 'id' | 'created_at'>>): Promise<void> {
     try {
+      const originalExpense = await this.getExpenseById(expenseId);
+      if (!originalExpense) throw new Error('Expense not found');
+
       await this.client.from('expenses').update(updates).eq('id', expenseId);
-      this.syncBalance();
+      const date = new Date(originalExpense.date);
+      await this.syncBalance(date);
     } catch (error) {
       throw new Error(`Updating expense failed: ${error}`);
     }
@@ -158,8 +163,12 @@ class SupabaseService {
 
   async deleteExpense(expenseId: number): Promise<void> {
     try {
+      const originalExpense = await this.getExpenseById(expenseId);
+      if (!originalExpense) throw new Error('Expense not found');
+
       await this.client.from('expenses').delete().eq('id', expenseId);
-      this.syncBalance();
+      const date = new Date(originalExpense.date);
+      await this.syncBalance(date);
     } catch (error) {
       throw new Error(`Deleting expense failed: ${error}`);
     }
@@ -315,17 +324,20 @@ class SupabaseService {
     }
   }
 
-  async syncBalance(): Promise<void> {
+  async syncBalance(expenseDate?: Date): Promise<void> {
     const expenses = await this.getTotalExpenses();
     await this.upsertTotalExpenses(expenses);
     const kariBalance = await this.getKariBalance();
-    const today = new Date();
-    const month = today.toLocaleString('en-US', { month: 'long' });
-    const debtByMonth = await this.getDebtByMonth(month);
 
+    const dateToUse = expenseDate ?? new Date();
+    const month = dateToUse.toLocaleString('en-US', { month: 'long' });
+
+    const currentMonth = new Date().toLocaleString('en-US', { month: 'long' });
+
+    const debtByMonth = await this.getDebtByMonth(month);
     if (debtByMonth?.length) {
       await this.updateDebt(debtByMonth[0], kariBalance);
-    } else {
+    } else if (month === currentMonth) {
       await this.insertDebt(kariBalance, month);
     }
   }

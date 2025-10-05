@@ -15,7 +15,6 @@
 .env.test.local
 .env.production.local
 deploy.sh
-/db/dumps
 
 npm-debug.log*
 yarn-debug.log*

@@ -354,7 +354,24 @@ class SupabaseService {
         { adolfo: 0, kari: 0 },
       );
 
-      return totals;
+      // Compensate debts between Adolfo and Kari: the smaller debt is
+      // subtracted from the larger so one party always ends at 0.
+      let adolfoTotal = Number(totals.adolfo || 0);
+      let kariTotal = Number(totals.kari || 0);
+
+      if (adolfoTotal > kariTotal) {
+        adolfoTotal = Number((adolfoTotal - kariTotal).toFixed(2));
+        kariTotal = 0;
+      } else if (kariTotal > adolfoTotal) {
+        kariTotal = Number((kariTotal - adolfoTotal).toFixed(2));
+        adolfoTotal = 0;
+      } else {
+        // equal or both zero
+        adolfoTotal = 0;
+        kariTotal = 0;
+      }
+
+      return { adolfo: adolfoTotal, kari: kariTotal };
     } catch (error) {
       throw new Error(`Fetching all debt failed: ${error}`);
     }

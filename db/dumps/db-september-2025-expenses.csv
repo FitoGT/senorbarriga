@@ -1,0 +1,75 @@
+id,created_at,date,description,category,amount,type,isPaidByKari,is_default
+327,2025-10-05T16:15:48.597235+00:00,2025-09-30,boxa grip,pharmacy,21.95,percentage,false,false
+326,2025-10-05T16:15:07.060644+00:00,2025-09-30,el gelenke,pet,17.27,percentage,false,false
+324,2025-10-05T16:14:10.590142+00:00,2025-09-29,LINDT,food,16.22,shared,false,false
+323,2025-10-05T16:13:21.175345+00:00,2025-09-29,go asia,supermarket,11.2,shared,false,false
+321,2025-10-05T16:10:25.854492+00:00,2025-09-29,bomba,food,8.28,shared,false,false
+329,2025-10-05T16:17:36.865764+00:00,2025-09-28,lieferando,food,37.15,shared,false,false
+322,2025-10-05T16:12:39.330454+00:00,2025-09-28,bomba,food,10.92,shared,false,false
+331,2025-10-05T16:18:54.924308+00:00,2025-09-27,REWE,supermarket,104.92,percentage,false,false
+330,2025-10-05T16:18:29.015009+00:00,2025-09-27,lieferando,food,46.43,shared,false,false
+328,2025-10-05T16:16:56.106477+00:00,2025-09-27,fizzy bubele shawarma judio,food,33.3,shared,false,false
+325,2025-10-05T16:14:47.379629+00:00,2025-09-26,die kuchenwerkstatt,food,17.21,shared,false,false
+320,2025-09-21T09:24:26.846355+00:00,2025-09-21,rewe,supermarket,101.09,percentage,false,false
+319,2025-09-21T09:23:57.555575+00:00,2025-09-21,la condesa,food,32.91,percentage,false,false
+318,2025-09-21T09:23:39.365326+00:00,2025-09-21,rewe,supermarket,22.53,percentage,false,false
+317,2025-09-21T09:23:16.090246+00:00,2025-09-21,rewe yaron,supermarket,10.58,percentage,false,false
+316,2025-09-21T09:22:48.794697+00:00,2025-09-21,lieferano indio,food,16,shared,false,false
+315,2025-09-21T09:22:26.18499+00:00,2025-09-21,Primark,other,68,kari,false,false
+314,2025-09-21T09:18:44.106682+00:00,2025-09-21,Ticket LH Kari Y Mari,other,459.78,kari,false,false
+267,2025-09-18T06:55:33.545521+00:00,2025-09-17,rossman,pharmacy,7.91,percentage,false,false
+270,2025-09-18T06:57:07.63178+00:00,2025-09-16,bomba,supermarket,22.02,percentage,false,false
+269,2025-09-18T06:56:40.832041+00:00,2025-09-16,rewe,supermarket,50.51,percentage,false,false
+268,2025-09-18T06:56:07.500618+00:00,2025-09-16,rewe,supermarket,18.8,percentage,false,false
+310,2025-09-18T07:46:59.441303+00:00,2025-09-15,breakfast,food,10.12,shared,true,false
+309,2025-09-18T07:46:32.457079+00:00,2025-09-15,coke train,food,4.94,shared,true,false
+278,2025-09-18T07:16:21.368222+00:00,2025-09-14,lunch,food,58.75,shared,false,false
+276,2025-09-18T07:02:03.73561+00:00,2025-09-14,dinner,food,34.67,shared,false,false
+275,2025-09-18T07:01:08.458586+00:00,2025-09-14,palm garten tkt,other,21.15,shared,false,false
+274,2025-09-18T07:00:32.668188+00:00,2025-09-14,breakfast,food,19.62,shared,false,false
+273,2025-09-18T07:00:10.770372+00:00,2025-09-14,coffee and cake,food,14.31,shared,false,false
+271,2025-09-18T06:58:01.754977+00:00,2025-09-14,ice cream,food,2.47,shared,false,false
+277,2025-09-18T07:02:53.150167+00:00,2025-09-13,dinner,food,56.4,shared,false,false
+279,2025-09-18T07:16:51.84115+00:00,2025-09-12,dinner,food,63.44,shared,false,false
+272,2025-09-18T06:59:13.475927+00:00,2025-09-12,pastillero pokemon,purchases,8.22,kari,false,false
+287,2025-09-18T07:23:24.923725+00:00,2025-09-11,lunch,food,21.96,shared,false,false
+284,2025-09-18T07:20:38.793043+00:00,2025-09-11,coffee and cake,food,21.71,shared,false,false
+283,2025-09-18T07:20:02.728521+00:00,2025-09-11,rewe,supermarket,15.11,shared,false,false
+282,2025-09-18T07:18:23.561312+00:00,2025-09-11,rewe,supermarket,3.51,shared,false,false
+281,2025-09-18T07:17:59.024881+00:00,2025-09-11,ice cream,food,2.35,shared,false,false
+280,2025-09-18T07:17:14.513906+00:00,2025-09-11,dinner,food,65.7,shared,false,false
+313,2025-09-18T09:40:49.136429+00:00,2025-09-10,Shawarmas,food,23,shared,true,false
+288,2025-09-18T07:24:07.54413+00:00,2025-09-10,skyline boat,other,42.42,shared,false,false
+286,2025-09-18T07:22:23.801751+00:00,2025-09-10,rewe,supermarket,10.25,percentage,false,false
+285,2025-09-18T07:21:46.409162+00:00,2025-09-10,wine,food,4.24,shared,false,false
+291,2025-09-18T07:26:42.395978+00:00,2025-09-09,dinner,food,45.64,shared,false,false
+290,2025-09-18T07:26:11.190809+00:00,2025-09-09,rewe,supermarket,27.76,shared,false,false
+289,2025-09-18T07:25:48.832796+00:00,2025-09-09,ice cream,food,6.17,shared,false,false
+297,2025-09-18T07:34:52.741594+00:00,2025-09-08,lunch,food,20.47,shared,false,false
+293,2025-09-18T07:28:40.201129+00:00,2025-09-08,dinner,food,57.63,shared,false,false
+292,2025-09-18T07:28:06.932469+00:00,2025-09-08,ice cream,food,4.94,shared,false,false
+303,2025-09-18T07:39:47.006757+00:00,2025-09-07,lunch,food,69.98,shared,false,false
+299,2025-09-18T07:37:11.067336+00:00,2025-09-07,breakfast,food,23.05,shared,false,false
+295,2025-09-18T07:31:27.679443+00:00,2025-09-07,kiosko,supermarket,6.94,percentage,false,false
+294,2025-09-18T07:30:25.603372+00:00,2025-09-07,ice cream,food,5.76,shared,false,false
+311,2025-09-18T09:38:51.541425+00:00,2025-09-06,Shawarmas,food,23,shared,true,false
+308,2025-09-18T07:45:18.749412+00:00,2025-09-06,taza & iman,purchases,13.53,shared,false,false
+301,2025-09-18T07:37:54.850051+00:00,2025-09-06,dinner,food,62.64,shared,false,false
+300,2025-09-18T07:37:33.198649+00:00,2025-09-06,rewe,supermarket,27.52,percentage,false,false
+298,2025-09-18T07:35:33.328362+00:00,2025-09-06,Main tower tkt,other,21.17,shared,false,false
+296,2025-09-18T07:31:50.851377+00:00,2025-09-06,DM,pharmacy,11.64,percentage,false,false
+266,2025-09-08T06:34:38.693481+00:00,2025-09-06,Kebab,food,24,percentage,true,false
+265,2025-09-08T06:33:56.590571+00:00,2025-09-06,Desayuno hpbf MUC,food,10,shared,true,false
+302,2025-09-18T07:38:23.282634+00:00,2025-09-05,"dinner ",food,64.11,shared,false,false
+306,2025-09-18T07:43:34.623822+00:00,2025-09-04,milk frother,purchases,40.55,shared,false,false
+305,2025-09-18T07:40:55.167745+00:00,2025-09-04,tkt air europa Maribel,other,1607.18,kari,false,false
+304,2025-09-18T07:40:11.674539+00:00,2025-09-04,ice cream,food,5.91,shared,false,false
+312,2025-09-18T09:39:25.148937+00:00,2025-09-03,Shawarmas,food,23,shared,true,false
+307,2025-09-18T07:44:07.930332+00:00,2025-09-03,Albondiga's food,pet,12.91,percentage,false,false
+143,2025-06-02T17:23:52.439865+00:00,2025-09-01,"seguro medico ",health insurance,426.25,shared,false,true
+98,2025-05-07T12:01:57.792376+00:00,2025-09-01,spotify premium,subscriptions,1.61,percentage,true,true
+97,2025-05-07T12:01:07.90614+00:00,2025-09-01,amazon prime,subscriptions,10.57,percentage,false,true
+96,2025-05-07T12:00:07.392192+00:00,2025-09-01,crunchyroll,subscriptions,5.19,percentage,false,true
+95,2025-05-07T11:59:44.977728+00:00,2025-09-01,youtube premium,subscriptions,15.22,percentage,false,true
+94,2025-05-07T11:59:17.697714+00:00,2025-09-01,o2,subscriptions,49.96,shared,false,true
+87,2025-05-01T14:36:53.916578+00:00,2025-09-01,Alquiler,rent,2100,percentage,true,true

@@ -1,0 +1,53 @@
+id,created_at,date,description,category,amount,type,isPaidByKari,is_default
+143,2025-06-02T17:23:52.439865+00:00,2025-05-31,"seguro medico ",health insurance,426.25,shared,false,true
+138,2025-06-02T08:47:28.387022+00:00,2025-05-30,decathol panta kari,purchases,17,kari,false,false
+137,2025-06-02T08:46:17.286264+00:00,2025-05-30,le bnurger,food,51.26,shared,false,false
+141,2025-06-02T08:49:02.605083+00:00,2025-05-29,merienda,food,7.85,shared,false,false
+142,2025-06-02T08:53:44.3452+00:00,2025-05-28,veteriunario,pet,248.55,percentage,false,false
+140,2025-06-02T08:48:21.603862+00:00,2025-05-27,REWE,supermarket,24.27,percentage,false,false
+139,2025-06-02T08:47:50.412624+00:00,2025-05-27,REWE,purchases,11,shared,false,false
+136,2025-05-26T06:50:12.061668+00:00,2025-05-26,dm,pharmacy,15.7,percentage,false,false
+135,2025-05-26T06:49:35.6694+00:00,2025-05-26,REWE,supermarket,20.5,percentage,false,false
+134,2025-05-26T06:49:10.86792+00:00,2025-05-26,jefreys burger del jueves cuando me dio depresion,food,35.6,shared,false,false
+133,2025-05-26T06:48:34.841703+00:00,2025-05-26,gorra kari,other,40.74,kari,false,false
+132,2025-05-26T06:48:07.476683+00:00,2025-05-26,rewe,supermarket,13.71,percentage,false,false
+131,2025-05-26T06:46:57.356122+00:00,2025-05-26,new era cafe,food,13.14,shared,false,false
+130,2025-05-26T06:46:35.418616+00:00,2025-05-26,adidos kari,other,68.25,kari,false,false
+129,2025-05-26T06:46:11.21182+00:00,2025-05-26,lieferando italiano,food,47.43,shared,false,false
+128,2025-05-21T15:58:28.589882+00:00,2025-05-21,lapiz,other,5.79,kari,false,false
+127,2025-05-21T15:58:03.262873+00:00,2025-05-21,REWE,supermarket,13.71,percentage,false,false
+126,2025-05-19T18:17:40.231625+00:00,2025-05-19,REWE,supermarket,94.02,percentage,false,false
+124,2025-05-19T18:16:30.221469+00:00,2025-05-19,sahne rolle,food,13.88,shared,false,false
+125,2025-05-19T18:17:23.422033+00:00,2025-05-18,merienda,food,10.59,shared,false,false
+123,2025-05-18T21:14:00.655104+00:00,2025-05-18,REWE,food,22.2,percentage,false,false
+122,2025-05-18T21:13:06.460738+00:00,2025-05-18,pizzas,food,26.87,shared,false,false
+120,2025-05-18T21:10:47.494006+00:00,2025-05-18,lieferando indio,food,45,shared,false,false
+119,2025-05-18T21:10:11.128738+00:00,2025-05-18,5 guys,food,46.45,shared,false,false
+116,2025-05-18T21:07:45.723275+00:00,2025-05-18,Rasmalai,supermarket,55.54,shared,false,false
+121,2025-05-18T21:12:11.540164+00:00,2025-05-17,bäckerei,food,13.58,shared,false,false
+118,2025-05-18T21:09:29.416757+00:00,2025-05-17,cinna,food,5.83,shared,false,false
+117,2025-05-18T21:08:38.639798+00:00,2025-05-17,pinta labio,purchases,11.16,kari,false,false
+115,2025-05-18T21:07:18.398138+00:00,2025-05-17,comida china,food,32.75,shared,false,false
+114,2025-05-13T08:27:49.592029+00:00,2025-05-13,REWE,supermarket,29.66,percentage,false,false
+113,2025-05-13T08:26:23.523942+00:00,2025-05-13,comida china,food,45.09,shared,false,false
+112,2025-05-13T08:25:57.116708+00:00,2025-05-13,jefreys burger,food,34.12,shared,false,false
+111,2025-05-13T08:24:59.798561+00:00,2025-05-13,pizzas post torneo,food,20.44,shared,false,false
+110,2025-05-13T08:24:24.908449+00:00,2025-05-13,REWE,supermarket,12.12,percentage,false,false
+109,2025-05-13T08:23:55.16119+00:00,2025-05-13,tachibo,food,4.56,shared,false,false
+108,2025-05-13T08:23:02.77399+00:00,2025-05-13,cyna,food,11.23,shared,false,false
+107,2025-05-13T08:22:24.23201+00:00,2025-05-13,REWE,supermarket,22.24,percentage,false,false
+106,2025-05-13T08:21:57.372158+00:00,2025-05-11,Tratoria,food,45.18,shared,false,false
+105,2025-05-07T12:12:33.132637+00:00,2025-05-07,tinte verde,other,11.44,shared,false,false
+104,2025-05-07T12:11:50.686518+00:00,2025-05-07,kebap garten,food,24.45,shared,false,false
+103,2025-05-07T12:10:32.413203+00:00,2025-05-07,sahne rolle,food,8.16,shared,false,false
+102,2025-05-07T12:07:52.090804+00:00,2025-05-07,bäckerei,supermarket,8.16,shared,false,false
+99,2025-05-07T12:03:25.442577+00:00,2025-05-07,comida albondiga,pet,14.29,percentage,false,false
+98,2025-05-07T12:01:57.792376+00:00,2025-05-07,spotify premium,subscriptions,16.49,percentage,true,true
+97,2025-05-07T12:01:07.90614+00:00,2025-05-07,amazon prime,subscriptions,9.76,percentage,false,true
+96,2025-05-07T12:00:07.392192+00:00,2025-05-07,crunchyroll,subscriptions,5.19,percentage,false,true
+95,2025-05-07T11:59:44.977728+00:00,2025-05-07,youtube premium,subscriptions,14.76,percentage,false,true
+94,2025-05-07T11:59:17.697714+00:00,2025-05-07,o2,subscriptions,54.96,percentage,false,true
+101,2025-05-07T12:07:11.976069+00:00,2025-05-05,REWE,supermarket,100.31,percentage,false,false
+93,2025-05-02T09:42:29.281193+00:00,2025-05-02,termometro y otras cosas,pharmacy,9.35,percentage,false,false
+88,2025-05-01T17:41:09.645442+00:00,2025-05-01,pizzas lieferando,food,36.63,shared,false,false
+87,2025-05-01T14:36:53.916578+00:00,2025-05-01,Alquiler,rent,2000,percentage,true,true

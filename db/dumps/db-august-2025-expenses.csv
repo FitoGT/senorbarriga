@@ -1,0 +1,51 @@
+id,created_at,date,description,category,amount,type,isPaidByKari,is_default
+264,2025-08-31T09:29:37.818949+00:00,2025-08-31,REWE,supermarket,95,percentage,false,false
+263,2025-08-31T09:28:58.739072+00:00,2025-08-31,tomaparyn,other,10.48,kari,false,false
+262,2025-08-31T09:28:29.118178+00:00,2025-08-31,dm,pharmacy,35.13,percentage,false,false
+261,2025-08-31T09:28:11.014317+00:00,2025-08-31,candado,other,14.04,shared,false,false
+260,2025-08-31T09:27:43.438285+00:00,2025-08-31,"Condesa ",food,32.67,shared,false,false
+259,2025-08-31T09:27:21.423359+00:00,2025-08-31,cafe en nesspreso,food,35.02,shared,false,false
+258,2025-08-31T09:26:58.385918+00:00,2025-08-31,calienta leche,other,40.55,shared,false,false
+257,2025-08-31T09:26:27.547577+00:00,2025-08-31,jefreys burger,food,10.34,shared,false,false
+256,2025-08-30T10:08:30.265877+00:00,2025-08-30,REWE,rent,95.47,percentage,false,false
+255,2025-08-30T10:07:52.484229+00:00,2025-08-30,bomba pizza,food,29.41,shared,false,false
+253,2025-08-30T10:06:37.635389+00:00,2025-08-25,rossman,pharmacy,25.57,percentage,false,false
+252,2025-08-30T10:06:04.376878+00:00,2025-08-24,BOMBA,food,15.23,percentage,false,false
+245,2025-08-30T10:01:10.257615+00:00,2025-08-24,lentes,rent,555.07,kari,false,false
+251,2025-08-30T10:05:16.490421+00:00,2025-08-23,twinkies,rent,15.26,shared,false,false
+250,2025-08-30T10:04:32.403419+00:00,2025-08-23,coso de manzana capsula,pharmacy,20.46,percentage,false,false
+249,2025-08-30T10:03:48.454394+00:00,2025-08-23,chocolate,food,23.19,shared,false,false
+248,2025-08-30T10:03:10.459027+00:00,2025-08-23,BOMBA,supermarket,34.65,percentage,false,false
+247,2025-08-30T10:02:37.10323+00:00,2025-08-23,anyong,food,43.77,shared,false,false
+246,2025-08-30T10:01:47.313215+00:00,2025-08-23,REWE,supermarket,96.7,percentage,false,false
+254,2025-08-30T10:07:17.873003+00:00,2025-08-20,burger king,food,33.36,shared,false,false
+244,2025-08-18T16:49:10.837902+00:00,2025-08-18,black milk,other,302.5,shared,false,false
+243,2025-08-18T16:46:38.990085+00:00,2025-08-18,la bomba,food,32.53,shared,false,false
+242,2025-08-18T16:46:08.061847+00:00,2025-08-18,uniqlo,other,51.26,shared,false,false
+241,2025-08-18T16:45:06.207615+00:00,2025-08-18,REWE,rent,95.23,percentage,false,false
+240,2025-08-18T16:44:40.738098+00:00,2025-08-18,mama bao,food,57.41,shared,false,false
+239,2025-08-18T16:42:46.397385+00:00,2025-08-18,flying tiger,food,12.89,shared,false,false
+238,2025-08-18T16:42:17.160084+00:00,2025-08-18,tchibo,other,18.75,kari,false,false
+237,2025-08-18T16:41:43.148957+00:00,2025-08-18,Rasmalai,food,35.85,shared,false,false
+236,2025-08-18T16:41:13.496508+00:00,2025-08-18,jefreys burger,food,40.78,shared,false,false
+235,2025-08-10T08:51:07.003978+00:00,2025-08-10,desayuno,food,5.14,shared,false,false
+234,2025-08-10T08:50:19.805569+00:00,2025-08-09,cafe,purchases,11.56,shared,false,false
+231,2025-08-10T08:46:59.021418+00:00,2025-08-09,cuatri mori,food,54.9,shared,false,false
+230,2025-08-10T06:47:36.045347+00:00,2025-08-09,"Condesa ",food,33.29,shared,false,false
+233,2025-08-10T08:49:01.632461+00:00,2025-08-08,REWE,supermarket,4.94,percentage,false,false
+232,2025-08-10T08:48:16.693114+00:00,2025-08-08,REWE,supermarket,99.63,percentage,false,false
+98,2025-05-07T12:01:57.792376+00:00,2025-08-07,spotify premium,subscriptions,16.49,percentage,true,true
+97,2025-05-07T12:01:07.90614+00:00,2025-08-07,amazon prime,subscriptions,9.76,percentage,false,true
+96,2025-05-07T12:00:07.392192+00:00,2025-08-07,crunchyroll,subscriptions,5.19,percentage,false,true
+95,2025-05-07T11:59:44.977728+00:00,2025-08-07,youtube premium,subscriptions,15.22,percentage,false,true
+94,2025-05-07T11:59:17.697714+00:00,2025-08-07,o2,subscriptions,49.96,shared,false,true
+229,2025-08-04T09:04:55.932858+00:00,2025-08-04,REWE,supermarket,12.37,percentage,false,false
+228,2025-08-04T09:04:28.596583+00:00,2025-08-04,REWE,supermarket,106.82,percentage,false,false
+227,2025-08-04T09:04:03.11766+00:00,2025-08-04,CHATGPT,subscriptions,26.66,percentage,false,false
+226,2025-08-04T09:03:28.03258+00:00,2025-08-04,FIVE GUYS,food,49.43,shared,false,false
+225,2025-08-04T09:02:40.716373+00:00,2025-08-04,HARIBO,food,6.9,shared,false,false
+224,2025-08-04T09:02:14.893711+00:00,2025-08-04,LINDT,food,20.82,shared,false,false
+223,2025-08-04T09:01:50.330731+00:00,2025-08-04,SAM,food,63.74,shared,false,false
+222,2025-08-04T09:01:09.714922+00:00,2025-08-04,ali express,purchases,26.17,shared,false,false
+143,2025-06-02T17:23:52.439865+00:00,2025-08-01,"seguro medico ",health insurance,426.25,shared,false,true
+87,2025-05-01T14:36:53.916578+00:00,2025-08-01,Alquiler,rent,2143,percentage,true,true

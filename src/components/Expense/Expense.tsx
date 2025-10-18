@@ -30,7 +30,7 @@ import { ExpenseCategory, ExpenseType, Currencies } from '../../interfaces/';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
 import { useInsertEpenseMutation, useUpdateExpenseMutation, useGetExpenseById } from '../../api/expenses/expenses';
-
+import { useGetCurrentExchangeRate } from '../../api/exchange-rate/exchange-rate';
 const formSchema = z.object({
   date: z
     .string()
@@ -59,6 +59,7 @@ type ExpenseFormData = z.infer<typeof formSchema>;
 const Expense = () => {
   const { mutate: insertExpense } = useInsertEpenseMutation();
   const { mutate: updateExpense } = useUpdateExpenseMutation();
+  const { data: exchangeData } = useGetCurrentExchangeRate()
 
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -78,6 +79,7 @@ const Expense = () => {
     watch,
     control,
     reset,
+    getValues,
     formState: { errors },
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(formSchema),
@@ -86,9 +88,24 @@ const Expense = () => {
       isPaidByKari: false,
       category: ExpenseCategory.FOOD,
       type: ExpenseType.PERCENTAGE,
-      currency: Currencies.EUR,
+      currency: Currencies.USD,
     },
   });
+
+  const currency = watch('currency');
+
+  useEffect(() => {
+    const isNotValidAmount = getValues('amount').length === 0 || getValues('amount') === '0';
+    if (isNotValidAmount) {
+      return
+    }
+    let newAmount = parseFloat(getValues('amount'));
+    if (currency === 'EUR' && exchangeData) {
+      newAmount = parseFloat(getValues('amount')) * exchangeData['USD'];
+      setValue('amount', String(newAmount), { shouldDirty: true, shouldValidate: true });
+      return
+    }
+  }, [currency, getValues]);
 
   useEffect(() => {
     if (expense) {
@@ -247,7 +264,6 @@ const Expense = () => {
                   }}
                   error={!!errors.currency}
                 >
-                  <InputLabel shrink={false}>€</InputLabel>
                   <Controller
                     name='currency'
                     control={control}

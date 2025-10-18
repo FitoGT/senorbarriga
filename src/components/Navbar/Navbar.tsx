@@ -38,7 +38,8 @@ const Navbar = () => {
   return (
     <>
       <AppBar
-        position='static'
+        position='fixed'
+        color='default'
         sx={{
           backgroundColor: theme.palette.background.paper,
           color: theme.palette.text.primary,

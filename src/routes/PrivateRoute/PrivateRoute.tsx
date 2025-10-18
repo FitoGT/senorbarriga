@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/Auth/AuthContext';
 import Navbar from '../../components/Navbar/Navbar';
+import Footer from '../../components/Footer/Footer';
 
 const PrivateRoute = () => {
   const { user, loading } = useAuth();
@@ -17,6 +18,7 @@ const PrivateRoute = () => {
     <>
       <Navbar />
       <Outlet />
+      <Footer />
     </>
   );
 };

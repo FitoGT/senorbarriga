@@ -10,7 +10,6 @@ const exportToCSV = (data: any[], filename: string) => {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
 
-  
   const date = new Date(data[0]?.date || Date.now());
   const month = date.toLocaleString('en-US', { month: 'long' }).toLowerCase();
   const year = date.getFullYear();
@@ -26,8 +25,16 @@ const exportDatabase = async () => {
   const [expenses, income, debts, totals] = await Promise.all([
     supabaseService.getAllExpenses(),
     supabaseService.getLatestIncome().then((i) => (i ? [i] : [])),
-    supabaseService.getClient().from('debt').select('*').then((res) => res.data || []),
-    supabaseService.getClient().from('total_expenses').select('*').then((res) => res.data || []),
+    supabaseService
+      .getClient()
+      .from('debt')
+      .select('*')
+      .then((res) => res.data || []),
+    supabaseService
+      .getClient()
+      .from('total_expenses')
+      .select('*')
+      .then((res) => res.data || []),
   ]);
 
   exportToCSV(expenses, 'expenses');

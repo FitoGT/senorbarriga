@@ -22,7 +22,6 @@ const Dashboard = () => {
   const [editing, setEditing] = useState<'kari' | 'adolfo' | null>(null);
   const [tempValue, setTempValue] = useState<string | null>(null);
   const { mutate: exportDB, isPending } = useExportDatabaseMutation();
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -87,7 +86,7 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <Container maxWidth='md' sx={{ mt: 4 }}>
+    <Container maxWidth='md' sx={{ mt: 10 }}>
       {loading ? (
         <FullLoader />
       ) : (

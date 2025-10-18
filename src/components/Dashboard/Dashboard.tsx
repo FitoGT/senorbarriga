@@ -86,7 +86,7 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <Container maxWidth='md' sx={{ mt: 10 }}>
+    <Container maxWidth='md' sx={{ mt: 10, mb: 10 }}>
       {loading ? (
         <FullLoader />
       ) : (

@@ -26,7 +26,7 @@ import dayjs from 'dayjs';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import FullLoader from '../Loader/FullLoader';
-import { ExpenseCategory, ExpenseType } from '../../interfaces/Expenses';
+import { ExpenseCategory, ExpenseType, Currencies } from '../../interfaces/';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
 import { useInsertEpenseMutation, useUpdateExpenseMutation, useGetExpenseById } from '../../api/expenses/expenses';
@@ -51,6 +51,7 @@ const formSchema = z.object({
   category: z.nativeEnum(ExpenseCategory, { errorMap: () => ({ message: 'Category is required' }) }),
   type: z.nativeEnum(ExpenseType, { errorMap: () => ({ message: 'Type is required' }) }),
   isPaidByKari: z.boolean(),
+  currency: z.nativeEnum(Currencies, { errorMap: () => ({ message: 'Currency is required' }) }),
 });
 
 type ExpenseFormData = z.infer<typeof formSchema>;
@@ -83,8 +84,9 @@ const Expense = () => {
     defaultValues: {
       date: dayjs().format('YYYY-MM-DD'),
       isPaidByKari: false,
-      category: ExpenseCategory.RENT, // valor inicial válido
+      category: ExpenseCategory.FOOD,
       type: ExpenseType.PERCENTAGE,
+      currency: Currencies.EUR,
     },
   });
 
@@ -152,7 +154,8 @@ const Expense = () => {
       <Container
         maxWidth='xs'
         sx={{
-          mt: 5,
+          mt: 10,
+          mb: 10,
           backgroundColor: theme.palette.background.paper,
           padding: 3,
           borderRadius: 2,
@@ -207,24 +210,66 @@ const Expense = () => {
                   },
                 }}
               />
-              <TextField
-                label='Amount'
-                variant='outlined'
-                fullWidth
-                margin='normal'
-                type='number'
-                {...register('amount')}
-                error={!!errors.amount}
-                helperText={errors.amount?.message}
+              <Box
+                display='flex'
+                alignItems='center'
+                gap={2}
                 sx={{
-                  input: { color: theme.palette.text.primary },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: theme.palette.divider },
-                    '&:hover fieldset': { borderColor: theme.palette.primary.main },
-                    '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
-                  },
+                  width: '100%',
+                  mt: 2,
                 }}
-              />
+              >
+                <TextField
+                  label='Amount'
+                  variant='outlined'
+                  type='number'
+                  fullWidth
+                  {...register('amount')}
+                  error={!!errors.amount}
+                  helperText={errors.amount?.message}
+                  sx={{
+                    input: { color: theme.palette.text.primary },
+                    '& .MuiOutlinedInput-root': {
+                      height: 56,
+                      '& fieldset': { borderColor: theme.palette.divider },
+                      '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                      '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
+                    },
+                  }}
+                />
+
+                <FormControl
+                  sx={{
+                    width: 90,
+                    '& .MuiOutlinedInput-root': {
+                      height: 56,
+                    },
+                  }}
+                  error={!!errors.currency}
+                >
+                  <InputLabel shrink={false}>€</InputLabel>
+                  <Controller
+                    name='currency'
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        displayEmpty
+                        variant='outlined'
+                        inputProps={{ sx: { height: 56, display: 'flex', alignItems: 'center' } }}
+                      >
+                        {Object.values(Currencies).map((cur) => (
+                          <MenuItem key={cur} value={cur}>
+                            {cur}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                  <FormHelperText>{errors.currency?.message}</FormHelperText>
+                </FormControl>
+              </Box>
+
               <FormControl fullWidth margin='normal' error={!!errors.category}>
                 <InputLabel>Category</InputLabel>
                 <Controller

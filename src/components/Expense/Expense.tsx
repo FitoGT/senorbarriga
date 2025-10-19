@@ -62,6 +62,7 @@ const Expense = () => {
   const { data: exchangeData } = useGetCurrentExchangeRate()
 
   const [loading, setLoading] = useState(false);
+  const [prevSelectedCurrency, setPrevSelectedCurrency] = useState('USD');
   const navigate = useNavigate();
   const theme = useTheme();
   const { id } = useParams();
@@ -103,6 +104,13 @@ const Expense = () => {
     if (currency === 'EUR' && exchangeData) {
       newAmount = parseFloat(getValues('amount')) * exchangeData['USD'];
       setValue('amount', String(newAmount), { shouldDirty: true, shouldValidate: true });
+      setPrevSelectedCurrency('EUR')
+      return
+    }
+    if (currency === 'USD' && prevSelectedCurrency === 'EUR' && exchangeData) {
+      newAmount = parseFloat(getValues('amount')) / exchangeData['USD'];
+      setValue('amount', String(newAmount), { shouldDirty: true, shouldValidate: true });
+      setPrevSelectedCurrency('USD')
       return
     }
   }, [currency, getValues]);

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { data, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,11 +26,12 @@ import dayjs from 'dayjs';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import FullLoader from '../Loader/FullLoader';
-import { ExpenseCategory, ExpenseType, Currencies } from '../../interfaces/';
+import { ExpenseCategory, ExpenseType } from '../../interfaces/';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
 import { useInsertEpenseMutation, useUpdateExpenseMutation, useGetExpenseById } from '../../api/expenses/expenses';
 import { useGetCurrentExchangeRate } from '../../api/exchange-rate/exchange-rate';
+
 const formSchema = z.object({
   date: z
     .string()
@@ -42,16 +43,22 @@ const formSchema = z.object({
     .string()
     .min(1, 'Description must be at least 1 character')
     .max(100, 'Description must be at most 100 characters'),
-  amount: z
+  usdAmount: z
     .string()
-    .min(1, 'Amount is required')
-    .refine((value) => !isNaN(parseFloat(value)) && parseFloat(value) > 0, {
-      message: 'Amount must be a valid number greater than 0',
+    .min(1, 'Amount (USD) is required')
+    .refine((v) => !isNaN(parseFloat(v.replace(',', '.'))) && parseFloat(v.replace(',', '.')) > 0, {
+      message: 'USD must be a valid number greater than 0',
     }),
+  eurAmount: z
+    .string()
+    .refine((v) => v === '' || (!isNaN(parseFloat(v.replace(',', '.'))) && parseFloat(v.replace(',', '.')) > 0), {
+      message: 'EUR must be a valid number greater than 0',
+    })
+    .optional()
+    .default(''),
   category: z.nativeEnum(ExpenseCategory, { errorMap: () => ({ message: 'Category is required' }) }),
   type: z.nativeEnum(ExpenseType, { errorMap: () => ({ message: 'Type is required' }) }),
   isPaidByKari: z.boolean(),
-  currency: z.nativeEnum(Currencies, { errorMap: () => ({ message: 'Currency is required' }) }),
 });
 
 type ExpenseFormData = z.infer<typeof formSchema>;
@@ -59,10 +66,9 @@ type ExpenseFormData = z.infer<typeof formSchema>;
 const Expense = () => {
   const { mutate: insertExpense } = useInsertEpenseMutation();
   const { mutate: updateExpense } = useUpdateExpenseMutation();
-  const { data: exchangeData } = useGetCurrentExchangeRate()
+  const { data: exchangeData } = useGetCurrentExchangeRate();
 
   const [loading, setLoading] = useState(false);
-  const [prevSelectedCurrency, setPrevSelectedCurrency] = useState('USD');
   const navigate = useNavigate();
   const theme = useTheme();
   const { id } = useParams();
@@ -77,10 +83,10 @@ const Expense = () => {
     register,
     handleSubmit,
     setValue,
-    watch,
     control,
     reset,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(formSchema),
@@ -89,49 +95,76 @@ const Expense = () => {
       isPaidByKari: false,
       category: ExpenseCategory.FOOD,
       type: ExpenseType.PERCENTAGE,
-      currency: Currencies.USD,
+      usdAmount: '',
+      eurAmount: '',
     },
   });
 
-  const currency = watch('currency');
+  const usdPerEur = exchangeData?.['USD'];
 
-  useEffect(() => {
-    const isNotValidAmount = getValues('amount').length === 0 || getValues('amount') === '0';
-    if (isNotValidAmount) {
-      return
+  const normalizeNumber = (raw: string) => raw.replace(',', '.');
+  const toFixed2 = (n: number) => (Number.isFinite(n) ? n.toFixed(2) : '');
+
+  const handleUsdChange = (raw: string) => {
+    const cleaned = normalizeNumber(raw);
+    setValue('usdAmount', cleaned, { shouldDirty: true, shouldValidate: true });
+
+    const num = parseFloat(cleaned);
+    if (!usdPerEur || isNaN(num)) {
+      setValue('eurAmount', '', { shouldDirty: true, shouldValidate: true });
+      return;
     }
-    let newAmount = parseFloat(getValues('amount'));
-    if (currency === 'EUR' && exchangeData) {
-      newAmount = parseFloat(getValues('amount')) * exchangeData['USD'];
-      setValue('amount', String(newAmount), { shouldDirty: true, shouldValidate: true });
-      setPrevSelectedCurrency('EUR')
-      return
+    const eur = num / usdPerEur;
+    setValue('eurAmount', toFixed2(eur), { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handleEurChange = (raw: string) => {
+    const cleaned = normalizeNumber(raw);
+    setValue('eurAmount', cleaned, { shouldDirty: true, shouldValidate: true });
+
+    const num = parseFloat(cleaned);
+    if (!usdPerEur || isNaN(num)) {
+      setValue('usdAmount', '', { shouldDirty: true, shouldValidate: true });
+      return;
     }
-    if (currency === 'USD' && prevSelectedCurrency === 'EUR' && exchangeData) {
-      newAmount = parseFloat(getValues('amount')) / exchangeData['USD'];
-      setValue('amount', String(newAmount), { shouldDirty: true, shouldValidate: true });
-      setPrevSelectedCurrency('USD')
-      return
-    }
-  }, [currency, getValues]);
+    const usd = num * usdPerEur;
+    setValue('usdAmount', toFixed2(usd), { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handleUsdBlur = () => {
+    const val = normalizeNumber(getValues('usdAmount') || '');
+    const num = parseFloat(val);
+    if (!isNaN(num)) setValue('usdAmount', toFixed2(num), { shouldDirty: true, shouldValidate: true });
+  };
+  const handleEurBlur = () => {
+    const val = normalizeNumber(getValues('eurAmount') || '');
+    const num = parseFloat(val);
+    if (!isNaN(num)) setValue('eurAmount', toFixed2(num), { shouldDirty: true, shouldValidate: true });
+  };
 
   useEffect(() => {
     if (expense) {
+      const usd = expense.amount ?? 0;
+      const eur = usdPerEur ? usd / usdPerEur : '';
       reset({
         date: expense.date,
         description: expense.description,
-        amount: expense.amount.toString(),
+        usdAmount: toFixed2(usd),
+        eurAmount: eur === '' ? '' : toFixed2(typeof eur === 'number' ? eur : parseFloat(String(eur))),
         category: expense.category,
         type: expense.type,
         isPaidByKari: expense.isPaidByKari,
       });
     }
-  }, [expense, reset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expense, usdPerEur]);
 
   const onSubmit = useCallback(
     async (data: ExpenseFormData) => {
       setLoading(true);
       try {
+        const usd = parseFloat(normalizeNumber(data.usdAmount));
+
         if (id) {
           const updateObj = {
             expenseId: Number(id),
@@ -139,7 +172,7 @@ const Expense = () => {
               date: data.date,
               description: data.description,
               category: data.category,
-              amount: parseFloat(data.amount),
+              amount: usd,
               type: data.type,
               isPaidByKari: data.isPaidByKari,
             },
@@ -150,7 +183,7 @@ const Expense = () => {
             date: data.date,
             description: data.description,
             category: data.category,
-            amount: parseFloat(data.amount),
+            amount: usd,
             type: data.type,
             isPaidByKari: data.isPaidByKari,
             // eslint-disable-next-line camelcase
@@ -160,13 +193,14 @@ const Expense = () => {
         reset();
         navigate(ROUTES.EXPENSES);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log('Error saving expense', error);
         showNotification(`Error saving expense: ${error}`, 'error');
       } finally {
         setLoading(false);
       }
     },
-    [data, id],
+    [id, insertExpense, updateExpense, navigate, reset, showNotification],
   );
 
   const handleCancel = () => {
@@ -182,7 +216,7 @@ const Expense = () => {
           mt: 10,
           mb: 10,
           backgroundColor: theme.palette.background.paper,
-          padding: 3,
+          p: 3,
           borderRadius: 2,
           boxShadow: 3,
         }}
@@ -194,6 +228,7 @@ const Expense = () => {
             <Typography variant='h5' fontWeight='bold' gutterBottom color='text.primary'>
               {id ? 'Edit Expense' : 'Add Expense'}
             </Typography>
+
             <Box component='form' onSubmit={handleSubmit(onSubmit)} width='100%'>
               <Controller
                 name='date'
@@ -235,23 +270,19 @@ const Expense = () => {
                   },
                 }}
               />
-              <Box
-                display='flex'
-                alignItems='center'
-                gap={2}
-                sx={{
-                  width: '100%',
-                  mt: 2,
-                }}
-              >
+
+              <Box display='flex' alignItems='flex-start' gap={2} sx={{ width: '100%', mt: 2 }}>
                 <TextField
-                  label='Amount'
-                  variant='outlined'
-                  type='number'
+                  label='Amount (USD)'
+                  type='text'
+                  inputMode='decimal'
+                  InputLabelProps={{ shrink: true }}
                   fullWidth
-                  {...register('amount')}
-                  error={!!errors.amount}
-                  helperText={errors.amount?.message}
+                  {...register('usdAmount')}
+                  onChange={(e) => handleUsdChange(e.target.value)}
+                  onBlur={handleUsdBlur}
+                  error={!!errors.usdAmount}
+                  helperText={errors.usdAmount?.message}
                   sx={{
                     input: { color: theme.palette.text.primary },
                     '& .MuiOutlinedInput-root': {
@@ -263,35 +294,28 @@ const Expense = () => {
                   }}
                 />
 
-                <FormControl
+                <TextField
+                  label={`Amount (EUR)${usdPerEur ? '' : ' — waiting rate'}`}
+                  type='text'
+                  inputMode='decimal'
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  {...register('eurAmount')}
+                  onChange={(e) => handleEurChange(e.target.value)}
+                  onBlur={handleEurBlur}
+                  disabled={!usdPerEur}
+                  error={!!errors.eurAmount}
+                  helperText={errors.eurAmount?.message}
                   sx={{
-                    width: 90,
+                    input: { color: theme.palette.text.primary },
                     '& .MuiOutlinedInput-root': {
                       height: 56,
+                      '& fieldset': { borderColor: theme.palette.divider },
+                      '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                      '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
                     },
                   }}
-                  error={!!errors.currency}
-                >
-                  <Controller
-                    name='currency'
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        {...field}
-                        displayEmpty
-                        variant='outlined'
-                        inputProps={{ sx: { height: 56, display: 'flex', alignItems: 'center' } }}
-                      >
-                        {Object.values(Currencies).map((cur) => (
-                          <MenuItem key={cur} value={cur}>
-                            {cur}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
-                  />
-                  <FormHelperText>{errors.currency?.message}</FormHelperText>
-                </FormControl>
+                />
               </Box>
 
               <FormControl fullWidth margin='normal' error={!!errors.category}>
@@ -311,6 +335,7 @@ const Expense = () => {
                 />
                 <FormHelperText>{errors.category?.message}</FormHelperText>
               </FormControl>
+
               <FormControl fullWidth margin='normal' error={!!errors.type}>
                 <InputLabel>Type</InputLabel>
                 <Controller
@@ -328,6 +353,7 @@ const Expense = () => {
                 />
                 <FormHelperText>{errors.type?.message}</FormHelperText>
               </FormControl>
+
               <FormControlLabel
                 control={
                   <Switch
@@ -338,6 +364,7 @@ const Expense = () => {
                 }
                 label='Paid by Kari'
               />
+
               <Box mt={3} display='flex' gap={2}>
                 <IconButton
                   color='success'

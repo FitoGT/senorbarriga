@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
@@ -26,11 +26,12 @@ import dayjs from 'dayjs';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import FullLoader from '../Loader/FullLoader';
-import { ExpenseCategory, ExpenseType } from '../../interfaces/';
+import { ExpenseCategory, ExpenseType, Currencies } from '../../interfaces/';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
 import { useInsertEpenseMutation, useUpdateExpenseMutation, useGetExpenseById } from '../../api/expenses/expenses';
 import { useGetCurrentExchangeRate } from '../../api/exchange-rate/exchange-rate';
+import { buildRatesMap, convertFromEuro, convertToEuro } from '../../utils/currency';
 
 const formSchema = z.object({
   date: z
@@ -100,7 +101,8 @@ const Expense = () => {
     },
   });
 
-  const usdPerEur = exchangeData?.['USD'];
+  const currencyRates = useMemo(() => buildRatesMap(exchangeData), [exchangeData]);
+  const usdPerEur = currencyRates[Currencies.USD];
 
   const normalizeNumber = (raw: string) => raw.replace(',', '.');
   const toFixed2 = (n: number) => (Number.isFinite(n) ? n.toFixed(2) : '');
@@ -114,7 +116,7 @@ const Expense = () => {
       setValue('eurAmount', '', { shouldDirty: true, shouldValidate: true });
       return;
     }
-    const eur = num / usdPerEur;
+    const eur = convertToEuro(num, Currencies.USD, currencyRates);
     setValue('eurAmount', toFixed2(eur), { shouldDirty: true, shouldValidate: true });
   };
 
@@ -127,7 +129,7 @@ const Expense = () => {
       setValue('usdAmount', '', { shouldDirty: true, shouldValidate: true });
       return;
     }
-    const usd = num * usdPerEur;
+    const usd = convertFromEuro(num, Currencies.USD, currencyRates);
     setValue('usdAmount', toFixed2(usd), { shouldDirty: true, shouldValidate: true });
   };
 
@@ -145,7 +147,7 @@ const Expense = () => {
   useEffect(() => {
     if (expense) {
       const usd = expense.amount ?? 0;
-      const eur = usdPerEur ? usd / usdPerEur : '';
+      const eur = usdPerEur ? convertToEuro(usd, Currencies.USD, currencyRates) : '';
       reset({
         date: expense.date,
         description: expense.description,
@@ -156,8 +158,7 @@ const Expense = () => {
         isPaidByKari: expense.isPaidByKari,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expense, usdPerEur]);
+  }, [expense, usdPerEur, currencyRates, reset]);
 
   const onSubmit = useCallback(
     async (data: ExpenseFormData) => {

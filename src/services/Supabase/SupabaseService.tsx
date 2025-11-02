@@ -10,6 +10,10 @@ import {
   Debt,
   RequestDebtDto,
   TotalDebt,
+  Saving,
+  SavingUser,
+  SavingType,
+  Currencies,
 } from '../../interfaces';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
@@ -28,9 +32,7 @@ class SupabaseService {
 
   async signInWithEmail(email: string, password: string): Promise<User> {
     try {
-      console.log(email, password);
       const { data }: AuthResponse = await this.client.auth.signInWithPassword({ email, password });
-      console.log(data);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return data.user!;
     } catch (error) {
@@ -406,6 +408,25 @@ class SupabaseService {
       this.syncBalance();
     } catch (error) {
       throw new Error(`Reset month failed: ${error}`);
+    }
+  }
+
+  async getAllSavings(): Promise<Saving[]> {
+    try {
+      const { data } = await this.client.from('savings').select('*').order('created_at', { ascending: false });
+
+      return (data ?? []).map((saving) => {
+        return {
+          id: saving.id,
+          created_at: saving.created_at,
+          user: saving.user as SavingUser,
+          type: saving.type as SavingType,
+          amount: typeof saving.amount === 'number' ? saving.amount : Number(saving.amount ?? 0),
+          currency: saving.currency as Currencies,
+        } satisfies Saving;
+      });
+    } catch (error) {
+      throw new Error(`Fetching all savings failed: ${error}`);
     }
   }
 }

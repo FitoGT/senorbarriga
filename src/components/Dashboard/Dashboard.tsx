@@ -1,16 +1,106 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Container, Stack, IconButton, Tooltip } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import DownloadIcon from '@mui/icons-material/Download';
 import DisplayCard from './DisplayCard';
 import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
-import { Income, TotalExpenses, TotalDebt } from '../../interfaces';
+import { Income, TotalExpenses, TotalDebt, Saving, SavingUser, Currencies } from '../../interfaces';
 import { useNotifications } from '../../context';
 import { useExportDatabaseMutation } from '../../api/db/db';
+import { useGetCurrentExchangeRate } from '../../api/exchange-rate/exchange-rate';
+import { buildRatesMap, convertToEuro, CurrencyRateMap } from '../../utils/currency';
 
 const formatNumber = (value: number): string => {
   return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+};
+
+type SavingsSummary = {
+  kari: number;
+  adolfo: number;
+  total: number;
+  kariPercentage: number;
+  adolfoPercentage: number;
+};
+
+type SavingsSnapshot = {
+  timestamp: number;
+  savings: Saving[];
+};
+
+const groupSavingsSnapshots = (allSavings: Saving[]): SavingsSnapshot[] => {
+  if (!allSavings.length) {
+    return [];
+  }
+
+  const groups = new Map<string, SavingsSnapshot>();
+
+  for (const saving of allSavings) {
+    const createdAt = saving.created_at ?? '';
+    const parsedDate = new Date(createdAt);
+    const timestamp = Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
+    const key = Number.isNaN(parsedDate.getTime()) ? createdAt : parsedDate.toISOString().split('T')[0];
+
+    const existing = groups.get(key);
+
+    if (existing) {
+      existing.savings.push(saving);
+      existing.timestamp = Math.max(existing.timestamp, timestamp);
+    } else {
+      groups.set(key, {
+        savings: [saving],
+        timestamp,
+      });
+    }
+  }
+
+  return Array.from(groups.values()).sort((a, b) => b.timestamp - a.timestamp);
+};
+
+const calculateSavingsTotals = (allSavings: Saving[], rates: CurrencyRateMap): SavingsSummary => {
+  const snapshots = groupSavingsSnapshots(allSavings);
+  const latestSnapshot = snapshots[0];
+
+  if (!latestSnapshot || latestSnapshot.savings.length === 0) {
+    return {
+      kari: 0,
+      adolfo: 0,
+      total: 0,
+      kariPercentage: 0,
+      adolfoPercentage: 0,
+    };
+  }
+
+  let kariTotal = 0;
+  let adolfoTotal = 0;
+
+  for (const saving of latestSnapshot.savings) {
+    if (!saving.user) {
+      continue;
+    }
+
+    const amount = typeof saving.amount === 'number' ? saving.amount : Number(saving.amount ?? 0);
+    const amountInEUR = convertToEuro(amount, saving.currency ?? Currencies.EUR, rates);
+
+    if (saving.user === SavingUser.KARI) {
+      kariTotal += amountInEUR;
+    }
+
+    if (saving.user === SavingUser.ADOLFO) {
+      adolfoTotal += amountInEUR;
+    }
+  }
+
+  const total = kariTotal + adolfoTotal;
+  const normalize = (value: number) => Number(value.toFixed(2));
+
+  return {
+    kari: normalize(kariTotal),
+    adolfo: normalize(adolfoTotal),
+    total: normalize(total),
+    kariPercentage: total ? normalize((kariTotal / total) * 100) : 0,
+    adolfoPercentage: total ? normalize((adolfoTotal / total) * 100) : 0,
+  };
 };
 
 const Dashboard = () => {
@@ -18,24 +108,30 @@ const Dashboard = () => {
   const [incomeData, setIncomeData] = useState<Income | null>(null);
   const [expensesData, setExpensesData] = useState<TotalExpenses | null>(null);
   const [debtData, setDebtData] = useState<TotalDebt | null>(null);
+  const [savingsData, setSavingsData] = useState<Saving[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<'kari' | 'adolfo' | null>(null);
   const [tempValue, setTempValue] = useState<string | null>(null);
   const { mutate: exportDB, isPending } = useExportDatabaseMutation();
+  const { data: exchangeRate } = useGetCurrentExchangeRate();
+  const currencyRates = useMemo(() => buildRatesMap(exchangeRate), [exchangeRate]);
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [latestIncome, totalExpenses, totalDebt] = await Promise.all([
+      const [latestIncome, totalExpenses, totalDebt, allSavings] = await Promise.all([
         supabaseService.getLatestIncome(),
         supabaseService.getTotalExpenses(),
         supabaseService.getTotalDebt(),
+        supabaseService.getAllSavings(),
       ]);
       setIncomeData(latestIncome);
       setExpensesData(totalExpenses);
       setDebtData(totalDebt);
+      setSavingsData(allSavings);
     } catch (error) {
       console.error('Error fetching data:', error);
       showNotification(`Error fetching data: ${error}`, 'error');
+      setSavingsData([]);
     }
     setLoading(false);
   };
@@ -84,6 +180,9 @@ const Dashboard = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const savingsTotals = useMemo(() => calculateSavingsTotals(savingsData, currencyRates), [savingsData, currencyRates]);
+  const hasSavingsData = savingsData.length > 0;
 
   return (
     <Container maxWidth='md' sx={{ mt: 10, mb: 10 }}>
@@ -145,7 +244,6 @@ const Dashboard = () => {
               color='primary'
             />
           </Stack>
-
           {/* Expenses */}
           <Stack sx={{ mt: 4 }} spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
             <DisplayCard
@@ -164,7 +262,6 @@ const Dashboard = () => {
               color='primary'
             />
           </Stack>
-
           {/* Debts */}
           <Stack sx={{ mt: 4 }} spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
             <DisplayCard title="Kari's Debt" amount={debtData ? formatNumber(debtData.kari) : '0,00'} color='success' />
@@ -174,6 +271,32 @@ const Dashboard = () => {
               color='info'
             />
           </Stack>
+          {/* Savings */}
+          {hasSavingsData && (
+            <Stack sx={{ mt: 4 }} spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
+              <DisplayCard
+                title="Kari's Savings"
+                amount={formatNumber(savingsTotals.kari)}
+                percentage={formatNumber(savingsTotals.kariPercentage)}
+                color='success'
+                currencySymbol='€'
+              />
+              <DisplayCard
+                title="Adolfo's Savings"
+                amount={formatNumber(savingsTotals.adolfo)}
+                percentage={formatNumber(savingsTotals.adolfoPercentage)}
+                color='info'
+                currencySymbol='€'
+              />
+              <DisplayCard
+                title='Total Savings'
+                amount={formatNumber(savingsTotals.total)}
+                percentage={formatNumber(100)}
+                color='primary'
+                currencySymbol='€'
+              />
+            </Stack>
+          )}
         </>
       )}
     </Container>

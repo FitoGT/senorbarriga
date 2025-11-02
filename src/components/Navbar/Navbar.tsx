@@ -14,6 +14,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import SavingsIcon from '@mui/icons-material/Savings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../context/Auth/AuthContext';
 import { useState } from 'react';
@@ -56,7 +57,7 @@ const Navbar = () => {
               color: theme.palette.text.primary,
             }}
           >
-            Señor Barriga App
+            Mr. Barriga App
           </Typography>
           <IconButton edge='end' color='inherit' aria-label='menu' onClick={toggleDrawer(true)}>
             <MenuIcon />
@@ -79,6 +80,13 @@ const Navbar = () => {
                 <ReceiptIcon />
               </ListItemIcon>
               <ListItemText primary='Expenses' />
+            </ListItemButton>
+
+            <ListItemButton onClick={() => handleNavigation(ROUTES.SAVINGS)}>
+              <ListItemIcon>
+                <SavingsIcon />
+              </ListItemIcon>
+              <ListItemText primary='Savings' />
             </ListItemButton>
 
             <ListItemButton onClick={logout}>

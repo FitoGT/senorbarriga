@@ -7,6 +7,7 @@ import Auth from './components/Auth/Auth';
 import Dashboard from './components/Dashboard/Dashboard';
 import Expenses from './components/Expenses/Expenses';
 import Expense from './components/Expense/Expense';
+import Savings from './components/Savings/Savings';
 import PrivateRoute from './routes/PrivateRoute/PrivateRoute';
 import { ROUTES } from './constants/routes';
 
@@ -25,6 +26,7 @@ function App() {
                 <Route element={<PrivateRoute />}>
                   <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
                   <Route path={ROUTES.EXPENSES} element={<Expenses />} />
+                  <Route path={ROUTES.SAVINGS} element={<Savings />} />
                   <Route path={ROUTES.EXPENSES + ':id?'} element={<Expense />} />
                   <Route path={ROUTES.EXPENSE} element={<Expense />} />
                 </Route>

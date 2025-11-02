@@ -7,10 +7,7 @@ import FullLoader from '../Loader/FullLoader';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
 import { useGetAllExpenses } from '../../api/expenses/expenses';
-
-const formatNumber = (value: number): string => {
-  return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
-};
+import { formatDecimal } from '../../utils/number';
 
 const Expenses = () => {
   const navigate = useNavigate();
@@ -41,7 +38,7 @@ const Expenses = () => {
               <Typography color='text.secondary'>No expenses recorded.</Typography>
             ) : (
               expenses.map((expense) => (
-                <ExpensesAccordion key={expense.id} expense={expense} formatNumber={formatNumber} />
+                <ExpensesAccordion key={expense.id} expense={expense} formatNumber={formatDecimal} />
               ))
             )}
           </Stack>

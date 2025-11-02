@@ -10,7 +10,13 @@ import {
   Debt,
   RequestDebtDto,
   TotalDebt,
+  Saving,
+  SavingUser,
+  SavingType,
+  Currencies,
+  SavingInsert,
 } from '../../interfaces';
+import { roundToDecimals } from '../../utils/number';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || '';
@@ -22,15 +28,24 @@ class SupabaseService {
     this.client = createClient(supabaseUrl, supabaseKey);
   }
 
+  private getDateRange(date: string): { start: string; end: string } {
+    const start = new Date(`${date}T00:00:00Z`);
+    const end = new Date(start.getTime());
+    end.setUTCDate(end.getUTCDate() + 1);
+
+    return {
+      start: start.toISOString(),
+      end: end.toISOString(),
+    };
+  }
+
   getClient(): SupabaseClient {
     return this.client;
   }
 
   async signInWithEmail(email: string, password: string): Promise<User> {
     try {
-      console.log(email, password);
       const { data }: AuthResponse = await this.client.auth.signInWithPassword({ email, password });
-      console.log(data);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return data.user!;
     } catch (error) {
@@ -221,9 +236,9 @@ class SupabaseService {
       const kariTotal = percentageExpenses * (incomeData.kari_percentage / 100) + sharedExpenses / 2 + kariExpenses;
 
       return {
-        total: Number(totalExpenses.toFixed(2)),
-        adolfo: Number(adolfoTotal.toFixed(2)),
-        kari: Number(kariTotal.toFixed(2)),
+        total: roundToDecimals(totalExpenses),
+        adolfo: roundToDecimals(adolfoTotal),
+        kari: roundToDecimals(kariTotal),
       };
     } catch (error) {
       throw new Error(`Fetching total expenses failed: ${error}`);
@@ -271,7 +286,7 @@ class SupabaseService {
 
       const totalPaidByKari = paidByKariData.reduce((sum, expense) => sum + (expense.amount || 0), 0);
 
-      const kariBalance = Number((kariTotal - totalPaidByKari).toFixed(2));
+      const kariBalance = roundToDecimals(kariTotal - totalPaidByKari);
 
       return kariBalance;
     } catch (error) {
@@ -360,10 +375,10 @@ class SupabaseService {
       let kariTotal = Number(totals.kari || 0);
 
       if (adolfoTotal > kariTotal) {
-        adolfoTotal = Number((adolfoTotal - kariTotal).toFixed(2));
+        adolfoTotal = roundToDecimals(adolfoTotal - kariTotal);
         kariTotal = 0;
       } else if (kariTotal > adolfoTotal) {
-        kariTotal = Number((kariTotal - adolfoTotal).toFixed(2));
+        kariTotal = roundToDecimals(kariTotal - adolfoTotal);
         adolfoTotal = 0;
       } else {
         // equal or both zero
@@ -406,6 +421,55 @@ class SupabaseService {
       this.syncBalance();
     } catch (error) {
       throw new Error(`Reset month failed: ${error}`);
+    }
+  }
+
+  async getAllSavings(): Promise<Saving[]> {
+    try {
+      const { data } = await this.client.from('savings').select('*').order('created_at', { ascending: false });
+
+      return (data ?? []).map((saving) => {
+        return {
+          id: saving.id,
+          created_at: saving.created_at,
+          user: saving.user as SavingUser,
+          type: saving.type as SavingType,
+          amount: typeof saving.amount === 'number' ? saving.amount : Number(saving.amount ?? 0),
+          currency: saving.currency as Currencies,
+        } satisfies Saving;
+      });
+    } catch (error) {
+      throw new Error(`Fetching all savings failed: ${error}`);
+    }
+  }
+
+  async insertSavingsBatch(savings: SavingInsert[]): Promise<void> {
+    try {
+      if (!savings.length) {
+        throw new Error('Savings payload must include at least one entry.');
+      }
+
+      await this.client.from('savings').insert(savings);
+    } catch (error) {
+      throw new Error(`Inserting savings failed: ${error}`);
+    }
+  }
+
+  async deleteSavingsByDate(date: string): Promise<void> {
+    try {
+      const { start, end } = this.getDateRange(date);
+      await this.client.from('savings').delete().gte('created_at', start).lt('created_at', end);
+    } catch (error) {
+      throw new Error(`Deleting savings snapshot failed: ${error}`);
+    }
+  }
+
+  async replaceSavingsGroup(originalDate: string, savings: SavingInsert[]): Promise<void> {
+    try {
+      await this.deleteSavingsByDate(originalDate);
+      await this.insertSavingsBatch(savings);
+    } catch (error) {
+      throw new Error(`Updating savings snapshot failed: ${error}`);
     }
   }
 }

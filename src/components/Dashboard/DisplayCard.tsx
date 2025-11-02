@@ -14,6 +14,7 @@ interface DisplayCardProps {
   onCancel?: () => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   tempValue?: string | null;
+  currencySymbol?: string;
 }
 
 const DisplayCard: React.FC<DisplayCardProps> = ({
@@ -27,6 +28,7 @@ const DisplayCard: React.FC<DisplayCardProps> = ({
   onCancel,
   onChange,
   tempValue,
+  currencySymbol = '$',
 }) => {
   const theme = useTheme();
 
@@ -87,7 +89,7 @@ const DisplayCard: React.FC<DisplayCardProps> = ({
           />
         ) : (
           <Typography variant='h6' color={theme.palette[color].main}>
-            $ {amount}
+            {currencySymbol} {amount}
           </Typography>
         )}
 

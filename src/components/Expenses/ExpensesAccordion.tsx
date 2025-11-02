@@ -22,6 +22,8 @@ import { ROUTES } from '../../constants/routes';
 import ExpensesDeleteModal from './ExpensesDeleteModal';
 import { useState } from 'react';
 import { useDeleteExpenseMutation } from '../../api/expenses/expenses';
+import { formatDate } from '../../utils/date';
+import type { DialogProps } from '@mui/material/Dialog';
 
 interface ExpensesAccordionProps {
   expense: Expense;
@@ -51,7 +53,11 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
     }
   };
 
-  const handleClose = () => setOpen(false);
+  const handleClose: NonNullable<DialogProps['onClose']> = (event, reason) => {
+    void event;
+    void reason;
+    setOpen(false);
+  };
 
   const handleEdit = (expenseId: number) => {
     navigate(`${ROUTES.EXPENSES}${expenseId}`);
@@ -73,7 +79,7 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
       >
         <Stack direction='row' spacing={2} width='100%' alignItems='center' justifyContent='space-between'>
           <Typography variant='body1' noWrap sx={{ width: '90px', color: theme.palette.text.primary }}>
-            {expense.date}
+            {formatDate(expense.date) || expense.date}
           </Typography>
 
           <Typography

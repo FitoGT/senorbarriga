@@ -1,4 +1,5 @@
 import { useGetCurrentExchangeRate } from '../../api/exchange-rate/exchange-rate';
+import { toFixedString } from '../../utils/number';
 
 export default function ExchangeRateCard() {
   const { data, isLoading, isError } = useGetCurrentExchangeRate();
@@ -10,7 +11,7 @@ export default function ExchangeRateCard() {
       <p className='text-lg flex items-center gap-2'>
         <img src='https://flagcdn.com/w20/eu.png' alt='EU flag' className='w-5 h-5 rounded-full shadow-sm' />
         &nbsp;<strong>1.00</strong>&nbsp;= &nbsp;
-        <strong>{data?.USD?.toFixed(2)}</strong>&nbsp;
+        <strong>{data?.USD ? toFixedString(data.USD) : '0.00'}</strong>&nbsp;
         <img src='https://flagcdn.com/w20/us.png' alt='US flag' className='w-5 h-5 rounded-full shadow-sm' />
       </p>
     </div>

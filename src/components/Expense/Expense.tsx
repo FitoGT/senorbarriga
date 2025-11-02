@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
@@ -22,21 +22,23 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import dayjs from 'dayjs';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import FullLoader from '../Loader/FullLoader';
-import { ExpenseCategory, ExpenseType } from '../../interfaces/';
+import { ExpenseCategory, ExpenseType, Currencies } from '../../interfaces/';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
 import { useInsertEpenseMutation, useUpdateExpenseMutation, useGetExpenseById } from '../../api/expenses/expenses';
 import { useGetCurrentExchangeRate } from '../../api/exchange-rate/exchange-rate';
+import { buildRatesMap, convertFromEuro, convertToEuro } from '../../utils/currency';
+import { normalizeDecimalInput, parseDecimal, toFixedString } from '../../utils/number';
+import { DATE_DISPLAY_FORMAT, formatDate, isValidDateString, parseForDateInput, today } from '../../utils/date';
 
 const formSchema = z.object({
   date: z
     .string()
     .min(1, 'Date is required')
-    .refine((value) => dayjs(value, 'YYYY-MM-DD', true).isValid(), {
+    .refine((value) => isValidDateString(value), {
       message: 'Invalid date format (YYYY-MM-DD required)',
     }),
   description: z
@@ -91,7 +93,7 @@ const Expense = () => {
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      date: dayjs().format('YYYY-MM-DD'),
+      date: today(),
       isPaidByKari: false,
       category: ExpenseCategory.FOOD,
       type: ExpenseType.PERCENTAGE,
@@ -100,76 +102,88 @@ const Expense = () => {
     },
   });
 
-  const usdPerEur = exchangeData?.['USD'];
-
-  const normalizeNumber = (raw: string) => raw.replace(',', '.');
-  const toFixed2 = (n: number) => (Number.isFinite(n) ? n.toFixed(2) : '');
+  const currencyRates = useMemo(() => buildRatesMap(exchangeData), [exchangeData]);
+  const usdPerEur = currencyRates[Currencies.USD];
 
   const handleUsdChange = (raw: string) => {
-    const cleaned = normalizeNumber(raw);
+    const cleaned = normalizeDecimalInput(raw);
     setValue('usdAmount', cleaned, { shouldDirty: true, shouldValidate: true });
 
-    const num = parseFloat(cleaned);
-    if (!usdPerEur || isNaN(num)) {
+    const num = parseDecimal(cleaned);
+    if (!usdPerEur || num === null) {
       setValue('eurAmount', '', { shouldDirty: true, shouldValidate: true });
       return;
     }
-    const eur = num / usdPerEur;
-    setValue('eurAmount', toFixed2(eur), { shouldDirty: true, shouldValidate: true });
+    const eur = convertToEuro(num, Currencies.USD, currencyRates);
+    setValue('eurAmount', toFixedString(eur), { shouldDirty: true, shouldValidate: true });
   };
 
   const handleEurChange = (raw: string) => {
-    const cleaned = normalizeNumber(raw);
+    const cleaned = normalizeDecimalInput(raw);
     setValue('eurAmount', cleaned, { shouldDirty: true, shouldValidate: true });
 
-    const num = parseFloat(cleaned);
-    if (!usdPerEur || isNaN(num)) {
+    const num = parseDecimal(cleaned);
+    if (!usdPerEur || num === null) {
       setValue('usdAmount', '', { shouldDirty: true, shouldValidate: true });
       return;
     }
-    const usd = num * usdPerEur;
-    setValue('usdAmount', toFixed2(usd), { shouldDirty: true, shouldValidate: true });
+    const usd = convertFromEuro(num, Currencies.USD, currencyRates);
+    setValue('usdAmount', toFixedString(usd), { shouldDirty: true, shouldValidate: true });
   };
 
   const handleUsdBlur = () => {
-    const val = normalizeNumber(getValues('usdAmount') || '');
-    const num = parseFloat(val);
-    if (!isNaN(num)) setValue('usdAmount', toFixed2(num), { shouldDirty: true, shouldValidate: true });
+    const val = normalizeDecimalInput(getValues('usdAmount') || '');
+    const num = parseDecimal(val);
+    if (num !== null) setValue('usdAmount', toFixedString(num), { shouldDirty: true, shouldValidate: true });
   };
   const handleEurBlur = () => {
-    const val = normalizeNumber(getValues('eurAmount') || '');
-    const num = parseFloat(val);
-    if (!isNaN(num)) setValue('eurAmount', toFixed2(num), { shouldDirty: true, shouldValidate: true });
+    const val = normalizeDecimalInput(getValues('eurAmount') || '');
+    const num = parseDecimal(val);
+    if (num !== null) setValue('eurAmount', toFixedString(num), { shouldDirty: true, shouldValidate: true });
   };
 
   useEffect(() => {
     if (expense) {
       const usd = expense.amount ?? 0;
-      const eur = usdPerEur ? usd / usdPerEur : '';
+      const eur = usdPerEur ? convertToEuro(usd, Currencies.USD, currencyRates) : null;
       reset({
-        date: expense.date,
+        date: formatDate(expense.date) || '',
         description: expense.description,
-        usdAmount: toFixed2(usd),
-        eurAmount: eur === '' ? '' : toFixed2(typeof eur === 'number' ? eur : parseFloat(String(eur))),
+        usdAmount: toFixedString(usd),
+        eurAmount: eur === null ? '' : toFixedString(eur),
         category: expense.category,
         type: expense.type,
         isPaidByKari: expense.isPaidByKari,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expense, usdPerEur]);
+  }, [expense, usdPerEur, currencyRates, reset]);
 
   const onSubmit = useCallback(
     async (data: ExpenseFormData) => {
       setLoading(true);
       try {
-        const usd = parseFloat(normalizeNumber(data.usdAmount));
+        const usdParsed = parseDecimal(data.usdAmount);
+
+        if (usdParsed === null) {
+          showNotification('Invalid USD amount', 'error');
+          setLoading(false);
+          return;
+        }
+
+        const usd = usdParsed;
+        const formattedDate = formatDate(data.date);
+
+        if (!formattedDate) {
+          showNotification('Invalid date provided', 'error');
+          setLoading(false);
+          return;
+        }
 
         if (id) {
           const updateObj = {
             expenseId: Number(id),
             updates: {
-              date: data.date,
+              date: formattedDate,
               description: data.description,
               category: data.category,
               amount: usd,
@@ -180,7 +194,7 @@ const Expense = () => {
           updateExpense(updateObj);
         } else {
           insertExpense({
-            date: data.date,
+            date: formattedDate,
             description: data.description,
             category: data.category,
             amount: usd,
@@ -237,9 +251,9 @@ const Expense = () => {
                   <DatePicker
                     {...field}
                     label='Date'
-                    value={field.value ? dayjs(field.value) : null}
-                    onChange={(newDate) => setValue('date', newDate ? newDate.format('YYYY-MM-DD') : '')}
-                    format='YYYY-MM-DD'
+                    value={parseForDateInput(field.value)}
+                    onChange={(newDate) => setValue('date', formatDate(newDate))}
+                    format={DATE_DISPLAY_FORMAT}
                     slotProps={{
                       textField: {
                         variant: 'outlined',

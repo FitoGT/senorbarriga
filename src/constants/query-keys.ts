@@ -6,3 +6,7 @@ export const EXPENSES_QUERY_KEYS = {
 export const EXCHANGE_RATE_KEYS = {
   EXCHANGE_RATE: 'exchange-rate',
 };
+
+export const SAVINGS_QUERY_KEYS = {
+  SAVINGS: 'savings',
+};

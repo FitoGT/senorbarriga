@@ -22,6 +22,7 @@ import { ROUTES } from '../../constants/routes';
 import ExpensesDeleteModal from './ExpensesDeleteModal';
 import { useState } from 'react';
 import { useDeleteExpenseMutation } from '../../api/expenses/expenses';
+import { formatDate } from '../../utils/date';
 
 interface ExpensesAccordionProps {
   expense: Expense;
@@ -73,7 +74,7 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
       >
         <Stack direction='row' spacing={2} width='100%' alignItems='center' justifyContent='space-between'>
           <Typography variant='body1' noWrap sx={{ width: '90px', color: theme.palette.text.primary }}>
-            {expense.date}
+            {formatDate(expense.date) || expense.date}
           </Typography>
 
           <Typography

@@ -1,106 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Container, Stack, IconButton, Tooltip } from '@mui/material';
+import { Box, Container, Stack, IconButton, Tooltip, Typography } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import DownloadIcon from '@mui/icons-material/Download';
 import DisplayCard from './DisplayCard';
 import FullLoader from '../Loader/FullLoader';
 import { supabaseService } from '../../services/Supabase/SupabaseService';
-import { Income, TotalExpenses, TotalDebt, Saving, SavingUser, Currencies } from '../../interfaces';
+import { Income, TotalExpenses, TotalDebt, Saving } from '../../interfaces';
 import { useNotifications } from '../../context';
 import { useExportDatabaseMutation } from '../../api/db/db';
 import { useGetCurrentExchangeRate } from '../../api/exchange-rate/exchange-rate';
-import { buildRatesMap, convertToEuro, CurrencyRateMap } from '../../utils/currency';
+import { buildRatesMap } from '../../utils/currency';
+import { formatDecimal, formatDecimalInput, formatPercentage, parseDecimal } from '../../utils/number';
+import { calculateSavingsSummary, getLatestSavingsGroup, groupSavingsByDate } from '../../utils/savings';
 
-const formatNumber = (value: number): string => {
-  return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
-};
-
-type SavingsSummary = {
-  kari: number;
-  adolfo: number;
-  total: number;
-  kariPercentage: number;
-  adolfoPercentage: number;
-};
-
-type SavingsSnapshot = {
-  timestamp: number;
-  savings: Saving[];
-};
-
-const groupSavingsSnapshots = (allSavings: Saving[]): SavingsSnapshot[] => {
-  if (!allSavings.length) {
-    return [];
-  }
-
-  const groups = new Map<string, SavingsSnapshot>();
-
-  for (const saving of allSavings) {
-    const createdAt = saving.created_at ?? '';
-    const parsedDate = new Date(createdAt);
-    const timestamp = Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
-    const key = Number.isNaN(parsedDate.getTime()) ? createdAt : parsedDate.toISOString().split('T')[0];
-
-    const existing = groups.get(key);
-
-    if (existing) {
-      existing.savings.push(saving);
-      existing.timestamp = Math.max(existing.timestamp, timestamp);
-    } else {
-      groups.set(key, {
-        savings: [saving],
-        timestamp,
-      });
-    }
-  }
-
-  return Array.from(groups.values()).sort((a, b) => b.timestamp - a.timestamp);
-};
-
-const calculateSavingsTotals = (allSavings: Saving[], rates: CurrencyRateMap): SavingsSummary => {
-  const snapshots = groupSavingsSnapshots(allSavings);
-  const latestSnapshot = snapshots[0];
-
-  if (!latestSnapshot || latestSnapshot.savings.length === 0) {
-    return {
-      kari: 0,
-      adolfo: 0,
-      total: 0,
-      kariPercentage: 0,
-      adolfoPercentage: 0,
-    };
-  }
-
-  let kariTotal = 0;
-  let adolfoTotal = 0;
-
-  for (const saving of latestSnapshot.savings) {
-    if (!saving.user) {
-      continue;
-    }
-
-    const amount = typeof saving.amount === 'number' ? saving.amount : Number(saving.amount ?? 0);
-    const amountInEUR = convertToEuro(amount, saving.currency ?? Currencies.EUR, rates);
-
-    if (saving.user === SavingUser.KARI) {
-      kariTotal += amountInEUR;
-    }
-
-    if (saving.user === SavingUser.ADOLFO) {
-      adolfoTotal += amountInEUR;
-    }
-  }
-
-  const total = kariTotal + adolfoTotal;
-  const normalize = (value: number) => Number(value.toFixed(2));
-
-  return {
-    kari: normalize(kariTotal),
-    adolfo: normalize(adolfoTotal),
-    total: normalize(total),
-    kariPercentage: total ? normalize((kariTotal / total) * 100) : 0,
-    adolfoPercentage: total ? normalize((adolfoTotal / total) * 100) : 0,
-  };
+type DashboardCardConfig = {
+  key: string;
+  title: string;
+  amount: string;
+  color: 'primary' | 'secondary' | 'success' | 'info' | 'warning';
+  percentage?: string;
+  currencySymbol?: string;
+  editKey?: 'kari' | 'adolfo';
 };
 
 const Dashboard = () => {
@@ -115,6 +35,7 @@ const Dashboard = () => {
   const { mutate: exportDB, isPending } = useExportDatabaseMutation();
   const { data: exchangeRate } = useGetCurrentExchangeRate();
   const currencyRates = useMemo(() => buildRatesMap(exchangeRate), [exchangeRate]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -143,7 +64,12 @@ const Dashboard = () => {
 
   const handleSave = async () => {
     if (!editing || tempValue === null) return;
-    const newValue = parseFloat(tempValue.replace(',', '.'));
+    const parsedValue = parseDecimal(tempValue);
+    if (parsedValue === null) {
+      return;
+    }
+
+    const newValue = parsedValue;
     try {
       await supabaseService.updateIncome(editing, newValue);
       await fetchData();
@@ -166,6 +92,18 @@ const Dashboard = () => {
     setTempValue(value);
   };
 
+  const handleEdit = (person: 'kari' | 'adolfo') => {
+    if (!incomeData) {
+      return;
+    }
+
+    setEditing(person);
+    const currentValue = person === 'kari' ? incomeData.kari_income : incomeData.adolfo_income;
+    setTempValue(
+      typeof currentValue === 'number' && Number.isFinite(currentValue) ? formatDecimalInput(currentValue) : '',
+    );
+  };
+
   const handleResetMonth = async () => {
     try {
       await supabaseService.resetMonth();
@@ -181,8 +119,159 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const savingsTotals = useMemo(() => calculateSavingsTotals(savingsData, currencyRates), [savingsData, currencyRates]);
-  const hasSavingsData = savingsData.length > 0;
+  const savingsTotals = useMemo(() => {
+    const groups = groupSavingsByDate(savingsData);
+    const latestGroup = getLatestSavingsGroup(groups);
+    return calculateSavingsSummary(latestGroup?.savings ?? [], currencyRates);
+  }, [savingsData, currencyRates]);
+
+  const incomeCards = useMemo<DashboardCardConfig[]>(() => {
+    if (!incomeData) {
+      return [];
+    }
+
+    return [
+      {
+        key: 'kari-income',
+        title: "Kari's Income",
+        amount: formatDecimal(incomeData.kari_income ?? 0),
+        percentage: formatDecimal(incomeData.kari_percentage ?? 0),
+        color: 'success',
+        editKey: 'kari',
+      },
+      {
+        key: 'adolfo-income',
+        title: "Adolfo's Income",
+        amount: formatDecimal(incomeData.adolfo_income ?? 0),
+        percentage: formatDecimal(incomeData.adolfo_percentage ?? 0),
+        color: 'info',
+        editKey: 'adolfo',
+      },
+      {
+        key: 'total-income',
+        title: 'Total Income',
+        amount: formatDecimal(incomeData.total_income ?? 0),
+        percentage: formatDecimal(100),
+        color: 'primary',
+      },
+    ];
+  }, [incomeData]);
+
+  const expenseCards = useMemo<DashboardCardConfig[]>(() => {
+    if (!expensesData) {
+      return [];
+    }
+
+    return [
+      {
+        key: 'kari-expenses',
+        title: "Kari's Expenses",
+        amount: formatDecimal(expensesData.kari ?? 0),
+        color: 'success',
+      },
+      {
+        key: 'adolfo-expenses',
+        title: "Adolfo's Expenses",
+        amount: formatDecimal(expensesData.adolfo ?? 0),
+        color: 'info',
+      },
+      {
+        key: 'total-expenses',
+        title: 'Total Expenses',
+        amount: formatDecimal(expensesData.total ?? 0),
+        color: 'primary',
+      },
+    ];
+  }, [expensesData]);
+
+  const debtCards = useMemo<DashboardCardConfig[]>(() => {
+    if (!debtData) {
+      return [];
+    }
+
+    return [
+      {
+        key: 'kari-debt',
+        title: "Kari's Debt",
+        amount: formatDecimal(debtData.kari ?? 0),
+        color: 'success',
+      },
+      {
+        key: 'adolfo-debt',
+        title: "Adolfo's Debt",
+        amount: formatDecimal(debtData.adolfo ?? 0),
+        color: 'info',
+      },
+    ];
+  }, [debtData]);
+
+  const savingsCards = useMemo<DashboardCardConfig[]>(() => {
+    if (!savingsData.length) {
+      return [];
+    }
+
+    return [
+      {
+        key: 'kari-savings',
+        title: "Kari's Savings",
+        amount: formatDecimal(savingsTotals.kari),
+        percentage: formatPercentage(savingsTotals.kariPercentage),
+        color: 'success',
+        currencySymbol: '€',
+      },
+      {
+        key: 'adolfo-savings',
+        title: "Adolfo's Savings",
+        amount: formatDecimal(savingsTotals.adolfo),
+        percentage: formatPercentage(savingsTotals.adolfoPercentage),
+        color: 'info',
+        currencySymbol: '€',
+      },
+      {
+        key: 'total-savings',
+        title: 'Total Savings',
+        amount: formatDecimal(savingsTotals.total),
+        percentage: formatPercentage(100),
+        color: 'primary',
+        currencySymbol: '€',
+      },
+    ];
+  }, [savingsTotals]);
+
+  const renderCardRow = (cards: DashboardCardConfig[], emptyMessage: string) => {
+    if (!cards.length) {
+      return (
+        <Typography color='text.secondary' textAlign='center'>
+          {emptyMessage}
+        </Typography>
+      );
+    }
+
+    return (
+      <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
+        {cards.map((card) => {
+          const editKey = card.editKey;
+
+          return (
+            <DisplayCard
+              key={card.key}
+              title={card.title}
+              amount={card.amount}
+              percentage={card.percentage}
+              color={card.color}
+              currencySymbol={card.currencySymbol ?? '$'}
+              editing={editKey ? editing === editKey : undefined}
+              onEdit={editKey ? () => handleEdit(editKey) : undefined}
+              onSave={editKey ? handleSave : undefined}
+              onCancel={editKey ? handleCancel : undefined}
+              onChange={editKey ? handleInputChange : undefined}
+              tempValue={editKey ? tempValue : undefined}
+            />
+          );
+        })}
+      </Stack>
+    );
+  };
 
   return (
     <Container maxWidth='md' sx={{ mt: 10, mb: 10 }}>
@@ -206,97 +295,16 @@ const Dashboard = () => {
             </Tooltip>
           </Stack>
           {/* Incomes */}
-          <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
-            <DisplayCard
-              title="Kari's Income"
-              amount={incomeData ? formatNumber(incomeData.kari_income) : '0,00'}
-              percentage={incomeData ? formatNumber(incomeData.kari_percentage) : '0,00'}
-              color='success'
-              editing={editing === 'kari'}
-              onEdit={() => {
-                setEditing('kari');
-                setTempValue(incomeData ? incomeData.kari_income.toString().replace('.', ',') : '');
-              }}
-              onSave={handleSave}
-              onCancel={handleCancel}
-              onChange={handleInputChange}
-              tempValue={tempValue}
-            />
-            <DisplayCard
-              title="Adolfo's Income"
-              amount={incomeData ? formatNumber(incomeData.adolfo_income) : '0,00'}
-              percentage={incomeData ? formatNumber(incomeData.adolfo_percentage) : '0,00'}
-              color='info'
-              editing={editing === 'adolfo'}
-              onEdit={() => {
-                setEditing('adolfo');
-                setTempValue(incomeData ? incomeData.adolfo_income.toString().replace('.', ',') : '');
-              }}
-              onSave={handleSave}
-              onCancel={handleCancel}
-              onChange={handleInputChange}
-              tempValue={tempValue}
-            />
-            <DisplayCard
-              title='Total Income'
-              amount={incomeData ? formatNumber(incomeData.total_income) : '0,00'}
-              percentage='100,00'
-              color='primary'
-            />
-          </Stack>
+          {renderCardRow(incomeCards, 'No income data available yet.')}
+
           {/* Expenses */}
-          <Stack sx={{ mt: 4 }} spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
-            <DisplayCard
-              title="Kari's Expenses"
-              amount={expensesData ? formatNumber(expensesData.kari) : '0,00'}
-              color='success'
-            />
-            <DisplayCard
-              title="Adolfo's Expenses"
-              amount={expensesData ? formatNumber(expensesData.adolfo) : '0,00'}
-              color='info'
-            />
-            <DisplayCard
-              title='Total Expenses'
-              amount={expensesData ? formatNumber(expensesData.total) : '0,00'}
-              color='primary'
-            />
-          </Stack>
+          <Box sx={{ mt: 4 }}>{renderCardRow(expenseCards, 'No expenses data available yet.')}</Box>
+
           {/* Debts */}
-          <Stack sx={{ mt: 4 }} spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
-            <DisplayCard title="Kari's Debt" amount={debtData ? formatNumber(debtData.kari) : '0,00'} color='success' />
-            <DisplayCard
-              title="Adolfo's Debt"
-              amount={debtData ? formatNumber(debtData.adolfo) : '0,00'}
-              color='info'
-            />
-          </Stack>
+          <Box sx={{ mt: 4 }}>{renderCardRow(debtCards, 'No debt data available yet.')}</Box>
+
           {/* Savings */}
-          {hasSavingsData && (
-            <Stack sx={{ mt: 4 }} spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent='center'>
-              <DisplayCard
-                title="Kari's Savings"
-                amount={formatNumber(savingsTotals.kari)}
-                percentage={formatNumber(savingsTotals.kariPercentage)}
-                color='success'
-                currencySymbol='€'
-              />
-              <DisplayCard
-                title="Adolfo's Savings"
-                amount={formatNumber(savingsTotals.adolfo)}
-                percentage={formatNumber(savingsTotals.adolfoPercentage)}
-                color='info'
-                currencySymbol='€'
-              />
-              <DisplayCard
-                title='Total Savings'
-                amount={formatNumber(savingsTotals.total)}
-                percentage={formatNumber(100)}
-                color='primary'
-                currencySymbol='€'
-              />
-            </Stack>
-          )}
+          <Box sx={{ mt: 4 }}>{renderCardRow(savingsCards, 'No savings data available yet.')}</Box>
         </>
       )}
     </Container>

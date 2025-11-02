@@ -5,56 +5,19 @@ import { useNotifications } from '../../context';
 import { useGetAllSavings } from '../../api/savings/savings';
 import { useGetCurrentExchangeRate } from '../../api/exchange-rate/exchange-rate';
 import DisplayCard from '../Dashboard/DisplayCard';
-import { Currencies, Saving, SavingType, SavingUser } from '../../interfaces';
+import { Currencies, SavingType, SavingUser } from '../../interfaces';
 import SavingsAccordion from './SavingsAccordion';
 import { SAVING_TYPE_LABELS, SAVING_USER_LABELS } from '../../constants/savings';
 import { buildRatesMap, convertToEuro, needsConversion } from '../../utils/currency';
+import { formatCurrency as formatCurrencyValue, formatDecimal, formatPercentage } from '../../utils/number';
+import { calculateSavingsSummary, getLatestSavingsGroup, groupSavingsByDate } from '../../utils/savings';
+import { formatDateWithFallback } from '../../utils/date';
 
 type AccountSummary = {
   type: SavingType;
   user: SavingUser;
   amount: number;
   currency: Currencies | null;
-};
-
-type SavingsGroup = {
-  dateKey: string;
-  timestamp: number;
-  savings: Saving[];
-};
-
-const parseDateKey = (createdAt: string): { key: string; timestamp: number } => {
-  const parsed = new Date(createdAt);
-
-  if (!Number.isNaN(parsed.getTime())) {
-    return {
-      key: parsed.toISOString().split('T')[0],
-      timestamp: parsed.getTime(),
-    };
-  }
-
-  return {
-    key: createdAt,
-    timestamp: 0,
-  };
-};
-
-const formatDateLabel = (value: string | null) => {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = new Date(value);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: '2-digit',
-  }).format(parsed);
 };
 
 const ADOLFO_ACCOUNT_ORDER: SavingType[] = [
@@ -80,45 +43,17 @@ const Savings = () => {
   const currencyRates = useMemo(() => buildRatesMap(exchangeRate), [exchangeRate]);
 
   const { latestSavings, latestDateKey, historicalGroups } = useMemo(() => {
-    if (!savings || savings.length === 0) {
-      return {
-        latestSavings: [] as Saving[],
-        latestDateKey: null as string | null,
-        historicalGroups: [] as SavingsGroup[],
-      };
-    }
-
-    const groups = new Map<string, SavingsGroup>();
-
-    for (const saving of savings) {
-      const createdAt = saving.created_at ?? '';
-      const { key, timestamp } = parseDateKey(createdAt);
-
-      const existing = groups.get(key);
-
-      if (existing) {
-        existing.savings.push(saving);
-        existing.timestamp = Math.max(existing.timestamp, timestamp);
-      } else {
-        groups.set(key, {
-          dateKey: key,
-          timestamp,
-          savings: [saving],
-        });
-      }
-    }
-
-    const sorted = Array.from(groups.values()).sort((a, b) => b.timestamp - a.timestamp);
-    const [latest, ...rest] = sorted;
+    const groups = groupSavingsByDate(savings ?? []);
+    const latestGroup = getLatestSavingsGroup(groups);
 
     return {
-      latestSavings: latest ? latest.savings : [],
-      latestDateKey: latest ? latest.dateKey : null,
-      historicalGroups: rest,
+      latestSavings: latestGroup ? latestGroup.savings : [],
+      latestDateKey: latestGroup ? latestGroup.dateKey : null,
+      historicalGroups: latestGroup ? groups.slice(1) : groups,
     };
   }, [savings]);
 
-  const latestDateLabel = useMemo(() => formatDateLabel(latestDateKey), [latestDateKey]);
+  const latestDateLabel = useMemo(() => formatDateWithFallback(latestDateKey), [latestDateKey]);
 
   const needsExchangeRate = useMemo(
     () => (savings ?? []).some((saving) => needsConversion(saving.currency)),
@@ -127,21 +62,13 @@ const Savings = () => {
 
   const isDataLoading = isLoading || (needsExchangeRate && isExchangeRateLoading);
 
-  const formatCurrency = useCallback((amount: number, currency: Currencies | null) => {
-    const normalized = currency ?? Currencies.EUR;
-    return new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: normalized,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount ?? 0);
-  }, []);
-
-  const formatEURAmount = useCallback(
-    (value: number) =>
-      new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value ?? 0),
+  const formatCurrency = useCallback(
+    (amount: number, currency: Currencies | null) =>
+      formatCurrencyValue(amount ?? 0, (currency ?? Currencies.EUR) as string),
     [],
   );
+
+  const formatEURAmount = useCallback((value: number) => formatDecimal(value ?? 0), []);
 
   const convertToEUR = useCallback(
     (amount: number, currency: Currencies | null) => convertToEuro(amount, currency, currencyRates),
@@ -194,38 +121,10 @@ const Savings = () => {
     };
   }, [latestSavings]);
 
-  const savingsTotals = useMemo(() => {
-    let kariTotal = 0;
-    let adolfoTotal = 0;
-
-    for (const saving of latestSavings) {
-      if (!saving.user) {
-        continue;
-      }
-
-      const eurAmount = convertToEUR(saving.amount ?? 0, saving.currency ?? Currencies.EUR);
-
-      if (saving.user === SavingUser.KARI) {
-        kariTotal += eurAmount;
-      }
-
-      if (saving.user === SavingUser.ADOLFO) {
-        adolfoTotal += eurAmount;
-      }
-    }
-
-    const total = kariTotal + adolfoTotal;
-
-    return {
-      kari: kariTotal,
-      adolfo: adolfoTotal,
-      total,
-      kariPercentage: total ? (kariTotal / total) * 100 : 0,
-      adolfoPercentage: total ? (adolfoTotal / total) * 100 : 0,
-    };
-  }, [convertToEUR, latestSavings]);
-
-  const formatPercentage = (value: number) => value.toFixed(2);
+  const savingsTotals = useMemo(
+    () => calculateSavingsSummary(latestSavings, currencyRates),
+    [latestSavings, currencyRates],
+  );
 
   useEffect(() => {
     if (error) {
@@ -323,7 +222,7 @@ const Savings = () => {
                 <DisplayCard
                   title='Total Savings'
                   amount={formatEURAmount(savingsTotals.total)}
-                  percentage='100.00'
+                  percentage={formatPercentage(100)}
                   color='primary'
                   currencySymbol='€'
                 />
@@ -340,10 +239,11 @@ const Savings = () => {
                 <SavingsAccordion
                   key={group.dateKey}
                   dateKey={group.dateKey}
-                  displayDate={formatDateLabel(group.dateKey) ?? group.dateKey}
+                  displayDate={formatDateWithFallback(group.dateKey, group.dateKey)}
                   savings={group.savings}
                   formatCurrency={formatCurrency}
                   convertToEUR={convertToEUR}
+                  currencyRates={currencyRates}
                 />
               ))}
             </Stack>

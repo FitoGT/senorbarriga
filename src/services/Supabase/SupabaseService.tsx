@@ -15,6 +15,7 @@ import {
   SavingType,
   Currencies,
 } from '../../interfaces';
+import { roundToDecimals } from '../../utils/number';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || '';
@@ -223,9 +224,9 @@ class SupabaseService {
       const kariTotal = percentageExpenses * (incomeData.kari_percentage / 100) + sharedExpenses / 2 + kariExpenses;
 
       return {
-        total: Number(totalExpenses.toFixed(2)),
-        adolfo: Number(adolfoTotal.toFixed(2)),
-        kari: Number(kariTotal.toFixed(2)),
+        total: roundToDecimals(totalExpenses),
+        adolfo: roundToDecimals(adolfoTotal),
+        kari: roundToDecimals(kariTotal),
       };
     } catch (error) {
       throw new Error(`Fetching total expenses failed: ${error}`);
@@ -273,7 +274,7 @@ class SupabaseService {
 
       const totalPaidByKari = paidByKariData.reduce((sum, expense) => sum + (expense.amount || 0), 0);
 
-      const kariBalance = Number((kariTotal - totalPaidByKari).toFixed(2));
+      const kariBalance = roundToDecimals(kariTotal - totalPaidByKari);
 
       return kariBalance;
     } catch (error) {
@@ -362,10 +363,10 @@ class SupabaseService {
       let kariTotal = Number(totals.kari || 0);
 
       if (adolfoTotal > kariTotal) {
-        adolfoTotal = Number((adolfoTotal - kariTotal).toFixed(2));
+        adolfoTotal = roundToDecimals(adolfoTotal - kariTotal);
         kariTotal = 0;
       } else if (kariTotal > adolfoTotal) {
-        kariTotal = Number((kariTotal - adolfoTotal).toFixed(2));
+        kariTotal = roundToDecimals(kariTotal - adolfoTotal);
         adolfoTotal = 0;
       } else {
         // equal or both zero

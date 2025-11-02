@@ -3,6 +3,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useMemo } from 'react';
 import { Currencies, Saving, SavingUser, SavingType } from '../../interfaces';
 import { SAVING_TYPE_LABELS, SAVING_USER_LABELS } from '../../constants/savings';
+import { formatCurrency as formatCurrencyValue } from '../../utils/number';
+import { calculateSavingsSummary } from '../../utils/savings';
+import { CurrencyRateMap } from '../../utils/currency';
+import { formatTimeWithFallback } from '../../utils/date';
 
 interface SavingsAccordionProps {
   dateKey: string;
@@ -10,43 +14,20 @@ interface SavingsAccordionProps {
   savings: Saving[];
   formatCurrency: (amount: number, currency: Currencies | null) => string;
   convertToEUR: (amount: number, currency: Currencies | null) => number;
+  currencyRates: CurrencyRateMap;
 }
 
-const formatEUR = (value: number): string =>
-  new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value ?? 0);
-
-const SavingsAccordion = ({ dateKey, displayDate, savings, formatCurrency, convertToEUR }: SavingsAccordionProps) => {
+const SavingsAccordion = ({
+  dateKey,
+  displayDate,
+  savings,
+  formatCurrency: formatCurrencyFn,
+  convertToEUR,
+  currencyRates,
+}: SavingsAccordionProps) => {
   const theme = useTheme();
 
-  const totals = useMemo(() => {
-    let kari = 0;
-    let adolfo = 0;
-
-    for (const saving of savings) {
-      const eurAmount = convertToEUR(saving.amount ?? 0, saving.currency ?? Currencies.EUR);
-
-      if (saving.user === SavingUser.KARI) {
-        kari += eurAmount;
-      }
-
-      if (saving.user === SavingUser.ADOLFO) {
-        adolfo += eurAmount;
-      }
-    }
-
-    const total = kari + adolfo;
-
-    return {
-      kari,
-      adolfo,
-      total,
-    };
-  }, [convertToEUR, savings]);
+  const totals = useMemo(() => calculateSavingsSummary(savings, currencyRates), [currencyRates, savings]);
 
   return (
     <Accordion
@@ -68,13 +49,13 @@ const SavingsAccordion = ({ dateKey, displayDate, savings, formatCurrency, conve
           </Typography>
           <Stack direction='row' spacing={2} justifyContent='flex-end'>
             <Typography variant='body2' color='text.secondary'>
-              Kari: {formatEUR(totals.kari)}
+              Kari: {formatCurrencyValue(totals.kari, Currencies.EUR)}
             </Typography>
             <Typography variant='body2' color='text.secondary'>
-              Adolfo: {formatEUR(totals.adolfo)}
+              Adolfo: {formatCurrencyValue(totals.adolfo, Currencies.EUR)}
             </Typography>
             <Typography variant='body2' color={theme.palette.primary.main} fontWeight='bold'>
-              Total: {formatEUR(totals.total)}
+              Total: {formatCurrencyValue(totals.total, Currencies.EUR)}
             </Typography>
           </Stack>
         </Stack>
@@ -87,10 +68,7 @@ const SavingsAccordion = ({ dateKey, displayDate, savings, formatCurrency, conve
             const label = [userLabel, typeLabel].filter(Boolean).join(' · ');
             const eurAmount = convertToEUR(saving.amount ?? 0, saving.currency ?? Currencies.EUR);
             const showConversion = (saving.currency ?? Currencies.EUR) !== Currencies.EUR;
-            const createdAtDate = new Date(saving.created_at);
-            const timeLabel = Number.isNaN(createdAtDate.getTime())
-              ? null
-              : createdAtDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timeLabel = formatTimeWithFallback(saving.created_at);
 
             return (
               <Stack
@@ -117,11 +95,11 @@ const SavingsAccordion = ({ dateKey, displayDate, savings, formatCurrency, conve
                 </Stack>
                 <Stack spacing={0.5} textAlign='right'>
                   <Typography variant='body1' color={theme.palette.primary.main} fontWeight='bold'>
-                    {formatCurrency(saving.amount ?? 0, saving.currency ?? Currencies.EUR)}
+                    {formatCurrencyFn(saving.amount ?? 0, saving.currency ?? Currencies.EUR)}
                   </Typography>
                   {showConversion && (
                     <Typography variant='caption' color='text.secondary'>
-                      {formatEUR(eurAmount)}
+                      {formatCurrencyValue(eurAmount, Currencies.EUR)}
                     </Typography>
                   )}
                 </Stack>

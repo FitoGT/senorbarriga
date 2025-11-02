@@ -1,5 +1,7 @@
-import { Accordion, AccordionSummary, AccordionDetails, Stack, Typography, useTheme } from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Stack, Typography, useTheme, IconButton } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useMemo } from 'react';
 import { Currencies, Saving, SavingUser, SavingType } from '../../interfaces';
 import { SAVING_TYPE_LABELS, SAVING_USER_LABELS } from '../../constants/savings';
@@ -15,6 +17,8 @@ interface SavingsAccordionProps {
   formatCurrency: (amount: number, currency: Currencies | null) => string;
   convertToEUR: (amount: number, currency: Currencies | null) => number;
   currencyRates: CurrencyRateMap;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 const SavingsAccordion = ({
@@ -24,10 +28,13 @@ const SavingsAccordion = ({
   formatCurrency: formatCurrencyFn,
   convertToEUR,
   currencyRates,
+  onEdit,
+  onDelete,
 }: SavingsAccordionProps) => {
   const theme = useTheme();
 
   const totals = useMemo(() => calculateSavingsSummary(savings, currencyRates), [currencyRates, savings]);
+  const hasActions = Boolean(onEdit || onDelete);
 
   return (
     <Accordion
@@ -43,10 +50,48 @@ const SavingsAccordion = ({
           color: theme.palette.text.primary,
         }}
       >
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} width='100%' justifyContent='space-between'>
-          <Typography variant='body1' fontWeight='bold'>
-            {displayDate}
-          </Typography>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
+          width='100%'
+          justifyContent='space-between'
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
+        >
+          <Stack direction='row' spacing={1} alignItems='center'>
+            <Typography variant='body1' fontWeight='bold'>
+              {displayDate}
+            </Typography>
+            {hasActions && (
+              <Stack direction='row' spacing={0.5} alignItems='center'>
+                {onEdit && (
+                  <IconButton
+                    size='small'
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onEdit();
+                    }}
+                    aria-label={`Edit savings snapshot from ${displayDate}`}
+                    sx={{ color: theme.palette.primary.main }}
+                  >
+                    <EditIcon fontSize='small' />
+                  </IconButton>
+                )}
+                {onDelete && (
+                  <IconButton
+                    size='small'
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDelete();
+                    }}
+                    aria-label={`Delete savings snapshot from ${displayDate}`}
+                    sx={{ color: theme.palette.error.main }}
+                  >
+                    <DeleteIcon fontSize='small' />
+                  </IconButton>
+                )}
+              </Stack>
+            )}
+          </Stack>
           <Stack direction='row' spacing={2} justifyContent='flex-end'>
             <Typography variant='body2' color='text.secondary'>
               Kari: {formatCurrencyValue(totals.kari, Currencies.EUR)}

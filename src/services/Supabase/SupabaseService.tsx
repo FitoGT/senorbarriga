@@ -14,6 +14,7 @@ import {
   SavingUser,
   SavingType,
   Currencies,
+  SavingInsert,
 } from '../../interfaces';
 import { roundToDecimals } from '../../utils/number';
 
@@ -25,6 +26,17 @@ class SupabaseService {
 
   constructor() {
     this.client = createClient(supabaseUrl, supabaseKey);
+  }
+
+  private getDateRange(date: string): { start: string; end: string } {
+    const start = new Date(`${date}T00:00:00Z`);
+    const end = new Date(start.getTime());
+    end.setUTCDate(end.getUTCDate() + 1);
+
+    return {
+      start: start.toISOString(),
+      end: end.toISOString(),
+    };
   }
 
   getClient(): SupabaseClient {
@@ -428,6 +440,36 @@ class SupabaseService {
       });
     } catch (error) {
       throw new Error(`Fetching all savings failed: ${error}`);
+    }
+  }
+
+  async insertSavingsBatch(savings: SavingInsert[]): Promise<void> {
+    try {
+      if (!savings.length) {
+        throw new Error('Savings payload must include at least one entry.');
+      }
+
+      await this.client.from('savings').insert(savings);
+    } catch (error) {
+      throw new Error(`Inserting savings failed: ${error}`);
+    }
+  }
+
+  async deleteSavingsByDate(date: string): Promise<void> {
+    try {
+      const { start, end } = this.getDateRange(date);
+      await this.client.from('savings').delete().gte('created_at', start).lt('created_at', end);
+    } catch (error) {
+      throw new Error(`Deleting savings snapshot failed: ${error}`);
+    }
+  }
+
+  async replaceSavingsGroup(originalDate: string, savings: SavingInsert[]): Promise<void> {
+    try {
+      await this.deleteSavingsByDate(originalDate);
+      await this.insertSavingsBatch(savings);
+    } catch (error) {
+      throw new Error(`Updating savings snapshot failed: ${error}`);
     }
   }
 }

@@ -1,17 +1,33 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import { Container, Stack, Typography, Card, CardContent, useTheme, useMediaQuery } from '@mui/material';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Container,
+  Stack,
+  Typography,
+  Card,
+  CardContent,
+  useTheme,
+  useMediaQuery,
+  IconButton,
+  Box,
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import FullLoader from '../Loader/FullLoader';
 import { useNotifications } from '../../context';
-import { useGetAllSavings } from '../../api/savings/savings';
+import { useDeleteSavingsGroupMutation, useGetAllSavings } from '../../api/savings/savings';
 import { useGetCurrentExchangeRate } from '../../api/exchange-rate/exchange-rate';
 import DisplayCard from '../Dashboard/DisplayCard';
 import { Currencies, SavingType, SavingUser } from '../../interfaces';
 import SavingsAccordion from './SavingsAccordion';
+import SavingsDeleteDialog from './SavingsDeleteDialog';
 import { SAVING_TYPE_LABELS, SAVING_USER_LABELS } from '../../constants/savings';
 import { buildRatesMap, convertToEuro, needsConversion } from '../../utils/currency';
 import { formatCurrency as formatCurrencyValue, formatDecimal, formatPercentage } from '../../utils/number';
 import { calculateSavingsSummary, getLatestSavingsGroup, groupSavingsByDate } from '../../utils/savings';
 import { formatDateWithFallback } from '../../utils/date';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
 
 type AccountSummary = {
   type: SavingType;
@@ -31,7 +47,9 @@ const KARI_ACCOUNT_ORDER: SavingType[] = [SavingType.CASH, SavingType.SABADELL, 
 
 const Savings = () => {
   const { showNotification } = useNotifications();
+  const navigate = useNavigate();
   const { data: savings, isLoading, error } = useGetAllSavings();
+  const { mutate: deleteSavingsGroup, isPending: isDeleting } = useDeleteSavingsGroupMutation();
   const {
     data: exchangeRate,
     isLoading: isExchangeRateLoading,
@@ -39,6 +57,7 @@ const Savings = () => {
   } = useGetCurrentExchangeRate();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const [deleteTarget, setDeleteTarget] = useState<{ dateKey: string; label: string } | null>(null);
 
   const currencyRates = useMemo(() => buildRatesMap(exchangeRate), [exchangeRate]);
 
@@ -74,6 +93,42 @@ const Savings = () => {
     (amount: number, currency: Currencies | null) => convertToEuro(amount, currency, currencyRates),
     [currencyRates],
   );
+
+  const handleAddSavings = useCallback(() => {
+    navigate(ROUTES.SAVINGS_ENTRY);
+  }, [navigate]);
+
+  const handleEditSavings = useCallback(
+    (dateKey: string) => {
+      navigate(`${ROUTES.SAVINGS_EDIT}${encodeURIComponent(dateKey)}`);
+    },
+    [navigate],
+  );
+
+  const handleDeletePrompt = useCallback((dateKey: string) => {
+    const label = formatDateWithFallback(dateKey, dateKey);
+    setDeleteTarget({ dateKey, label });
+  }, []);
+
+  const handleCloseDelete = useCallback(() => {
+    setDeleteTarget(null);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    deleteSavingsGroup(deleteTarget.dateKey, {
+      onSuccess: () => {
+        setDeleteTarget(null);
+      },
+      onError: (deleteError) => {
+        const message = deleteError instanceof Error ? deleteError.message : String(deleteError);
+        showNotification(`Error deleting savings: ${message}`, 'error');
+      },
+    });
+  }, [deleteSavingsGroup, deleteTarget, showNotification]);
 
   const groupedAccounts = useMemo(() => {
     const seed = {
@@ -181,9 +236,34 @@ const Savings = () => {
       ) : (
         <Stack spacing={4} sx={{ mt: 4 }}>
           <Stack spacing={0.5}>
-            <Typography variant='h5' fontWeight='bold' color='text.primary'>
-              Savings
-            </Typography>
+            <Box display='flex' alignItems='center' justifyContent='space-between'>
+              <Typography variant='h5' fontWeight='bold' color='text.primary'>
+                Savings
+              </Typography>
+              <Stack direction='row' spacing={1} alignItems='center'>
+                {latestDateLabel && latestDateKey && (
+                  <>
+                    <IconButton
+                      color='primary'
+                      onClick={() => handleEditSavings(latestDateKey)}
+                      aria-label='Edit latest savings snapshot'
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      color='error'
+                      onClick={() => handleDeletePrompt(latestDateKey)}
+                      aria-label='Delete latest savings snapshot'
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </>
+                )}
+                <IconButton color='primary' onClick={handleAddSavings} aria-label='Add savings snapshot'>
+                  <AddIcon />
+                </IconButton>
+              </Stack>
+            </Box>
             {latestDateLabel && (
               <Typography variant='body2' color='text.secondary'>
                 Last updated: {latestDateLabel}
@@ -244,12 +324,21 @@ const Savings = () => {
                   formatCurrency={formatCurrency}
                   convertToEUR={convertToEUR}
                   currencyRates={currencyRates}
+                  onEdit={() => handleEditSavings(group.dateKey)}
+                  onDelete={() => handleDeletePrompt(group.dateKey)}
                 />
               ))}
             </Stack>
           )}
         </Stack>
       )}
+      <SavingsDeleteDialog
+        open={Boolean(deleteTarget)}
+        dateLabel={deleteTarget?.label ?? ''}
+        loading={isDeleting}
+        onClose={handleCloseDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </Container>
   );
 };

@@ -22,3 +22,11 @@ export interface Saving {
   amount: number;
   currency: Currencies;
 }
+
+export interface SavingInsert {
+  created_at: string;
+  user: SavingUser;
+  type: SavingType;
+  amount: number;
+  currency: Currencies;
+}

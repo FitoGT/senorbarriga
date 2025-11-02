@@ -1,0 +1,83 @@
+id,created_at,date,description,category,amount,type,isPaidByKari,is_default
+413,2025-11-02T08:30:17.283843+00:00,2025-10-31,mercado tego,supermarket,6.93,percentage,false,false
+412,2025-11-02T08:29:53.711005+00:00,2025-10-31,chocolates,supermarket,28.88,percentage,false,false
+409,2025-10-30T15:02:24.220079+00:00,2025-10-30,Rewe,supermarket,44.96,percentage,false,false
+411,2025-10-30T17:52:17.401245+00:00,2025-10-29,Cafe,supermarket,48.2,percentage,false,false
+410,2025-10-30T15:03:27.098273+00:00,2025-10-28,Rewe,supermarket,73.83,percentage,false,false
+408,2025-10-27T19:19:51.223796+00:00,2025-10-27,"Mate y filtro ",purchases,35.68,shared,false,false
+407,2025-10-26T12:53:12.556649+00:00,2025-10-26,Bomba,food,16.67,percentage,false,false
+406,2025-10-25T14:00:30.707071+00:00,2025-10-25,"Schnitzel ",food,81.28,shared,false,false
+404,2025-10-25T13:09:54.463209+00:00,2025-10-25,"Douglas ",pharmacy,20.31,percentage,false,false
+402,2025-10-25T10:27:43.054675+00:00,2025-10-25,Dm,pharmacy,17.07,percentage,false,false
+405,2025-10-25T14:00:14.496353+00:00,2025-10-24,Rewe,supermarket,74.42,percentage,false,false
+403,2025-10-25T12:09:16.255572+00:00,2025-10-24,"Rewe gretränkt ",supermarket,2.78,percentage,false,false
+399,2025-10-22T18:28:06.28281+00:00,2025-10-22,Dm,pharmacy,21.49,percentage,false,false
+398,2025-10-22T18:13:52.111795+00:00,2025-10-22,Lidl queso y cerdo,supermarket,12.03,percentage,false,false
+401,2025-10-22T18:31:42.090511+00:00,2025-10-20,Rewe,supermarket,54.44,percentage,false,false
+400,2025-10-22T18:30:57.581934+00:00,2025-10-20,Rewe gretränkt,supermarket,4.89,percentage,false,false
+397,2025-10-20T11:34:13.646979+00:00,2025-10-20,Shawarma,food,29.2,shared,false,false
+396,2025-10-19T12:43:25.949167+00:00,2025-10-19,Cinnamood,food,17.05,shared,false,false
+395,2025-10-19T10:58:22.726334+00:00,2025-10-19,Salchichas,food,30.95,shared,false,false
+394,2025-10-19T10:31:02.582848+00:00,2025-10-19,Wisky,purchases,36.21,shared,false,false
+393,2025-10-19T10:20:36.801804+00:00,2025-10-19,Currywurst,food,12.27,shared,false,false
+392,2025-10-19T10:13:30.254003+00:00,2025-10-19,"Queso ",food,98.95,percentage,false,false
+391,2025-10-19T10:02:42.905993+00:00,2025-10-19,Queso trufa,supermarket,11.1,percentage,false,false
+382,2025-10-18T15:32:58.891108+00:00,2025-10-18,SAM,food,88.74,shared,false,false
+379,2025-10-18T15:31:02.853438+00:00,2025-10-18,REWE,supermarket,63.41,percentage,false,false
+381,2025-10-18T15:32:41.012166+00:00,2025-10-16,REWE getrenk,supermarket,5.95,percentage,false,false
+380,2025-10-18T15:32:12.874628+00:00,2025-10-16,REWE,supermarket,45.31,percentage,false,false
+378,2025-10-18T15:30:36.650497+00:00,2025-10-15,Haribo gomitas,food,2.76,shared,false,false
+377,2025-10-18T15:29:52.702546+00:00,2025-10-15,cafes,food,9.4,shared,false,false
+376,2025-10-18T15:29:18.123905+00:00,2025-10-15,zapatos maribel,purchases,40.68,kari,false,false
+375,2025-10-18T15:27:53.25065+00:00,2025-10-14,REWE,supermarket,2.65,percentage,false,false
+374,2025-10-18T15:27:31.743694+00:00,2025-10-14,bäckerei,food,8.49,shared,false,false
+373,2025-10-18T15:27:05.902499+00:00,2025-10-14,dm,pharmacy,15.18,percentage,false,false
+372,2025-10-18T15:26:00.188481+00:00,2025-10-14,REWE,supermarket,44,percentage,false,false
+384,2025-10-18T15:34:57.834658+00:00,2025-10-13,riechard,food,5.92,shared,true,false
+371,2025-10-18T15:24:33.546672+00:00,2025-10-13,rewe aeropuerto,food,6.77,shared,false,false
+370,2025-10-18T15:23:31.835938+00:00,2025-10-13,bomba,food,9.31,shared,false,false
+369,2025-10-18T15:22:56.16302+00:00,2025-10-13,cinamood,food,10.93,shared,false,false
+368,2025-10-18T15:22:22.900537+00:00,2025-10-13,dm,pharmacy,11.81,percentage,false,false
+367,2025-10-18T15:21:33.417799+00:00,2025-10-13,chocolates altanura,supermarket,12.76,percentage,false,false
+366,2025-10-18T15:20:41.380559+00:00,2025-10-13,control de amazon,purchases,17.83,shared,false,false
+364,2025-10-18T15:15:13.896949+00:00,2025-10-13,Subway,food,18.91,shared,false,false
+363,2025-10-18T15:14:47.841611+00:00,2025-10-13,Primark,purchases,26.17,kari,false,false
+362,2025-10-18T15:13:58.126639+00:00,2025-10-13,anyong,food,41.18,shared,false,false
+361,2025-10-18T15:13:31.248473+00:00,2025-10-13,FIVE GUYS,food,49.96,shared,false,false
+360,2025-10-18T15:11:36.864809+00:00,2025-10-13,repuesto purru,purchases,55.55,shared,false,false
+359,2025-10-18T15:10:47.640479+00:00,2025-10-13,REWE,supermarket,59.65,percentage,false,false
+357,2025-10-11T18:08:51.060218+00:00,2025-10-11,zwiebeln,supermarket,3.79,percentage,false,false
+356,2025-10-11T18:08:23.831666+00:00,2025-10-11,cinna,food,10.93,shared,false,false
+355,2025-10-11T18:08:05.119084+00:00,2025-10-11,alnatura,supermarket,12.76,percentage,false,false
+354,2025-10-11T18:07:38.631253+00:00,2025-10-11,dm,pharmacy,11.81,percentage,false,false
+353,2025-10-11T18:07:13.242525+00:00,2025-10-11,REWE,supermarket,58.03,percentage,false,false
+352,2025-10-11T18:06:45.480084+00:00,2025-10-11,helado bomba,food,9.31,percentage,false,false
+351,2025-10-11T18:06:26.824205+00:00,2025-10-11,waldheim,food,18.29,shared,false,false
+350,2025-10-11T18:05:53.776566+00:00,2025-10-11,REWE,supermarket,7.21,percentage,false,false
+349,2025-10-11T18:05:21.855113+00:00,2025-10-11,Rasmalai,food,57.08,shared,false,false
+348,2025-10-11T18:04:31.325431+00:00,2025-10-11,miel,supermarket,4.44,percentage,false,false
+347,2025-10-11T18:02:47.110695+00:00,2025-10-11,el closet,rent,14.99,shared,false,false
+346,2025-10-11T18:01:50.81189+00:00,2025-10-11,wimmer,food,7.17,shared,false,false
+345,2025-10-11T18:01:29.836968+00:00,2025-10-11,bomba,food,8.21,shared,false,false
+344,2025-10-11T18:01:09.792113+00:00,2025-10-11,bomba,food,10.91,shared,false,false
+343,2025-10-11T18:00:41.259106+00:00,2025-10-11,zoetl,food,11.94,shared,false,false
+342,2025-10-11T18:00:25.426813+00:00,2025-10-11,ganchos,other,15.63,percentage,false,false
+341,2025-10-11T17:59:29.231266+00:00,2025-10-11,lieferando,food,24.9,shared,false,false
+340,2025-10-11T17:59:07.957563+00:00,2025-10-11,ganchos,other,28.85,percentage,false,false
+339,2025-10-11T17:58:35.320717+00:00,2025-10-11,bbking,food,31.38,shared,false,false
+338,2025-10-11T17:58:10.138709+00:00,2025-10-11,"comida albondiga ",pet,31.74,percentage,false,false
+337,2025-10-11T17:56:35.444191+00:00,2025-10-11,libros a1 b1,other,34.21,shared,false,false
+336,2025-10-11T17:55:47.425287+00:00,2025-10-11,shan india,food,53.85,shared,false,false
+335,2025-10-11T17:55:25.436912+00:00,2025-10-11,mama bao,food,45.8,shared,false,false
+334,2025-10-11T17:54:19.418331+00:00,2025-10-11,REWE,supermarket,93.7,percentage,false,false
+333,2025-10-11T17:53:48.189045+00:00,2025-10-11,openai,subscriptions,27.09,percentage,false,false
+332,2025-10-11T17:53:25.446357+00:00,2025-10-11,bomba,food,7.63,shared,false,false
+383,2025-10-18T15:33:55.182852+00:00,2025-10-04,go asia,supermarket,10.25,percentage,true,false
+385,2025-10-18T15:36:46.504305+00:00,2025-10-01,CHATGPT,subscriptions,27.09,percentage,false,false
+143,2025-06-02T17:23:52.439865+00:00,2025-10-01,"seguro medico ",health insurance,426.25,shared,false,true
+98,2025-05-07T12:01:57.792376+00:00,2025-10-01,spotify premium,subscriptions,17.39,percentage,true,true
+97,2025-05-07T12:01:07.90614+00:00,2025-10-01,amazon prime,subscriptions,11.99,percentage,false,true
+96,2025-05-07T12:00:07.392192+00:00,2025-10-01,crunchyroll,subscriptions,5.19,percentage,false,true
+95,2025-05-07T11:59:44.977728+00:00,2025-10-01,youtube premium,subscriptions,15.22,percentage,false,true
+94,2025-05-07T11:59:17.697714+00:00,2025-10-01,o2,subscriptions,49.96,shared,false,true
+87,2025-05-01T14:36:53.916578+00:00,2025-10-01,Alquiler,rent,2121.15,percentage,true,true

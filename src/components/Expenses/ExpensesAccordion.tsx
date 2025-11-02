@@ -23,6 +23,7 @@ import ExpensesDeleteModal from './ExpensesDeleteModal';
 import { useState } from 'react';
 import { useDeleteExpenseMutation } from '../../api/expenses/expenses';
 import { formatDate } from '../../utils/date';
+import type { DialogProps } from '@mui/material/Dialog';
 
 interface ExpensesAccordionProps {
   expense: Expense;
@@ -52,7 +53,11 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
     }
   };
 
-  const handleClose = () => setOpen(false);
+  const handleClose: NonNullable<DialogProps['onClose']> = (event, reason) => {
+    void event;
+    void reason;
+    setOpen(false);
+  };
 
   const handleEdit = (expenseId: number) => {
     navigate(`${ROUTES.EXPENSES}${expenseId}`);

@@ -8,19 +8,18 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
+type TransitionChild = React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>>;
+
+const Transition = React.forwardRef<HTMLDivElement, TransitionProps & { children: TransitionChild }>(
+  function Transition(props, ref) {
+    return <Slide direction='up' ref={ref} {...props} />;
   },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction='up' ref={ref} {...props} />;
-});
+);
 
 interface ExpensesDeleteModalProps {
   open: boolean;
   expenseId: number;
-  handleClose: (event: NonNullable<unknown>, reason: 'backdropClick' | 'escapeKeyDown') => void;
+  handleClose: NonNullable<React.ComponentProps<typeof Dialog>['onClose']>;
   handleDelete: (expenseId: number) => void;
 }
 

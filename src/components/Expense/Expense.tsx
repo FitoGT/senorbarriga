@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -61,6 +62,7 @@ const formSchema = z.object({
   category: z.nativeEnum(ExpenseCategory, { errorMap: () => ({ message: 'Category is required' }) }),
   type: z.nativeEnum(ExpenseType, { errorMap: () => ({ message: 'Type is required' }) }),
   isPaidByKari: z.boolean(),
+  is_default: z.boolean(),
 });
 
 type ExpenseFormData = z.infer<typeof formSchema>;
@@ -99,6 +101,7 @@ const Expense = () => {
       type: ExpenseType.PERCENTAGE,
       usdAmount: '',
       eurAmount: '',
+      is_default: false,
     },
   });
 
@@ -154,6 +157,7 @@ const Expense = () => {
         category: expense.category,
         type: expense.type,
         isPaidByKari: expense.isPaidByKari,
+        is_default: expense.is_default,
       });
     }
   }, [expense, usdPerEur, currencyRates, reset]);
@@ -189,6 +193,7 @@ const Expense = () => {
               amount: usd,
               type: data.type,
               isPaidByKari: data.isPaidByKari,
+              is_default: data.is_default,
             },
           };
           updateExpense(updateObj);
@@ -200,8 +205,7 @@ const Expense = () => {
             amount: usd,
             type: data.type,
             isPaidByKari: data.isPaidByKari,
-            // eslint-disable-next-line camelcase
-            is_default: false,
+            is_default: data.is_default,
           });
         }
         reset();
@@ -377,6 +381,17 @@ const Expense = () => {
                   />
                 }
                 label='Paid by Kari'
+              />
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    {...register('is_default')}
+                    checked={watch('is_default')}
+                    onChange={(e) => setValue('is_default', e.target.checked)}
+                  />
+                }
+                label='Is Recurrent?'
               />
 
               <Box mt={3} display='flex' gap={2}>

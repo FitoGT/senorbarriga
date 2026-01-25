@@ -16,6 +16,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PaymentIcon from '@mui/icons-material/Payment';
 import CalculateIcon from '@mui/icons-material/Calculate';
+import EventRepeatIcon from '@mui/icons-material/EventRepeat';
 import { Expense } from '../../interfaces/Expenses';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
@@ -129,6 +130,16 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
               variant='outlined'
               sx={{ color: theme.palette.text.primary }}
             />
+            {expense.is_default && (
+              <Chip
+                icon={<EventRepeatIcon />}
+                label="Recurrent"
+                color='info'
+                variant='outlined'
+                sx={{ color: theme.palette.text.primary }}
+              />
+            )}
+
           </Stack>
           <Stack direction='row' spacing={1}>
             <IconButton color='primary' onClick={() => handleEdit(expense.id)} aria-label='edit' size='small'>

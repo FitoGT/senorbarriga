@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -34,7 +34,7 @@ import { useGetCurrentExchangeRate } from '../../api/exchange-rate/exchange-rate
 import { buildRatesMap, convertFromEuro, convertToEuro } from '../../utils/currency';
 import { normalizeDecimalInput, parseDecimal, toFixedString } from '../../utils/number';
 import { DATE_DISPLAY_FORMAT, formatDate, isValidDateString, parseForDateInput, today } from '../../utils/date';
-
+import { CategoryTypeMap } from '../../interfaces/CategoryTypeMap';
 const formSchema = z.object({
   date: z
     .string()
@@ -107,6 +107,12 @@ const Expense = () => {
 
   const currencyRates = useMemo(() => buildRatesMap(exchangeData), [exchangeData]);
   const usdPerEur = currencyRates[Currencies.USD];
+  const selectedCategory = useWatch({ control, name: 'category' });
+
+  const normalizeCategoryKey = (c: unknown) =>
+    String(c ?? '')
+      .trim()
+      .toLowerCase();
 
   const handleUsdChange = (raw: string) => {
     const cleaned = normalizeDecimalInput(raw);
@@ -144,23 +150,6 @@ const Expense = () => {
     const num = parseDecimal(val);
     if (num !== null) setValue('eurAmount', toFixedString(num), { shouldDirty: true, shouldValidate: true });
   };
-
-  useEffect(() => {
-    if (expense) {
-      const usd = expense.amount ?? 0;
-      const eur = usdPerEur ? convertToEuro(usd, Currencies.USD, currencyRates) : null;
-      reset({
-        date: formatDate(expense.date) || '',
-        description: expense.description,
-        usdAmount: toFixedString(usd),
-        eurAmount: eur === null ? '' : toFixedString(eur),
-        category: expense.category,
-        type: expense.type,
-        isPaidByKari: expense.isPaidByKari,
-        is_default: expense.is_default,
-      });
-    }
-  }, [expense, usdPerEur, currencyRates, reset]);
 
   const onSubmit = useCallback(
     async (data: ExpenseFormData) => {
@@ -225,6 +214,37 @@ const Expense = () => {
     reset();
     navigate(ROUTES.EXPENSES);
   };
+
+  useEffect(() => {
+    if (expense) {
+      const usd = expense.amount ?? 0;
+      const eur = usdPerEur ? convertToEuro(usd, Currencies.USD, currencyRates) : null;
+      reset({
+        date: formatDate(expense.date) || '',
+        description: expense.description,
+        usdAmount: toFixedString(usd),
+        eurAmount: eur === null ? '' : toFixedString(eur),
+        category: expense.category,
+        type: expense.type,
+        isPaidByKari: expense.isPaidByKari,
+        is_default: expense.is_default,
+      });
+    }
+  }, [expense, usdPerEur, currencyRates, reset]);
+
+  useEffect(() => {
+    if (!selectedCategory) return;
+
+    const key = normalizeCategoryKey(selectedCategory);
+    const mappedType = CategoryTypeMap[key as keyof typeof CategoryTypeMap];
+
+    if (!mappedType) return;
+
+    // Evita loops y updates innecesarios
+    if (getValues('type') !== mappedType) {
+      setValue('type', mappedType, { shouldDirty: true, shouldValidate: true });
+    }
+  }, [selectedCategory, getValues, setValue]);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>

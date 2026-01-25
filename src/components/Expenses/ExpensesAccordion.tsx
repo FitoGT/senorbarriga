@@ -133,13 +133,12 @@ const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNu
             {expense.is_default && (
               <Chip
                 icon={<EventRepeatIcon />}
-                label="Recurrent"
+                label='Recurrent'
                 color='info'
                 variant='outlined'
                 sx={{ color: theme.palette.text.primary }}
               />
             )}
-
           </Stack>
           <Stack direction='row' spacing={1}>
             <IconButton color='primary' onClick={() => handleEdit(expense.id)} aria-label='edit' size='small'>

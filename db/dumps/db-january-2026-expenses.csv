@@ -1,0 +1,51 @@
+id,created_at,date,description,category,amount,type,isPaidByKari,is_default
+516,2026-01-25T15:03:59.040478+00:00,2026-01-25,dm,pharmacy,2.88,percentage,false,false
+515,2026-01-25T15:03:45.301682+00:00,2026-01-25,la condesa,food,58.41,shared,false,false
+514,2026-01-25T15:03:22.23108+00:00,2026-01-25,go asia,food,20.56,shared,false,false
+513,2026-01-25T15:03:06.370083+00:00,2026-01-25,lindt,food,29.27,percentage,false,false
+512,2026-01-25T15:02:53.545615+00:00,2026-01-25,krapfen,food,12.84,shared,false,false
+511,2026-01-25T15:02:36.115315+00:00,2026-01-25,repuesto miele,food,30.16,percentage,false,false
+510,2026-01-25T15:01:57.417366+00:00,2026-01-25,krapfen,food,6.12,shared,false,false
+509,2026-01-25T15:01:42.884975+00:00,2026-01-25,burger king,food,50.37,shared,false,false
+508,2026-01-23T19:11:36.808727+00:00,2026-01-23,Rewe,supermarket,127.72,percentage,false,false
+507,2026-01-23T19:11:22.066055+00:00,2026-01-23,Rewe getränk,supermarket,13.98,percentage,false,false
+506,2026-01-23T16:21:35.86599+00:00,2026-01-23,"Cacao y helado ",supermarket,7.41,percentage,true,false
+505,2026-01-23T16:20:49.327139+00:00,2026-01-23,Dm,pharmacy,10.9,percentage,true,false
+504,2026-01-23T16:19:52.211252+00:00,2026-01-23,Pasta arabe,supermarket,1.4,percentage,true,false
+497,2026-01-16T14:43:25.459475+00:00,2026-01-16,REWE getrenk,supermarket,8.8,percentage,false,false
+496,2026-01-16T14:43:03.443407+00:00,2026-01-16,rewe,supermarket,76.17,percentage,false,false
+495,2026-01-16T14:42:40.74941+00:00,2026-01-16,pizzas con vodka de mierda,supermarket,34.92,percentage,false,false
+494,2026-01-16T14:41:54.304327+00:00,2026-01-16,comida albondiga,pet,12.91,percentage,false,false
+493,2026-01-16T14:41:10.490251+00:00,2026-01-16,harpie spray duster,purchases,5.94,shared,false,false
+492,2026-01-16T14:40:20.988893+00:00,2026-01-16,afilador de cuchillo,purchases,22.66,shared,false,false
+491,2026-01-16T14:40:00.326287+00:00,2026-01-16,illy cafe,supermarket,20.9,percentage,false,false
+490,2026-01-16T14:39:39.582547+00:00,2026-01-16,starbucks,supermarket,66.5,percentage,false,false
+498,2026-01-16T14:44:30.239008+00:00,2026-01-15,Subway,food,38.45,shared,false,false
+489,2026-01-15T07:38:10.134683+00:00,2026-01-15,Rewe,supermarket,155.07,percentage,false,false
+488,2026-01-15T07:36:59.379503+00:00,2026-01-15,"Regalo Maribel ",food,22.71,shared,false,false
+487,2026-01-15T07:36:20.898669+00:00,2026-01-15,Tapa boca,purchases,8.14,shared,false,false
+499,2026-01-16T14:45:01.044814+00:00,2026-01-14,krapfen,food,9.28,shared,false,false
+500,2026-01-16T14:45:34.788443+00:00,2026-01-12,subway,food,22.89,shared,false,false
+503,2026-01-16T14:47:17.379657+00:00,2026-01-10,zoetl,food,10.44,shared,false,false
+502,2026-01-16T14:46:57.220728+00:00,2026-01-10,dm,pharmacy,10.44,percentage,false,false
+501,2026-01-16T14:46:34.94203+00:00,2026-01-10,le burger,food,92.25,shared,false,false
+483,2026-01-08T09:43:43.711222+00:00,2026-01-08,taladro,food,25.91,percentage,false,false
+482,2026-01-08T09:42:11.690566+00:00,2026-01-08,REWE,supermarket,28.5,percentage,false,false
+481,2026-01-08T09:41:17.414498+00:00,2026-01-08,arena y cafe,pet,26.24,percentage,false,false
+480,2026-01-05T11:19:40.877274+00:00,2026-01-05,ali express,purchases,35.53,percentage,false,false
+479,2026-01-05T11:19:13.602335+00:00,2026-01-05,rewe,supermarket,12.3,percentage,false,false
+478,2026-01-05T11:18:54.982521+00:00,2026-01-05,apotheke,pharmacy,16.04,percentage,false,false
+476,2026-01-05T11:17:52.178218+00:00,2026-01-05,dm,pharmacy,17.3,percentage,false,false
+475,2026-01-05T11:17:29.525741+00:00,2026-01-05,asia shop,supermarket,36.26,percentage,false,false
+474,2026-01-05T11:17:04.663876+00:00,2026-01-05,lezizel,food,62.13,shared,false,false
+485,2026-01-09T13:02:05.26336+00:00,2026-01-03,Rossman,pharmacy,14.19,percentage,true,false
+484,2026-01-09T13:01:25.2269+00:00,2026-01-03,Rewe,supermarket,61.59,percentage,true,false
+486,2026-01-09T13:02:44.109663+00:00,2026-01-01,Disney,subscriptions,12.91,percentage,true,true
+477,2026-01-05T11:18:38.771803+00:00,2026-01-01,CHATGPT,subscriptions,27.07,percentage,false,true
+143,2025-06-02T17:23:52.439865+00:00,2026-01-01,"seguro medico ",health insurance,426.25,shared,false,true
+98,2025-05-07T12:01:57.792376+00:00,2026-01-01,Spotify,subscriptions,21.06,percentage,true,true
+97,2025-05-07T12:01:07.90614+00:00,2026-01-01,amazon prime,subscriptions,11.99,percentage,false,true
+96,2025-05-07T12:00:07.392192+00:00,2026-01-01,crunchyroll,subscriptions,5.19,percentage,false,true
+95,2025-05-07T11:59:44.977728+00:00,2026-01-01,Youtube,subscriptions,15.22,percentage,false,true
+94,2025-05-07T11:59:17.697714+00:00,2026-01-01,O2,cellphone,49.96,shared,false,true
+87,2025-05-01T14:36:53.916578+00:00,2026-01-01,Alquiler,rent,2121.15,percentage,true,true

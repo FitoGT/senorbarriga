@@ -1,0 +1,73 @@
+id,created_at,date,description,category,amount,type,isPaidByKari,is_default
+678,2026-05-02T12:02:57.818172+00:00,2026-05-31,clases aleman,other,342.33,shared,false,false
+731,2026-05-31T12:08:07.291935+00:00,2026-05-30,Uniqlo Kari,purchases,124.59,kari,false,false
+730,2026-05-31T12:07:01.281458+00:00,2026-05-30,Kebap,food,16.95,percentage,false,false
+729,2026-05-31T12:06:46.249217+00:00,2026-05-30,"Billar ",other,32.6,shared,false,false
+728,2026-05-31T12:06:27.169544+00:00,2026-05-30,"Helados ",food,9.39,percentage,false,false
+727,2026-05-31T12:05:40.539031+00:00,2026-05-30,"Hamburguesas ",food,34.95,percentage,false,false
+726,2026-05-31T12:05:27.131783+00:00,2026-05-30,"Flying tiger ",purchases,13,shared,false,false
+725,2026-05-31T12:04:47.015812+00:00,2026-05-30,Rewe,supermarket,87,percentage,false,false
+724,2026-05-31T12:04:33.727112+00:00,2026-05-28,"Rewe ",supermarket,2.66,percentage,false,false
+723,2026-05-31T12:04:12.810111+00:00,2026-05-28,"Rewe getrenkt ",food,8.61,shared,false,false
+722,2026-05-31T12:03:50.235402+00:00,2026-05-28,Protector solar,pharmacy,28.28,percentage,false,false
+721,2026-05-31T12:03:35.019194+00:00,2026-05-27,Rewe,supermarket,7.2,percentage,false,false
+720,2026-05-31T12:03:22.480791+00:00,2026-05-27,"Pollo asado ",food,15.14,percentage,false,false
+732,2026-05-31T12:12:07.335336+00:00,2026-05-26,The Apothecary diaries 6,other,8.72,kari,false,false
+719,2026-05-31T12:02:56.092339+00:00,2026-05-26,Bomba,supermarket,19.75,percentage,false,false
+718,2026-05-31T12:02:41.978455+00:00,2026-05-25,"Helados ",food,12.28,percentage,false,false
+715,2026-05-31T12:01:54.099968+00:00,2026-05-25,Dm,pharmacy,34.72,percentage,false,false
+716,2026-05-31T12:02:09.309245+00:00,2026-05-24,Bomba,supermarket,21.65,percentage,false,false
+717,2026-05-31T12:02:24.317967+00:00,2026-05-23,Cafe,food,21.62,percentage,false,false
+714,2026-05-31T12:01:40.287955+00:00,2026-05-23,5guys,food,48.16,percentage,false,false
+713,2026-05-31T12:01:17.517618+00:00,2026-05-23,"Traje de baño ",purchases,51.16,kari,false,false
+712,2026-05-31T12:00:47.405538+00:00,2026-05-23,Rewe,supermarket,152.44,percentage,false,false
+733,2026-05-31T12:12:36.384284+00:00,2026-05-21,The Apothecary diaries 5,other,7.85,kari,false,false
+711,2026-05-31T11:58:50.35769+00:00,2026-05-20,Subway,food,20.67,percentage,false,false
+548,2026-03-04T20:20:25.582511+00:00,2026-05-20,DB ticket Kari,transportation,73.39,kari,true,true
+710,2026-05-31T11:58:26.641847+00:00,2026-05-19,"Aspiradora ",purchases,514.68,shared,false,false
+709,2026-05-31T11:58:04.439406+00:00,2026-05-16,"Rewe ",supermarket,5.35,percentage,false,false
+708,2026-05-31T11:57:50.715888+00:00,2026-05-16,"Rewe getrenkt ",supermarket,6.02,percentage,false,false
+707,2026-05-31T11:57:31.55012+00:00,2026-05-16,Rewe,supermarket,103.09,percentage,false,false
+706,2026-05-31T11:57:12.510761+00:00,2026-05-13,"Farmacia ",pharmacy,37.24,percentage,false,false
+699,2026-05-31T11:52:17.328519+00:00,2026-05-10,Rewe,supermarket,79.5,percentage,false,false
+734,2026-05-31T12:13:04.442929+00:00,2026-05-09,"Exploding kittens ",purchases,30.13,shared,false,false
+705,2026-05-31T11:56:36.002478+00:00,2026-05-09,Dm,pharmacy,5,percentage,false,false
+703,2026-05-31T11:54:44.441389+00:00,2026-05-09,Condesa,food,32.65,percentage,false,false
+704,2026-05-31T11:56:11.365824+00:00,2026-05-08,Bier garten,food,12.96,percentage,false,false
+702,2026-05-31T11:54:25.130878+00:00,2026-05-08,"Condesa ",food,35.1,percentage,false,false
+701,2026-05-31T11:53:49.921588+00:00,2026-05-08,"Cartera verde Uniqlo ",purchases,34.82,kari,false,false
+700,2026-05-31T11:52:47.978595+00:00,2026-05-08,"Comida india ",food,58.94,percentage,false,false
+698,2026-05-31T11:50:06.808942+00:00,2026-05-07,"Café ",food,27.38,percentage,false,false
+697,2026-05-31T11:49:31.941745+00:00,2026-05-07,"Regalo Hadar ",purchases,55.45,shared,false,false
+696,2026-05-31T11:49:08.77985+00:00,2026-05-06,Helados,food,6.44,percentage,false,false
+695,2026-05-31T11:48:48.962524+00:00,2026-05-06,Rewe,supermarket,19.46,percentage,false,false
+694,2026-05-31T11:48:32.72868+00:00,2026-05-06,Rewe getrenkt,supermarket,14.6,percentage,false,false
+693,2026-05-31T11:47:47.312338+00:00,2026-05-04,Haribo,food,4.21,percentage,false,false
+692,2026-05-31T11:47:28.269837+00:00,2026-05-04,Panaderia,food,6.95,percentage,false,false
+691,2026-05-31T11:46:51.114804+00:00,2026-05-04,Rewe,supermarket,20.55,percentage,false,false
+690,2026-05-31T11:46:35.477269+00:00,2026-05-04,Cervezas,food,16,percentage,false,false
+689,2026-05-31T11:45:56.756439+00:00,2026-05-04,"Goulash ",food,26.45,percentage,false,false
+688,2026-05-31T11:45:10.78919+00:00,2026-05-03,Yormas,supermarket,2.48,percentage,false,false
+687,2026-05-31T11:44:37.653247+00:00,2026-05-03,"Café Grosshadern ",food,13.54,percentage,false,false
+686,2026-05-31T11:43:47.203974+00:00,2026-05-03,Rewe getrenkt,supermarket,8.36,percentage,false,false
+685,2026-05-31T11:42:39.144483+00:00,2026-05-03,Zeit fur brot,food,23.93,shared,false,false
+683,2026-05-31T11:41:41.732574+00:00,2026-05-03,Helados ammersee,food,25,percentage,false,false
+681,2026-05-03T16:17:17.36272+00:00,2026-05-03,Comida en ammersee,food,35.11,percentage,false,false
+684,2026-05-31T11:42:05.673686+00:00,2026-05-02,Rewe,supermarket,34.91,percentage,false,false
+682,2026-05-31T11:39:55.623343+00:00,2026-05-02,5guys,food,47,percentage,false,false
+680,2026-05-02T17:03:07.916683+00:00,2026-05-02,"Rewe Flughafen ",food,9.68,percentage,false,false
+679,2026-05-02T13:08:41.739674+00:00,2026-05-02,Zeit fur brot,food,23.4,percentage,false,false
+677,2026-05-02T12:02:39.088942+00:00,2026-05-02,rewe getrank,supermarket,8.19,percentage,false,false
+676,2026-05-02T12:02:24.846732+00:00,2026-05-02,rewe,supermarket,35.11,percentage,false,false
+675,2026-05-02T12:02:03.213105+00:00,2026-05-02,secured pins,purchases,9.59,shared,false,false
+674,2026-05-02T12:01:43.531952+00:00,2026-05-02,comida,pet,14.66,percentage,false,false
+673,2026-05-02T12:01:26.175657+00:00,2026-05-01,rascador,pet,24.29,percentage,false,false
+486,2026-01-09T13:02:44.109663+00:00,2026-05-01,Disney,subscriptions,12.78,percentage,true,true
+477,2026-01-05T11:18:38.771803+00:00,2026-05-01,CHATGPT,subscriptions,27.07,percentage,false,true
+143,2025-06-02T17:23:52.439865+00:00,2026-05-01,"seguro medico ",health insurance,426.25,shared,false,true
+98,2025-05-07T12:01:57.792376+00:00,2026-05-01,Spotify,subscriptions,21.06,percentage,true,true
+97,2025-05-07T12:01:07.90614+00:00,2026-05-01,amazon prime,subscriptions,11.99,percentage,false,true
+96,2025-05-07T12:00:07.392192+00:00,2026-05-01,crunchyroll,subscriptions,5.19,percentage,false,true
+95,2025-05-07T11:59:44.977728+00:00,2026-05-01,Youtube,subscriptions,15.22,percentage,false,true
+94,2025-05-07T11:59:17.697714+00:00,2026-05-01,O2,cellphone,49.96,shared,false,true
+87,2025-05-01T14:36:53.916578+00:00,2026-05-01,Alquiler,rent,2124.15,percentage,true,true

@@ -49,7 +49,9 @@ const Savings = () => {
   return (
     <Container maxWidth={false} sx={{ px: { xs: 2, sm: 2.25 }, pt: 0.5, pb: 5 }}>
       <SavingsEntry embedded />
-      <Typography variant='h5' sx={{ mt: 3.25, mb: 1.75, px: 0.5 }}>History</Typography>
+      <Typography variant='h5' sx={{ mt: 3.25, mb: 1.75, px: 0.5 }}>
+        History
+      </Typography>
       {history.length ? (
         <Stack spacing={1.5}>
           {history.map((group) => (

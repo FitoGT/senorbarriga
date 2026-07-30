@@ -45,7 +45,9 @@ const Expenses = () => {
             {!expenses?.length ? (
               <Typography color='text.secondary'>No expenses recorded.</Typography>
             ) : (
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(420px,100%),1fr))', gap: 1.5 }}>
+              <Box
+                sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(420px,100%),1fr))', gap: 1.5 }}
+              >
                 {expenses.map((expense) => (
                   <ExpensesAccordion key={expense.id} expense={expense} formatNumber={formatDecimal} />
                 ))}

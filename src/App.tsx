@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { ThemeProvider, CssBaseline } from '@mui/material';

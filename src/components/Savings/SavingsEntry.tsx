@@ -3,16 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Stack,
-  TextField,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Box, Button, CircularProgress, Container, Stack, TextField, Typography, useTheme } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import FullLoader from '../Loader/FullLoader';
 import { useNotifications } from '../../context';
@@ -306,50 +297,63 @@ const SavingsEntry = ({ embedded = false }: SavingsEntryProps) => {
             )}
           />
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: 1.75, mt: 2 }}>
-          {[SavingUser.KARI, SavingUser.ADOLFO].map((user) => (
-            <Stack key={user} spacing={1.25} sx={{ p: 2.25, bgcolor: '#171920', borderRadius: '20px' }}>
-              <Box display='flex' alignItems='center' gap={1}>
-                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: user === SavingUser.KARI ? 'success.main' : 'info.main' }} />
-              <Typography variant='subtitle1' fontWeight='bold' color={user === SavingUser.KARI ? 'success.main' : 'info.main'}>
-                {SAVING_USER_LABELS[user]}
-              </Typography>
-              </Box>
-              {fieldsWithState
-                .filter((field) => field.user === user)
-                .map((field) => (
-                  <TextField
-                    key={field.name}
-                    label={`${SAVING_TYPE_LABELS[field.type]} (${field.currency})`}
-                    fullWidth
-                    type='text'
-                    inputMode='decimal'
-                    {...register(field.name)}
-                    onChange={(event) => handleAmountChange(field.name, event.target.value)}
-                    onBlur={() => handleAmountBlur(field.name)}
-                    error={!!errors[field.name]}
-                    helperText={errors[field.name]?.message}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))',
+              gap: 1.75,
+              mt: 2,
+            }}
+          >
+            {[SavingUser.KARI, SavingUser.ADOLFO].map((user) => (
+              <Stack key={user} spacing={1.25} sx={{ p: 2.25, bgcolor: '#171920', borderRadius: '20px' }}>
+                <Box display='flex' alignItems='center' gap={1}>
+                  <Box
                     sx={{
-                      input: { color: theme.palette.text.primary },
-                      '& .MuiOutlinedInput-root': {
-                        '& fieldset': { borderColor: theme.palette.divider },
-                        '&:hover fieldset': { borderColor: theme.palette.primary.main },
-                        '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
-                      },
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      bgcolor: user === SavingUser.KARI ? 'success.main' : 'info.main',
                     }}
                   />
-                ))}
-            </Stack>
-          ))}
+                  <Typography
+                    variant='subtitle1'
+                    fontWeight='bold'
+                    color={user === SavingUser.KARI ? 'success.main' : 'info.main'}
+                  >
+                    {SAVING_USER_LABELS[user]}
+                  </Typography>
+                </Box>
+                {fieldsWithState
+                  .filter((field) => field.user === user)
+                  .map((field) => (
+                    <TextField
+                      key={field.name}
+                      label={`${SAVING_TYPE_LABELS[field.type]} (${field.currency})`}
+                      fullWidth
+                      type='text'
+                      inputMode='decimal'
+                      {...register(field.name)}
+                      onChange={(event) => handleAmountChange(field.name, event.target.value)}
+                      onBlur={() => handleAmountBlur(field.name)}
+                      error={!!errors[field.name]}
+                      helperText={errors[field.name]?.message}
+                      sx={{
+                        input: { color: theme.palette.text.primary },
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': { borderColor: theme.palette.divider },
+                          '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                          '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
+                        },
+                      }}
+                    />
+                  ))}
+              </Stack>
+            ))}
           </Box>
 
           <Box mt={4} display='flex' gap={2}>
-            <Button
-              variant='contained'
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-              sx={{ flexGrow: 1 }}
-            >
+            <Button variant='contained' onClick={handleSubmit(onSubmit)} disabled={isPending} sx={{ flexGrow: 1 }}>
               {isPending ? <CircularProgress size={24} color='inherit' /> : 'Save snapshot'}
             </Button>
             <Button

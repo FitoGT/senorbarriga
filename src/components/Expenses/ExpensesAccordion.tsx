@@ -42,13 +42,30 @@ const ExpensesAccordion = ({ expense, formatNumber }: ExpensesAccordionProps) =>
 
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px 14px', p: 2, bgcolor: '#1e2027', borderRadius: '20px', boxShadow: '0 8px 22px rgba(0,0,0,.22)' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '10px 14px',
+          p: 2,
+          bgcolor: '#1e2027',
+          borderRadius: '20px',
+          boxShadow: '0 8px 22px rgba(0,0,0,.22)',
+        }}
+      >
         <Box sx={{ width: 46, flex: 'none', textAlign: 'center' }}>
-          <Typography fontWeight={800} lineHeight={1}>{String(day || '').padStart(2, '0')}</Typography>
-          <Typography variant='caption' color='text.secondary' fontWeight={700}>{monthLabel}</Typography>
+          <Typography fontWeight={800} lineHeight={1}>
+            {String(day || '').padStart(2, '0')}
+          </Typography>
+          <Typography variant='caption' color='text.secondary' fontWeight={700}>
+            {monthLabel}
+          </Typography>
         </Box>
         <Box sx={{ minWidth: 0, flex: '1 1 150px' }}>
-          <Typography fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>{expense.description}</Typography>
+          <Typography fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>
+            {expense.description}
+          </Typography>
           <Box display='flex' alignItems='center' flexWrap='wrap' gap={1} mt={0.6}>
             <Chip
               size='small'
@@ -56,7 +73,13 @@ const ExpensesAccordion = ({ expense, formatNumber }: ExpensesAccordionProps) =>
               label={expense.isPaidByKari ? 'Kari' : 'Adolfo'}
               title={expense.isPaidByKari ? 'Paid by Kari' : 'Paid by Adolfo'}
               variant='outlined'
-              sx={{ height: 26, color: 'text.secondary', borderColor: '#333846', fontSize: 11, '& .MuiChip-icon': { color: 'inherit', fontSize: 15 } }}
+              sx={{
+                height: 26,
+                color: 'text.secondary',
+                borderColor: '#333846',
+                fontSize: 11,
+                '& .MuiChip-icon': { color: 'inherit', fontSize: 15 },
+              }}
             />
             {expense.type === 'kari' || expense.type === 'adolfo' ? (
               <Chip
@@ -65,13 +88,28 @@ const ExpensesAccordion = ({ expense, formatNumber }: ExpensesAccordionProps) =>
                 label={expense.type === 'kari' ? 'Kari' : 'Adolfo'}
                 title={expense.type === 'kari' ? 'Kari only' : 'Adolfo only'}
                 variant='outlined'
-                sx={{ height: 26, color: 'text.secondary', borderColor: '#333846', fontSize: 11, '& .MuiChip-icon': { color: 'inherit', fontSize: 15 } }}
+                sx={{
+                  height: 26,
+                  color: 'text.secondary',
+                  borderColor: '#333846',
+                  fontSize: 11,
+                  '& .MuiChip-icon': { color: 'inherit', fontSize: 15 },
+                }}
               />
             ) : (
               <Box
                 title={expense.type === 'percentage' ? 'Percentage split' : '50 / 50 split'}
                 aria-label={expense.type === 'percentage' ? 'Percentage split' : '50 / 50 split'}
-                sx={{ minWidth: 30, height: 26, px: 0.75, display: 'grid', placeItems: 'center', color: 'text.secondary', border: '1px solid #333846', borderRadius: 999 }}
+                sx={{
+                  minWidth: 30,
+                  height: 26,
+                  px: 0.75,
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: 'text.secondary',
+                  border: '1px solid #333846',
+                  borderRadius: 999,
+                }}
               >
                 {expense.type === 'percentage' ? (
                   <PercentIcon sx={{ fontSize: 18 }} />
@@ -92,7 +130,16 @@ const ExpensesAccordion = ({ expense, formatNumber }: ExpensesAccordionProps) =>
               <Box
                 title='Monthly'
                 aria-label='Monthly recurring expense'
-                sx={{ minWidth: 30, height: 26, px: 0.75, display: 'grid', placeItems: 'center', color: 'text.secondary', border: '1px solid #333846', borderRadius: 999 }}
+                sx={{
+                  minWidth: 30,
+                  height: 26,
+                  px: 0.75,
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: 'text.secondary',
+                  border: '1px solid #333846',
+                  borderRadius: 999,
+                }}
               >
                 <EventRepeatIcon sx={{ fontSize: 18 }} />
               </Box>
@@ -101,18 +148,46 @@ const ExpensesAccordion = ({ expense, formatNumber }: ExpensesAccordionProps) =>
               size='small'
               label={expense.category}
               variant='outlined'
-              sx={{ height: 26, color: 'text.secondary', borderColor: '#333846', fontSize: 11, textTransform: 'capitalize' }}
+              sx={{
+                height: 26,
+                color: 'text.secondary',
+                borderColor: '#333846',
+                fontSize: 11,
+                textTransform: 'capitalize',
+              }}
             />
           </Box>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, flex: { xs: '1 0 100%', sm: 'none' }, pt: { xs: 1, sm: 0 }, borderTop: { xs: '1px solid #262932', sm: 0 } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: 1,
+            flex: { xs: '1 0 100%', sm: 'none' },
+            pt: { xs: 1, sm: 0 },
+            borderTop: { xs: '1px solid #262932', sm: 0 },
+          }}
+        >
           <Typography fontWeight={800} sx={{ mr: 0.5, fontVariantNumeric: 'tabular-nums' }}>
             $ {formatNumber(expense.amount)}
           </Typography>
-          <IconButton onClick={() => navigate(`${ROUTES.EXPENSES}${expense.id}`)} aria-label='Edit expense' sx={{ bgcolor: '#242832', color: 'text.secondary', '&:hover': { bgcolor: '#2f333e', color: 'text.primary' } }}>
+          <IconButton
+            onClick={() => navigate(`${ROUTES.EXPENSES}${expense.id}`)}
+            aria-label='Edit expense'
+            sx={{
+              bgcolor: '#242832',
+              color: 'text.secondary',
+              '&:hover': { bgcolor: '#2f333e', color: 'text.primary' },
+            }}
+          >
             <EditIcon fontSize='small' />
           </IconButton>
-          <IconButton onClick={() => setOpen(true)} aria-label='Delete expense' sx={{ bgcolor: '#242832', color: 'text.secondary', '&:hover': { bgcolor: '#3a2521', color: '#ff8f78' } }}>
+          <IconButton
+            onClick={() => setOpen(true)}
+            aria-label='Delete expense'
+            sx={{ bgcolor: '#242832', color: 'text.secondary', '&:hover': { bgcolor: '#3a2521', color: '#ff8f78' } }}
+          >
             <DeleteIcon fontSize='small' />
           </IconButton>
         </Box>

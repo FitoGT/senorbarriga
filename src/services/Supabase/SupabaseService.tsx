@@ -472,7 +472,6 @@ class SupabaseService {
       throw new Error(`Deleting savings snapshot failed: ${error}`);
     }
   }
-
 }
 
 export const supabaseService = new SupabaseService();

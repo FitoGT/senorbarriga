@@ -384,13 +384,34 @@ const Expense = ({ embedded = false, onSaved }: ExpenseProps) => {
                       value={field.value}
                       exclusive
                       onChange={(_, value) => value && field.onChange(value)}
-                      sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, '& .MuiToggleButtonGroup-grouped': { m: 0, border: '1px solid #2e323b !important', borderRadius: '999px !important' } }}
+                      sx={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 1,
+                        '& .MuiToggleButtonGroup-grouped': {
+                          m: 0,
+                          border: '1px solid #2e323b !important',
+                          borderRadius: '999px !important',
+                        },
+                      }}
                     >
                       {Object.values(ExpenseCategory).map((cat) => (
                         <ToggleButton
                           key={cat}
                           value={cat}
-                          sx={{ minHeight: 44, px: 2, py: 0, color: 'text.secondary', textTransform: 'capitalize', fontWeight: 700, '&.Mui-selected': { color: 'primary.contrastText', background: 'linear-gradient(140deg,#a6a9ff,#7478ff)' }, '&.Mui-selected:hover': { bgcolor: 'primary.light' } }}
+                          sx={{
+                            minHeight: 44,
+                            px: 2,
+                            py: 0,
+                            color: 'text.secondary',
+                            textTransform: 'capitalize',
+                            fontWeight: 700,
+                            '&.Mui-selected': {
+                              color: 'primary.contrastText',
+                              background: 'linear-gradient(140deg,#a6a9ff,#7478ff)',
+                            },
+                            '&.Mui-selected:hover': { bgcolor: 'primary.light' },
+                          }}
                         >
                           {cat}
                         </ToggleButton>
@@ -414,10 +435,26 @@ const Expense = ({ embedded = false, onSaved }: ExpenseProps) => {
                       exclusive
                       onChange={(_, value) => value && field.onChange(value)}
                       fullWidth
-                      sx={{ p: 0.5, bgcolor: '#171920', borderRadius: 999, '& .MuiToggleButtonGroup-grouped': { border: 0, borderRadius: '999px !important' } }}
+                      sx={{
+                        p: 0.5,
+                        bgcolor: '#171920',
+                        borderRadius: 999,
+                        '& .MuiToggleButtonGroup-grouped': { border: 0, borderRadius: '999px !important' },
+                      }}
                     >
                       {Object.values(ExpenseType).map((t) => (
-                        <ToggleButton key={t} value={t} sx={{ minHeight: 42, color: 'text.secondary', fontWeight: 700, textTransform: 'none', '&.Mui-selected': { bgcolor: '#31353f', color: 'text.primary' }, '&.Mui-selected:hover': { bgcolor: '#393e49' } }}>
+                        <ToggleButton
+                          key={t}
+                          value={t}
+                          sx={{
+                            minHeight: 42,
+                            color: 'text.secondary',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            '&.Mui-selected': { bgcolor: '#31353f', color: 'text.primary' },
+                            '&.Mui-selected:hover': { bgcolor: '#393e49' },
+                          }}
+                        >
                           {t === ExpenseType.SHARED
                             ? '50 / 50'
                             : t === ExpenseType.PERCENTAGE
@@ -443,10 +480,38 @@ const Expense = ({ embedded = false, onSaved }: ExpenseProps) => {
                     exclusive
                     fullWidth
                     onChange={(_, value) => value && setValue('isPaidByKari', value === 'kari')}
-                    sx={{ mt: 1, p: 0.5, bgcolor: '#171920', borderRadius: 999, '& .MuiToggleButtonGroup-grouped': { border: 0, borderRadius: '999px !important' } }}
+                    sx={{
+                      mt: 1,
+                      p: 0.5,
+                      bgcolor: '#171920',
+                      borderRadius: 999,
+                      '& .MuiToggleButtonGroup-grouped': { border: 0, borderRadius: '999px !important' },
+                    }}
                   >
-                    <ToggleButton value='adolfo' sx={{ minHeight: 42, color: 'text.secondary', fontWeight: 700, textTransform: 'none', '&.Mui-selected': { bgcolor: 'info.main', color: '#0d1b2c' } }}>Adolfo</ToggleButton>
-                    <ToggleButton value='kari' sx={{ minHeight: 42, color: 'text.secondary', fontWeight: 700, textTransform: 'none', '&.Mui-selected': { bgcolor: 'success.main', color: '#08240f' } }}>Kari</ToggleButton>
+                    <ToggleButton
+                      value='adolfo'
+                      sx={{
+                        minHeight: 42,
+                        color: 'text.secondary',
+                        fontWeight: 700,
+                        textTransform: 'none',
+                        '&.Mui-selected': { bgcolor: 'info.main', color: '#0d1b2c' },
+                      }}
+                    >
+                      Adolfo
+                    </ToggleButton>
+                    <ToggleButton
+                      value='kari'
+                      sx={{
+                        minHeight: 42,
+                        color: 'text.secondary',
+                        fontWeight: 700,
+                        textTransform: 'none',
+                        '&.Mui-selected': { bgcolor: 'success.main', color: '#08240f' },
+                      }}
+                    >
+                      Kari
+                    </ToggleButton>
                   </ToggleButtonGroup>
                 </Box>
                 <Box>
@@ -454,7 +519,16 @@ const Expense = ({ embedded = false, onSaved }: ExpenseProps) => {
                     Recurrent
                   </Typography>
                   <FormControlLabel
-                    sx={{ display: 'flex', minHeight: 52, mt: 1, mx: 0, px: 1.25, bgcolor: '#171920', border: '1px solid #2e323b', borderRadius: 999 }}
+                    sx={{
+                      display: 'flex',
+                      minHeight: 52,
+                      mt: 1,
+                      mx: 0,
+                      px: 1.25,
+                      bgcolor: '#171920',
+                      border: '1px solid #2e323b',
+                      borderRadius: 999,
+                    }}
                     control={
                       <Switch
                         {...register('is_default')}

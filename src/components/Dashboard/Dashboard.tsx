@@ -61,14 +61,20 @@ const Dashboard = () => {
 
   return (
     <Container maxWidth={false} sx={{ px: { xs: 2, sm: 2.25 }, pt: 0.5, pb: 5 }}>
-      <Box sx={{ bgcolor: '#1e2027', borderRadius: '22px', overflow: 'hidden', boxShadow: '0 12px 30px rgba(0,0,0,.28)' }}>
+      <Box
+        sx={{ bgcolor: '#1e2027', borderRadius: '22px', overflow: 'hidden', boxShadow: '0 12px 30px rgba(0,0,0,.28)' }}
+      >
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 2, p: 2.25 }}>
           <Box>
             <Box display='flex' alignItems='center' gap={0.9}>
               <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main' }} />
-              <Typography variant='caption' color='text.secondary' fontWeight={700}>Kari&apos;s share</Typography>
+              <Typography variant='caption' color='text.secondary' fontWeight={700}>
+                Kari&apos;s share
+              </Typography>
             </Box>
-            <Typography variant='h5' mt={1} color='success.main'>{money(expenses?.kari ?? 0)}</Typography>
+            <Typography variant='h5' mt={1} color='success.main'>
+              {money(expenses?.kari ?? 0)}
+            </Typography>
             <Typography variant='caption' color='text.secondary'>
               {formatDecimal(income?.kari_percentage ?? 0)}% share of total
             </Typography>
@@ -76,9 +82,13 @@ const Dashboard = () => {
           <Box>
             <Box display='flex' alignItems='center' gap={0.9}>
               <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'info.main' }} />
-              <Typography variant='caption' color='text.secondary' fontWeight={700}>Adolfo&apos;s share</Typography>
+              <Typography variant='caption' color='text.secondary' fontWeight={700}>
+                Adolfo&apos;s share
+              </Typography>
             </Box>
-            <Typography variant='h5' mt={1} color='info.main'>{money(expenses?.adolfo ?? 0)}</Typography>
+            <Typography variant='h5' mt={1} color='info.main'>
+              {money(expenses?.adolfo ?? 0)}
+            </Typography>
             <Typography variant='caption' color='text.secondary'>
               {formatDecimal(income?.adolfo_percentage ?? 0)}% share of total
             </Typography>
@@ -86,28 +96,70 @@ const Dashboard = () => {
           <Box>
             <Box display='flex' alignItems='center' gap={0.9}>
               <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'text.primary' }} />
-              <Typography variant='caption' color='text.secondary' fontWeight={700}>Total expenses</Typography>
+              <Typography variant='caption' color='text.secondary' fontWeight={700}>
+                Total expenses
+              </Typography>
             </Box>
-            <Typography variant='h5' mt={1} color='text.primary'>{money(expenses?.total ?? 0)}</Typography>
-            <Typography variant='caption' color='text.secondary'>100% of total</Typography>
+            <Typography variant='h5' mt={1} color='text.primary'>
+              {money(expenses?.total ?? 0)}
+            </Typography>
+            <Typography variant='caption' color='text.secondary'>
+              100% of total
+            </Typography>
           </Box>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px 16px', px: 2.25, py: 1.6, bgcolor: '#1b1c2d', borderTop: '1px solid #30325b' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '6px 16px',
+            px: 2.25,
+            py: 1.6,
+            bgcolor: '#1b1c2d',
+            borderTop: '1px solid #30325b',
+          }}
+        >
           <Typography variant='caption' sx={{ color: '#b9bcf4', fontWeight: 700 }}>
             {kariOwes ? 'Kari owes Adolfo' : 'Adolfo owes Kari'}
           </Typography>
-          <Typography variant='h5' color='primary.light'>{money(debtAmount)}</Typography>
+          <Typography variant='h5' color='primary.light'>
+            {money(debtAmount)}
+          </Typography>
         </Box>
         <Box
           component='button'
           onClick={() => navigate(ROUTES.SAVINGS)}
-          sx={{ width: '100%', border: 0, borderTop: '1px solid #262932', bgcolor: '#1a1c22', color: 'text.primary', px: 2.25, py: 1.5, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, cursor: 'pointer', textAlign: 'left', '&:hover': { bgcolor: '#232630' } }}
+          sx={{
+            width: '100%',
+            border: 0,
+            borderTop: '1px solid #262932',
+            bgcolor: '#1a1c22',
+            color: 'text.primary',
+            px: 2.25,
+            py: 1.5,
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 2,
+            cursor: 'pointer',
+            textAlign: 'left',
+            '&:hover': { bgcolor: '#232630' },
+          }}
         >
-          <Typography variant='caption' color='text.secondary' fontWeight={700}>Savings</Typography>
+          <Typography variant='caption' color='text.secondary' fontWeight={700}>
+            Savings
+          </Typography>
           <Typography fontWeight={800}>{money(savingsSummary.total)}</Typography>
-          <Typography variant='body2' color='success.main' fontWeight={700}>K {money(savingsSummary.kari)}</Typography>
-          <Typography variant='body2' color='info.main' fontWeight={700}>A {money(savingsSummary.adolfo)}</Typography>
-          <Typography variant='caption' color='text.secondary' sx={{ ml: 'auto' }}>View savings →</Typography>
+          <Typography variant='body2' color='success.main' fontWeight={700}>
+            K {money(savingsSummary.kari)}
+          </Typography>
+          <Typography variant='body2' color='info.main' fontWeight={700}>
+            A {money(savingsSummary.adolfo)}
+          </Typography>
+          <Typography variant='caption' color='text.secondary' sx={{ ml: 'auto' }}>
+            View savings →
+          </Typography>
         </Box>
       </Box>
 

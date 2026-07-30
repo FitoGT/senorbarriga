@@ -29,7 +29,6 @@ function App() {
                   <Route path={ROUTES.EXPENSES} element={<Expenses />} />
                   <Route path={ROUTES.SAVINGS} element={<Savings />} />
                   <Route path={ROUTES.SAVINGS_ENTRY} element={<SavingsEntry />} />
-                  <Route path={ROUTES.SAVINGS_EDIT + ':date'} element={<SavingsEntry />} />
                   <Route path={ROUTES.EXPENSES + ':id?'} element={<Expense />} />
                   <Route path={ROUTES.EXPENSE} element={<Expense />} />
                 </Route>

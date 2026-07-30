@@ -10,15 +10,14 @@ import {
   Typography,
   CircularProgress,
   Box,
-  MenuItem,
   FormControl,
-  InputLabel,
-  Select,
   Switch,
   FormControlLabel,
-  IconButton,
   FormHelperText,
   useTheme,
+  Button,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -67,9 +66,14 @@ const formSchema = z.object({
 
 type ExpenseFormData = z.infer<typeof formSchema>;
 
-const Expense = () => {
-  const { mutate: insertExpense } = useInsertEpenseMutation();
-  const { mutate: updateExpense } = useUpdateExpenseMutation();
+interface ExpenseProps {
+  embedded?: boolean;
+  onSaved?: () => void | Promise<void>;
+}
+
+const Expense = ({ embedded = false, onSaved }: ExpenseProps) => {
+  const { mutateAsync: insertExpense } = useInsertEpenseMutation();
+  const { mutateAsync: updateExpense } = useUpdateExpenseMutation();
   const { data: exchangeData } = useGetCurrentExchangeRate();
 
   const [loading, setLoading] = useState(false);
@@ -185,9 +189,9 @@ const Expense = () => {
               is_default: data.is_default,
             },
           };
-          updateExpense(updateObj);
+          await updateExpense(updateObj);
         } else {
-          insertExpense({
+          await insertExpense({
             date: formattedDate,
             description: data.description,
             category: data.category,
@@ -198,7 +202,10 @@ const Expense = () => {
           });
         }
         reset();
-        navigate(ROUTES.EXPENSES);
+        await onSaved?.();
+        if (!embedded) {
+          navigate(ROUTES.EXPENSES);
+        }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log('Error saving expense', error);
@@ -207,12 +214,14 @@ const Expense = () => {
         setLoading(false);
       }
     },
-    [id, insertExpense, updateExpense, navigate, reset, showNotification],
+    [embedded, id, insertExpense, updateExpense, navigate, onSaved, reset, showNotification],
   );
 
   const handleCancel = () => {
     reset();
-    navigate(ROUTES.EXPENSES);
+    if (!embedded) {
+      navigate(ROUTES.EXPENSES);
+    }
   };
 
   useEffect(() => {
@@ -249,14 +258,15 @@ const Expense = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Container
-        maxWidth='xs'
+        maxWidth={embedded ? false : 'md'}
         sx={{
-          mt: 10,
-          mb: 10,
+          mt: embedded ? 0 : 2,
+          mb: embedded ? 0 : 5,
           backgroundColor: theme.palette.background.paper,
-          p: 3,
-          borderRadius: 2,
-          boxShadow: 3,
+          p: { xs: 2, sm: 3 },
+          borderRadius: '26px',
+          boxShadow: '0 14px 34px rgba(0,0,0,.3)',
+          maxWidth: embedded ? 'none' : undefined,
         }}
       >
         {showLoader ? (
@@ -264,7 +274,7 @@ const Expense = () => {
         ) : (
           <>
             <Typography variant='h5' fontWeight='bold' gutterBottom color='text.primary'>
-              {id ? 'Edit Expense' : 'Add Expense'}
+              {id ? 'Edit expense' : embedded ? 'Add expense' : 'Add expense'}
             </Typography>
 
             <Box component='form' onSubmit={handleSubmit(onSubmit)} width='100%'>
@@ -309,7 +319,13 @@ const Expense = () => {
                 }}
               />
 
-              <Box display='flex' alignItems='flex-start' gap={2} sx={{ width: '100%', mt: 2 }}>
+              <Box
+                display='flex'
+                flexDirection={{ xs: 'column', sm: 'row' }}
+                alignItems='flex-start'
+                gap={2}
+                sx={{ width: '100%', mt: 2 }}
+              >
                 <TextField
                   label='Amount (USD)'
                   type='text'
@@ -357,79 +373,118 @@ const Expense = () => {
               </Box>
 
               <FormControl fullWidth margin='normal' error={!!errors.category}>
-                <InputLabel>Category</InputLabel>
+                <Typography variant='caption' color='text.secondary' fontWeight={700} mb={1}>
+                  Category
+                </Typography>
                 <Controller
                   name='category'
                   control={control}
                   render={({ field }) => (
-                    <Select {...field}>
+                    <ToggleButtonGroup
+                      value={field.value}
+                      exclusive
+                      onChange={(_, value) => value && field.onChange(value)}
+                      sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, '& .MuiToggleButtonGroup-grouped': { m: 0, border: '1px solid #2e323b !important', borderRadius: '999px !important' } }}
+                    >
                       {Object.values(ExpenseCategory).map((cat) => (
-                        <MenuItem key={cat} value={cat}>
+                        <ToggleButton
+                          key={cat}
+                          value={cat}
+                          sx={{ minHeight: 44, px: 2, py: 0, color: 'text.secondary', textTransform: 'capitalize', fontWeight: 700, '&.Mui-selected': { color: 'primary.contrastText', background: 'linear-gradient(140deg,#a6a9ff,#7478ff)' }, '&.Mui-selected:hover': { bgcolor: 'primary.light' } }}
+                        >
                           {cat}
-                        </MenuItem>
+                        </ToggleButton>
                       ))}
-                    </Select>
+                    </ToggleButtonGroup>
                   )}
                 />
                 <FormHelperText>{errors.category?.message}</FormHelperText>
               </FormControl>
 
               <FormControl fullWidth margin='normal' error={!!errors.type}>
-                <InputLabel>Type</InputLabel>
+                <Typography variant='caption' color='text.secondary' fontWeight={700} mb={1}>
+                  Split
+                </Typography>
                 <Controller
                   name='type'
                   control={control}
                   render={({ field }) => (
-                    <Select {...field}>
+                    <ToggleButtonGroup
+                      {...field}
+                      exclusive
+                      onChange={(_, value) => value && field.onChange(value)}
+                      fullWidth
+                      sx={{ p: 0.5, bgcolor: '#171920', borderRadius: 999, '& .MuiToggleButtonGroup-grouped': { border: 0, borderRadius: '999px !important' } }}
+                    >
                       {Object.values(ExpenseType).map((t) => (
-                        <MenuItem key={t} value={t}>
-                          {t}
-                        </MenuItem>
+                        <ToggleButton key={t} value={t} sx={{ minHeight: 42, color: 'text.secondary', fontWeight: 700, textTransform: 'none', '&.Mui-selected': { bgcolor: '#31353f', color: 'text.primary' }, '&.Mui-selected:hover': { bgcolor: '#393e49' } }}>
+                          {t === ExpenseType.SHARED
+                            ? '50 / 50'
+                            : t === ExpenseType.PERCENTAGE
+                              ? 'Percentage'
+                              : t === ExpenseType.KARI
+                                ? 'Kari only'
+                                : 'Adolfo only'}
+                        </ToggleButton>
                       ))}
-                    </Select>
+                    </ToggleButtonGroup>
                   )}
                 />
                 <FormHelperText>{errors.type?.message}</FormHelperText>
               </FormControl>
 
-              <FormControlLabel
-                control={
-                  <Switch
-                    {...register('isPaidByKari')}
-                    checked={watch('isPaidByKari')}
-                    onChange={(e) => setValue('isPaidByKari', e.target.checked)}
+              <Box display='grid' gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr' }} gap={2} mt={1}>
+                <Box>
+                  <Typography variant='caption' color='text.secondary' fontWeight={700}>
+                    Paid by
+                  </Typography>
+                  <ToggleButtonGroup
+                    value={watch('isPaidByKari') ? 'kari' : 'adolfo'}
+                    exclusive
+                    fullWidth
+                    onChange={(_, value) => value && setValue('isPaidByKari', value === 'kari')}
+                    sx={{ mt: 1, p: 0.5, bgcolor: '#171920', borderRadius: 999, '& .MuiToggleButtonGroup-grouped': { border: 0, borderRadius: '999px !important' } }}
+                  >
+                    <ToggleButton value='adolfo' sx={{ minHeight: 42, color: 'text.secondary', fontWeight: 700, textTransform: 'none', '&.Mui-selected': { bgcolor: 'info.main', color: '#0d1b2c' } }}>Adolfo</ToggleButton>
+                    <ToggleButton value='kari' sx={{ minHeight: 42, color: 'text.secondary', fontWeight: 700, textTransform: 'none', '&.Mui-selected': { bgcolor: 'success.main', color: '#08240f' } }}>Kari</ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+                <Box>
+                  <Typography variant='caption' color='text.secondary' fontWeight={700}>
+                    Recurrent
+                  </Typography>
+                  <FormControlLabel
+                    sx={{ display: 'flex', minHeight: 52, mt: 1, mx: 0, px: 1.25, bgcolor: '#171920', border: '1px solid #2e323b', borderRadius: 999 }}
+                    control={
+                      <Switch
+                        {...register('is_default')}
+                        checked={watch('is_default')}
+                        onChange={(e) => setValue('is_default', e.target.checked)}
+                      />
+                    }
+                    label='Repeats monthly'
                   />
-                }
-                label='Paid by Kari'
-              />
+                </Box>
+              </Box>
 
-              <FormControlLabel
-                control={
-                  <Switch
-                    {...register('is_default')}
-                    checked={watch('is_default')}
-                    onChange={(e) => setValue('is_default', e.target.checked)}
-                  />
-                }
-                label='Is Recurrent?'
-              />
-
-              <Box mt={3} display='flex' gap={2}>
-                <IconButton
-                  color='success'
+              <Box mt={3} display='flex' flexWrap='wrap' gap={1.25}>
+                <Button
+                  variant='contained'
                   onClick={handleSubmit(onSubmit)}
                   disabled={loading}
-                  sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
+                  startIcon={loading ? undefined : <CheckIcon />}
                 >
-                  {loading ? <CircularProgress size={24} color='inherit' /> : <CheckIcon />}
-                </IconButton>
-                <IconButton
-                  color='error'
+                  {loading ? <CircularProgress size={24} color='inherit' /> : id ? 'Save changes' : 'Add expense'}
+                </Button>
+                <Button
+                  variant='outlined'
+                  color='inherit'
                   onClick={handleCancel}
-                  sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
+                  startIcon={<CloseIcon />}
+                  sx={{ borderColor: '#333846', color: 'text.secondary' }}
                 >
-                  <CloseIcon />
-                </IconButton>
+                  {embedded ? 'Clear' : 'Cancel'}
+                </Button>
               </Box>
             </Box>
           </>

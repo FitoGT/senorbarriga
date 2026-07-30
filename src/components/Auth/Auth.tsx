@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Container, TextField, Button, Typography, CircularProgress, Box, useTheme } from '@mui/material';
+import { Alert, Container, TextField, Button, Typography, CircularProgress, Box, useTheme } from '@mui/material';
 import { ROUTES } from '../../constants/routes';
 
 const formSchema = z.object({
@@ -44,20 +44,20 @@ const Auth = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        mt: 5,
+        mt: { xs: 3, sm: 8 },
         backgroundColor: theme.palette.background.paper,
         padding: 3,
-        borderRadius: 2,
-        boxShadow: 3,
+        borderRadius: '26px',
+        boxShadow: '0 14px 34px rgba(0,0,0,.3)',
       }}
     >
       <Typography variant='h5' fontWeight='bold' gutterBottom color='text.primary'>
-        Login
+        Señor Barriga
       </Typography>
       {error && (
-        <Typography color='error' sx={{ mb: 2 }}>
+        <Alert severity='error' role='alert' sx={{ width: '100%', mb: 1, borderRadius: 2 }}>
           {error}
-        </Typography>
+        </Alert>
       )}
       <Box component='form' onSubmit={handleSubmit(onSubmit)} width='100%'>
         <TextField
@@ -100,7 +100,7 @@ const Auth = () => {
         />
         <Box mt={2}>
           <Button type='submit' variant='contained' color='primary' fullWidth disabled={loading}>
-            {loading ? <CircularProgress size={24} color='inherit' /> : 'Login'}
+            {loading ? <CircularProgress size={24} color='inherit' /> : 'Sign in'}
           </Button>
         </Box>
       </Box>

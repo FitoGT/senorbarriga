@@ -1,157 +1,124 @@
-import { useNavigate } from 'react-router-dom';
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
-  Stack,
-  useTheme,
-  useMediaQuery,
-  Chip,
-  IconButton,
-} from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import SellIcon from '@mui/icons-material/Sell';
+import { useState } from 'react';
+import { Box, Chip, IconButton, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import PaymentIcon from '@mui/icons-material/Payment';
-import CalculateIcon from '@mui/icons-material/Calculate';
+import PaymentsIcon from '@mui/icons-material/Payments';
+import PercentIcon from '@mui/icons-material/Percent';
+import PersonIcon from '@mui/icons-material/Person';
 import EventRepeatIcon from '@mui/icons-material/EventRepeat';
+import { useNavigate } from 'react-router-dom';
+import type { DialogProps } from '@mui/material/Dialog';
 import { Expense } from '../../interfaces/Expenses';
 import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
 import ExpensesDeleteModal from './ExpensesDeleteModal';
-import { useState } from 'react';
 import { useDeleteExpenseMutation } from '../../api/expenses/expenses';
-import { formatDate } from '../../utils/date';
-import type { DialogProps } from '@mui/material/Dialog';
 
 interface ExpensesAccordionProps {
   expense: Expense;
   formatNumber: (value: number) => string;
 }
 
-const ExpensesAccordion: React.FC<ExpensesAccordionProps> = ({ expense, formatNumber }) => {
+const ExpensesAccordion = ({ expense, formatNumber }: ExpensesAccordionProps) => {
   const navigate = useNavigate();
-  const theme = useTheme();
   const { showNotification } = useNotifications();
   const { mutate: deleteExpense } = useDeleteExpenseMutation();
-  const isXs = useMediaQuery(theme.breakpoints.only('xs'));
-  const isSm = useMediaQuery(theme.breakpoints.only('sm'));
-  const isMd = useMediaQuery(theme.breakpoints.only('md'));
-  const isLg = useMediaQuery(theme.breakpoints.up('lg'));
   const [open, setOpen] = useState(false);
+  const [year, month, day] = expense.date.split('-').map(Number);
+  const monthLabel = Number.isFinite(month)
+    ? new Intl.DateTimeFormat('en', { month: 'short' }).format(new Date(year, month - 1, day)).toUpperCase()
+    : '';
 
-  const descriptionWidth = isXs ? '100px' : isSm ? '200px' : isMd ? '300px' : isLg ? '400px' : '100%';
-
-  const handleDelete = async (expenseId: number) => {
+  const handleDelete = (expenseId: number) => {
     try {
       deleteExpense(expenseId);
       setOpen(false);
     } catch (error) {
-      console.error('Failed to delete the expense', error);
       showNotification(`Failed to delete the expense ${error}`, 'error');
     }
   };
 
-  const handleClose: NonNullable<DialogProps['onClose']> = (event, reason) => {
-    void event;
-    void reason;
-    setOpen(false);
-  };
-
-  const handleEdit = (expenseId: number) => {
-    navigate(`${ROUTES.EXPENSES}${expenseId}`);
-  };
+  const handleClose: NonNullable<DialogProps['onClose']> = () => setOpen(false);
 
   return (
-    <Accordion
-      sx={{
-        backgroundColor: theme.palette.background.paper,
-        color: theme.palette.text.primary,
-      }}
-    >
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon sx={{ color: theme.palette.text.primary }} />}
-        sx={{
-          backgroundColor: theme.palette.grey[900],
-          color: theme.palette.text.primary,
-        }}
-      >
-        <Stack direction='row' spacing={2} width='100%' alignItems='center' justifyContent='space-between'>
-          <Typography variant='body1' noWrap sx={{ width: '90px', color: theme.palette.text.primary }}>
-            {formatDate(expense.date) || expense.date}
-          </Typography>
-
-          <Typography
-            variant='body1'
-            fontWeight='bold'
-            noWrap
-            sx={{
-              width: descriptionWidth,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              color: theme.palette.text.primary,
-            }}
-          >
-            {expense.description}
-          </Typography>
-          <Typography
-            variant='body1'
-            color='primary'
-            noWrap
-            sx={{ width: '80px', textAlign: 'right', color: theme.palette.primary.main }}
-          >
+    <>
+      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px 14px', p: 2, bgcolor: '#1e2027', borderRadius: '20px', boxShadow: '0 8px 22px rgba(0,0,0,.22)' }}>
+        <Box sx={{ width: 46, flex: 'none', textAlign: 'center' }}>
+          <Typography fontWeight={800} lineHeight={1}>{String(day || '').padStart(2, '0')}</Typography>
+          <Typography variant='caption' color='text.secondary' fontWeight={700}>{monthLabel}</Typography>
+        </Box>
+        <Box sx={{ minWidth: 0, flex: '1 1 150px' }}>
+          <Typography fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>{expense.description}</Typography>
+          <Box display='flex' alignItems='center' flexWrap='wrap' gap={1} mt={0.6}>
+            <Chip
+              size='small'
+              icon={<PaymentsIcon />}
+              label={expense.isPaidByKari ? 'Kari' : 'Adolfo'}
+              title={expense.isPaidByKari ? 'Paid by Kari' : 'Paid by Adolfo'}
+              variant='outlined'
+              sx={{ height: 26, color: 'text.secondary', borderColor: '#333846', fontSize: 11, '& .MuiChip-icon': { color: 'inherit', fontSize: 15 } }}
+            />
+            {expense.type === 'kari' || expense.type === 'adolfo' ? (
+              <Chip
+                size='small'
+                icon={<PersonIcon />}
+                label={expense.type === 'kari' ? 'Kari' : 'Adolfo'}
+                title={expense.type === 'kari' ? 'Kari only' : 'Adolfo only'}
+                variant='outlined'
+                sx={{ height: 26, color: 'text.secondary', borderColor: '#333846', fontSize: 11, '& .MuiChip-icon': { color: 'inherit', fontSize: 15 } }}
+              />
+            ) : (
+              <Box
+                title={expense.type === 'percentage' ? 'Percentage split' : '50 / 50 split'}
+                aria-label={expense.type === 'percentage' ? 'Percentage split' : '50 / 50 split'}
+                sx={{ minWidth: 30, height: 26, px: 0.75, display: 'grid', placeItems: 'center', color: 'text.secondary', border: '1px solid #333846', borderRadius: 999 }}
+              >
+                {expense.type === 'percentage' ? (
+                  <PercentIcon sx={{ fontSize: 18 }} />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 18,
+                      height: 18,
+                      border: '2px solid currentColor',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(90deg, currentColor 50%, transparent 50%)',
+                    }}
+                  />
+                )}
+              </Box>
+            )}
+            {expense.is_default && (
+              <Box
+                title='Monthly'
+                aria-label='Monthly recurring expense'
+                sx={{ minWidth: 30, height: 26, px: 0.75, display: 'grid', placeItems: 'center', color: 'text.secondary', border: '1px solid #333846', borderRadius: 999 }}
+              >
+                <EventRepeatIcon sx={{ fontSize: 18 }} />
+              </Box>
+            )}
+            <Chip
+              size='small'
+              label={expense.category}
+              variant='outlined'
+              sx={{ height: 26, color: 'text.secondary', borderColor: '#333846', fontSize: 11, textTransform: 'capitalize' }}
+            />
+          </Box>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, flex: { xs: '1 0 100%', sm: 'none' }, pt: { xs: 1, sm: 0 }, borderTop: { xs: '1px solid #262932', sm: 0 } }}>
+          <Typography fontWeight={800} sx={{ mr: 0.5, fontVariantNumeric: 'tabular-nums' }}>
             $ {formatNumber(expense.amount)}
           </Typography>
-        </Stack>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Stack direction='row' spacing={1} flexWrap='wrap' alignItems='center' justifyContent='space-between'>
-          <Stack direction='row' spacing={1} flexWrap='wrap'>
-            <Chip
-              icon={<SellIcon />}
-              label={expense.category}
-              color='primary'
-              variant='outlined'
-              sx={{ color: theme.palette.text.primary }}
-            />
-            <Chip
-              icon={<CalculateIcon />}
-              label={expense.type}
-              color='secondary'
-              variant='outlined'
-              sx={{ color: theme.palette.text.primary }}
-            />
-            <Chip
-              icon={<PaymentIcon />}
-              label={`${expense.isPaidByKari ? 'Kari' : 'Adolfo'}`}
-              color='success'
-              variant='outlined'
-              sx={{ color: theme.palette.text.primary }}
-            />
-            {expense.is_default && (
-              <Chip
-                icon={<EventRepeatIcon />}
-                label='Recurrent'
-                color='info'
-                variant='outlined'
-                sx={{ color: theme.palette.text.primary }}
-              />
-            )}
-          </Stack>
-          <Stack direction='row' spacing={1}>
-            <IconButton color='primary' onClick={() => handleEdit(expense.id)} aria-label='edit' size='small'>
-              <EditIcon />
-            </IconButton>
-            <IconButton color='error' onClick={() => setOpen(true)} aria-label='delete' size='small'>
-              <DeleteIcon />
-            </IconButton>
-          </Stack>
-        </Stack>
-      </AccordionDetails>
+          <IconButton onClick={() => navigate(`${ROUTES.EXPENSES}${expense.id}`)} aria-label='Edit expense' sx={{ bgcolor: '#242832', color: 'text.secondary', '&:hover': { bgcolor: '#2f333e', color: 'text.primary' } }}>
+            <EditIcon fontSize='small' />
+          </IconButton>
+          <IconButton onClick={() => setOpen(true)} aria-label='Delete expense' sx={{ bgcolor: '#242832', color: 'text.secondary', '&:hover': { bgcolor: '#3a2521', color: '#ff8f78' } }}>
+            <DeleteIcon fontSize='small' />
+          </IconButton>
+        </Box>
+      </Box>
       <ExpensesDeleteModal open={open} handleClose={handleClose} handleDelete={handleDelete} expenseId={expense.id} />
-    </Accordion>
+    </>
   );
 };
 

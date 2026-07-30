@@ -44,13 +44,17 @@ class SupabaseService {
   }
 
   async signInWithEmail(email: string, password: string): Promise<User> {
-    try {
-      const { data }: AuthResponse = await this.client.auth.signInWithPassword({ email, password });
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return data.user!;
-    } catch (error) {
-      throw new Error(`Sign-in failed: ${error}`);
+    const { data, error }: AuthResponse = await this.client.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      throw error;
     }
+
+    if (!data.user) {
+      throw new Error('Unable to sign in. Please check your credentials.');
+    }
+
+    return data.user;
   }
 
   async signOut(): Promise<void> {
@@ -212,6 +216,7 @@ class SupabaseService {
       let percentageExpenses = 0;
       let sharedExpenses = 0;
       let kariExpenses = 0;
+      let adolfoExpenses = 0;
 
       for (const expense of expensesData) {
         totalExpenses += expense.amount || 0;
@@ -226,12 +231,16 @@ class SupabaseService {
           case 'kari':
             kariExpenses += expense.amount || 0;
             break;
+          case 'adolfo':
+            adolfoExpenses += expense.amount || 0;
+            break;
           default:
             break;
         }
       }
 
-      const adolfoTotal = percentageExpenses * (incomeData.adolfo_percentage / 100) + sharedExpenses / 2;
+      const adolfoTotal =
+        percentageExpenses * (incomeData.adolfo_percentage / 100) + sharedExpenses / 2 + adolfoExpenses;
 
       const kariTotal = percentageExpenses * (incomeData.kari_percentage / 100) + sharedExpenses / 2 + kariExpenses;
 
@@ -464,14 +473,6 @@ class SupabaseService {
     }
   }
 
-  async replaceSavingsGroup(originalDate: string, savings: SavingInsert[]): Promise<void> {
-    try {
-      await this.deleteSavingsByDate(originalDate);
-      await this.insertSavingsBatch(savings);
-    } catch (error) {
-      throw new Error(`Updating savings snapshot failed: ${error}`);
-    }
-  }
 }
 
 export const supabaseService = new SupabaseService();

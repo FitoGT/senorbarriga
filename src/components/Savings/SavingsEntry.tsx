@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,14 +8,11 @@ import {
   Button,
   CircularProgress,
   Container,
-  IconButton,
   Stack,
   TextField,
   Typography,
   useTheme,
 } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import FullLoader from '../Loader/FullLoader';
 import { useNotifications } from '../../context';
@@ -88,53 +85,41 @@ const formSchema = z.object({
   ...formSchemaShape,
 });
 
-const SavingsEntry = () => {
+interface SavingsEntryProps {
+  embedded?: boolean;
+}
+
+const SavingsEntry = ({ embedded = false }: SavingsEntryProps) => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { showNotification } = useNotifications();
   const { data: savings, isLoading, error } = useGetAllSavings();
   const { mutateAsync: saveSavingsSnapshot, isPending } = useInsertSavingsMutation();
-  const { date: dateParam } = useParams<{ date?: string }>();
-
-  const editingDateKey = dateParam ? decodeURIComponent(dateParam) : null;
-  const isEditing = Boolean(editingDateKey);
-
   const snapshotData = useMemo(() => {
     const groups = groupSavingsByDate(savings ?? []);
     const latestGroup = getLatestSavingsGroup(groups);
-    const targetGroup = editingDateKey ? groups.find((group) => group.dateKey === editingDateKey) : latestGroup;
     const dateKeys = new Set(groups.map((group) => group.dateKey));
 
     return {
       groups,
       latestGroup,
-      targetGroup,
       dateKeys,
     };
-  }, [editingDateKey, savings]);
+  }, [savings]);
 
-  const { latestGroup, targetGroup, dateKeys } = snapshotData;
+  const { latestGroup, dateKeys } = snapshotData;
 
   const fallbackDate = useMemo(() => today(), []);
-  const defaultDate = isEditing ? (editingDateKey ?? fallbackDate) : (latestGroup?.dateKey ?? fallbackDate);
+  const defaultDate = fallbackDate;
 
-  const duplicateDateKeys = useMemo(() => {
-    const keys = new Set(dateKeys);
-    if (editingDateKey) {
-      keys.delete(editingDateKey);
-    }
-    return keys;
-  }, [dateKeys, editingDateKey]);
+  const duplicateDateKeys = useMemo(() => new Set(dateKeys), [dateKeys]);
 
   const seedSavings = useMemo<Saving[]>(() => {
-    if (targetGroup?.savings?.length) {
-      return targetGroup.savings;
-    }
     if (latestGroup?.savings?.length) {
       return latestGroup.savings;
     }
     return [] as Saving[];
-  }, [latestGroup, targetGroup]);
+  }, [latestGroup]);
 
   const fieldsWithState = useMemo<SavingsFieldState[]>(() => {
     const latestMap = new Map<string, { amount: number; currency: Currencies | null }>();
@@ -254,65 +239,45 @@ const SavingsEntry = () => {
       try {
         await saveSavingsSnapshot({
           entries: payload,
-          originalDate: editingDateKey ?? undefined,
         });
-        navigate(ROUTES.SAVINGS);
+        if (!embedded) {
+          navigate(ROUTES.SAVINGS);
+        }
       } catch (submitError) {
         const message = submitError instanceof Error ? submitError.message : String(submitError);
         showNotification(`Error saving savings: ${message}`, 'error');
       }
     },
-    [duplicateDateKeys, editingDateKey, fieldsWithState, navigate, saveSavingsSnapshot, setError, showNotification],
+    [duplicateDateKeys, embedded, fieldsWithState, navigate, saveSavingsSnapshot, setError, showNotification],
   );
 
   const handleCancel = useCallback(() => {
-    navigate(ROUTES.SAVINGS);
-  }, [navigate]);
+    reset(defaultValues);
+    if (!embedded) {
+      navigate(ROUTES.SAVINGS);
+    }
+  }, [defaultValues, embedded, navigate, reset]);
 
   if (isLoading) {
     return <FullLoader />;
   }
 
-  if (isEditing && !targetGroup) {
-    return (
-      <Container
-        maxWidth='sm'
-        sx={{
-          mt: 10,
-          mb: 10,
-          backgroundColor: theme.palette.background.paper,
-          p: 3,
-          borderRadius: 2,
-          boxShadow: 3,
-        }}
-      >
-        <Stack spacing={3} alignItems='flex-start'>
-          <Typography variant='h5' fontWeight='bold' color='text.primary'>
-            Snapshot not found
-          </Typography>
-          <Typography color='text.secondary'>We could not find a savings snapshot for the selected date.</Typography>
-          <Button variant='contained' color='primary' onClick={() => navigate(ROUTES.SAVINGS)}>
-            Go back to savings
-          </Button>
-        </Stack>
-      </Container>
-    );
-  }
   return (
     <Container
-      maxWidth='sm'
+      maxWidth={embedded ? false : 'sm'}
       sx={{
-        mt: 10,
-        mb: 10,
+        mt: embedded ? 0 : 2,
+        mb: embedded ? 0 : 5,
         backgroundColor: theme.palette.background.paper,
         p: 3,
-        borderRadius: 2,
-        boxShadow: 3,
+        borderRadius: '26px',
+        boxShadow: '0 14px 34px rgba(0,0,0,.3)',
+        maxWidth: embedded ? 'none' : undefined,
       }}
     >
       <Stack spacing={3}>
         <Typography variant='h5' fontWeight='bold' color='text.primary'>
-          {isEditing ? 'Edit Savings Snapshot' : 'Add Savings Snapshot'}
+          New savings snapshot
         </Typography>
 
         <Box component='form' onSubmit={handleSubmit(onSubmit)}>
@@ -341,11 +306,15 @@ const SavingsEntry = () => {
             )}
           />
 
-          {[SavingUser.ADOLFO, SavingUser.KARI].map((user) => (
-            <Stack key={user} spacing={2} sx={{ mt: 3 }}>
-              <Typography variant='subtitle1' fontWeight='bold' color='text.secondary'>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: 1.75, mt: 2 }}>
+          {[SavingUser.KARI, SavingUser.ADOLFO].map((user) => (
+            <Stack key={user} spacing={1.25} sx={{ p: 2.25, bgcolor: '#171920', borderRadius: '20px' }}>
+              <Box display='flex' alignItems='center' gap={1}>
+                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: user === SavingUser.KARI ? 'success.main' : 'info.main' }} />
+              <Typography variant='subtitle1' fontWeight='bold' color={user === SavingUser.KARI ? 'success.main' : 'info.main'}>
                 {SAVING_USER_LABELS[user]}
               </Typography>
+              </Box>
               {fieldsWithState
                 .filter((field) => field.user === user)
                 .map((field) => (
@@ -353,7 +322,6 @@ const SavingsEntry = () => {
                     key={field.name}
                     label={`${SAVING_TYPE_LABELS[field.type]} (${field.currency})`}
                     fullWidth
-                    margin='normal'
                     type='text'
                     inputMode='decimal'
                     {...register(field.name)}
@@ -373,23 +341,25 @@ const SavingsEntry = () => {
                 ))}
             </Stack>
           ))}
+          </Box>
 
           <Box mt={4} display='flex' gap={2}>
-            <IconButton
-              color='success'
+            <Button
+              variant='contained'
               onClick={handleSubmit(onSubmit)}
               disabled={isPending}
-              sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
+              sx={{ flexGrow: 1 }}
             >
-              {isPending ? <CircularProgress size={24} color='inherit' /> : <CheckIcon />}
-            </IconButton>
-            <IconButton
-              color='error'
+              {isPending ? <CircularProgress size={24} color='inherit' /> : 'Save snapshot'}
+            </Button>
+            <Button
+              variant='outlined'
+              color='inherit'
               onClick={handleCancel}
-              sx={{ flexGrow: 1, border: '1px solid', borderRadius: '8px', p: 1 }}
+              sx={{ borderColor: '#333846', color: 'text.secondary' }}
             >
-              <CloseIcon />
-            </IconButton>
+              {embedded ? 'Reset' : 'Cancel'}
+            </Button>
           </Box>
         </Box>
       </Stack>

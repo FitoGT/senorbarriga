@@ -36,15 +36,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
+
     try {
       const loggedInUser = await supabaseService.signInWithEmail(email, password);
       setUser(loggedInUser);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      setError(err.message);
-      showNotification(`Error in login: ${err.message}`, 'error');
+    } catch (err: unknown) {
+      const originalMessage = err instanceof Error ? err.message : String(err);
+      const message = originalMessage.toLowerCase().includes('invalid login credentials')
+        ? 'Incorrect email or password.'
+        : originalMessage || 'Unable to sign in. Please try again.';
+
+      setUser(null);
+      setError(message);
+      showNotification(message, 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const logout = async () => {

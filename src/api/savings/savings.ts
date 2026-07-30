@@ -6,7 +6,6 @@ import { useNotifications } from '../../context';
 
 type SavingsMutationArgs = {
   entries: SavingInsert[];
-  originalDate?: string;
 };
 
 export const useGetAllSavings = () => {
@@ -21,17 +20,12 @@ export const useInsertSavingsMutation = () => {
   const { showNotification } = useNotifications();
 
   return useMutation({
-    mutationFn: async ({ entries, originalDate }: SavingsMutationArgs) => {
-      if (originalDate) {
-        return await supabaseService.replaceSavingsGroup(originalDate, entries);
-      }
-
+    mutationFn: async ({ entries }: SavingsMutationArgs) => {
       return await supabaseService.insertSavingsBatch(entries);
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SAVINGS_QUERY_KEYS.SAVINGS] });
-      const message = variables.originalDate ? 'Savings snapshot updated' : 'Savings snapshot saved';
-      showNotification(message, 'success');
+      showNotification('Savings snapshot saved', 'success');
     },
   });
 };

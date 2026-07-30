@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/Auth/AuthContext';
 import Navbar from '../../components/Navbar/Navbar';
-import Footer from '../../components/Footer/Footer';
+import { Box } from '@mui/material';
 
 const PrivateRoute = () => {
   const { user, loading } = useAuth();
@@ -15,11 +15,10 @@ const PrivateRoute = () => {
   }
 
   return (
-    <>
+    <Box sx={{ minHeight: '100vh', pb: 5 }}>
       <Navbar />
       <Outlet />
-      <Footer />
-    </>
+    </Box>
   );
 };
 

@@ -2,7 +2,7 @@ import { ExpenseType } from './';
 
 export const CategoryTypeMap = {
   cellphone: ExpenseType.SHARED,
-  food: ExpenseType.SHARED,
+  food: ExpenseType.PERCENTAGE,
   'health insurance': ExpenseType.SHARED,
   pet: ExpenseType.PERCENTAGE,
   pharmacy: ExpenseType.PERCENTAGE,

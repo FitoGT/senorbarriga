@@ -16,6 +16,7 @@ export enum ExpenseType {
   PERCENTAGE = 'percentage',
   SHARED = 'shared',
   KARI = 'kari',
+  ADOLFO = 'adolfo',
 }
 
 export interface Expense {

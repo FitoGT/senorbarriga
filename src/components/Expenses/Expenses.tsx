@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Stack, Typography, Box, IconButton } from '@mui/material';
+import { Container, Stack, Typography, Box, IconButton, TextField } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ExpensesAccordion from '../Expenses/ExpensesAccordion';
 import FullLoader from '../Loader/FullLoader';
@@ -8,11 +8,13 @@ import { useNotifications } from '../../context';
 import { ROUTES } from '../../constants/routes';
 import { useGetAllExpenses } from '../../api/expenses/expenses';
 import { formatDecimal } from '../../utils/number';
+import { currentMonth } from '../../utils/date';
 
 const Expenses = () => {
   const navigate = useNavigate();
   const { showNotification } = useNotifications();
-  const { data: expenses, isLoading, error } = useGetAllExpenses();
+  const [month, setMonth] = useState(currentMonth);
+  const { data: expenses, isLoading, error } = useGetAllExpenses(month);
 
   useEffect(() => {
     if (error) {
@@ -30,6 +32,13 @@ const Expenses = () => {
               <Typography variant='h5' fontWeight='bold' color='text.primary'>
                 Expenses
               </Typography>
+              <TextField
+                type='month'
+                size='small'
+                value={month}
+                onChange={(event) => setMonth(event.target.value)}
+                inputProps={{ 'aria-label': 'Expense month' }}
+              />
               <IconButton
                 color='primary'
                 onClick={() => navigate(ROUTES.EXPENSE)}

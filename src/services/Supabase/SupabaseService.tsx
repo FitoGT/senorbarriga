@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 import { createClient, SupabaseClient, AuthResponse, User } from '@supabase/supabase-js';
-import { addMonths, parseISO, format } from 'date-fns';
 import {
   ExpenseCategory,
   ExpenseType,
@@ -10,6 +9,7 @@ import {
   Debt,
   RequestDebtDto,
   TotalDebt,
+  DebtPayment,
   Saving,
   SavingUser,
   SavingType,
@@ -17,6 +17,7 @@ import {
   SavingInsert,
 } from '../../interfaces';
 import { roundToDecimals } from '../../utils/number';
+import { currentMonth, getMonthRange, monthFromDate } from '../../utils/date';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || '';
@@ -76,12 +77,14 @@ class SupabaseService {
 
   async getLatestIncome(): Promise<Income | null> {
     try {
-      const { data } = await this.client
+      const { data, error } = await this.client
         .from('income')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('month_key', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
+
+      if (error) throw error;
 
       return data;
     } catch (error) {
@@ -89,35 +92,55 @@ class SupabaseService {
     }
   }
 
+  async getIncomeForMonth(month: string): Promise<Income | null> {
+    await this.ensureMonthlyIncome(month);
+    const { data, error } = await this.client
+      .from('income')
+      .select('*')
+      .lte('month_key', month)
+      .order('month_key', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(`Fetching income for ${month} failed: ${error.message}`);
+    return data;
+  }
+
+  private async ensureMonthlyIncome(month: string): Promise<void> {
+    const { error } = await this.client.rpc('ensure_monthly_income', { target_month: month });
+    if (error) throw new Error(`Creating income snapshot for ${month} failed: ${error.message}`);
+  }
+
   async updateIncome(person: 'kari' | 'adolfo', newIncome: number): Promise<void> {
     try {
-      const latestIncome = await this.getLatestIncome();
-      if (!latestIncome) throw new Error('No income record found.');
+      const month = currentMonth();
+      const baseIncome = await this.getIncomeForMonth(month);
+      if (!baseIncome) throw new Error('No income record found.');
 
-      let updatedData: Partial<Income> = {};
+      let kariIncome = baseIncome.kari_income;
+      let adolfoIncome = baseIncome.adolfo_income;
 
       if (person === 'kari') {
-        const totalIncome = newIncome + latestIncome.adolfo_income;
-        updatedData = {
-          kari_income: newIncome,
-          total_income: totalIncome,
-          kari_percentage: (newIncome / totalIncome) * 100,
-          adolfo_percentage: 100 - (newIncome / totalIncome) * 100,
-        };
+        kariIncome = newIncome;
       } else if (person === 'adolfo') {
-        const totalIncome = newIncome + latestIncome.kari_income;
-        updatedData = {
-          adolfo_income: newIncome,
-          total_income: totalIncome,
-          adolfo_percentage: (newIncome / totalIncome) * 100,
-          kari_percentage: 100 - (newIncome / totalIncome) * 100,
-        };
+        adolfoIncome = newIncome;
       } else {
         throw new Error('Invalid person type. Use "kari" or "adolfo".');
       }
 
-      await this.client.from('income').update(updatedData).eq('id', latestIncome.id);
-      await this.syncBalance();
+      const totalIncome = kariIncome + adolfoIncome;
+      if (totalIncome <= 0) throw new Error('Total income must be greater than zero.');
+      const snapshot = {
+        month_key: month,
+        kari_income: kariIncome,
+        adolfo_income: adolfoIncome,
+        total_income: totalIncome,
+        kari_percentage: (kariIncome / totalIncome) * 100,
+        adolfo_percentage: (adolfoIncome / totalIncome) * 100,
+        total_percentage: 100,
+      };
+      const { error } = await this.client.from('income').upsert([snapshot], { onConflict: 'month_key' });
+      if (error) throw error;
+      await this.syncBalance(month);
     } catch (error) {
       throw new Error(`Updating income failed: ${error}`);
     }
@@ -141,11 +164,33 @@ class SupabaseService {
     }
   }
 
+  async getExpensesByMonth(month: string): Promise<Expense[]> {
+    await this.ensureMonthlyExpenses(month);
+    const { start, end } = getMonthRange(month);
+    const { data, error } = await this.client
+      .from('expenses')
+      .select('*')
+      .gte('date', start)
+      .lt('date', end)
+      .order('date', { ascending: false })
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(`Fetching expenses for ${month} failed: ${error.message}`);
+    return (data || []).map((expense) => ({
+      ...expense,
+      category: expense.category as ExpenseCategory,
+      type: expense.type as ExpenseType,
+    }));
+  }
+
+  private async ensureMonthlyExpenses(month: string): Promise<void> {
+    const { error } = await this.client.rpc('ensure_monthly_expenses', { target_month: month });
+    if (error) throw new Error(`Creating recurring expenses for ${month} failed: ${error.message}`);
+  }
+
   async insertExpense(expense: Omit<Expense, 'id' | 'created_at'>): Promise<void> {
     try {
       await this.client.from('expenses').insert([expense]);
-      const date = new Date(expense.date);
-      await this.syncBalance(date);
+      await this.syncBalance(monthFromDate(expense.date));
     } catch (error) {
       throw new Error(`Inserting expense failed: ${error}`);
     }
@@ -173,8 +218,10 @@ class SupabaseService {
       if (!originalExpense) throw new Error('Expense not found');
 
       await this.client.from('expenses').update(updates).eq('id', expenseId);
-      const date = new Date(originalExpense.date);
-      await this.syncBalance(date);
+      const oldMonth = monthFromDate(originalExpense.date);
+      const newMonth = updates.date ? monthFromDate(updates.date) : oldMonth;
+      await this.syncBalance(oldMonth);
+      if (newMonth !== oldMonth) await this.syncBalance(newMonth);
     } catch (error) {
       throw new Error(`Updating expense failed: ${error}`);
     }
@@ -186,19 +233,21 @@ class SupabaseService {
       if (!originalExpense) throw new Error('Expense not found');
 
       await this.client.from('expenses').delete().eq('id', expenseId);
-      const date = new Date(originalExpense.date);
-      await this.syncBalance(date);
+      await this.syncBalance(monthFromDate(originalExpense.date));
     } catch (error) {
       throw new Error(`Deleting expense failed: ${error}`);
     }
   }
 
-  async getTotalExpenses(): Promise<TotalExpenses> {
+  async getTotalExpenses(month: string = currentMonth()): Promise<TotalExpenses> {
     try {
+      await this.ensureMonthlyExpenses(month);
+      await this.ensureMonthlyIncome(month);
       const { data: incomeData, error: incomeError } = await this.client
         .from('income')
         .select('adolfo_percentage, kari_percentage')
-        .order('created_at', { ascending: false })
+        .lte('month_key', month)
+        .order('month_key', { ascending: false })
         .limit(1)
         .single();
 
@@ -206,7 +255,9 @@ class SupabaseService {
         throw new Error(`Fetching latest income failed: ${incomeError?.message}`);
       }
 
-      const { data: expensesData, error: expensesError } = await this.client.from('expenses').select('amount, type');
+      const { start, end } = getMonthRange(month);
+      const { data: expensesData, error: expensesError } = await this.client
+        .from('expenses').select('amount, type').gte('date', start).lt('date', end);
 
       if (expensesError || !expensesData) {
         throw new Error(`Fetching expenses failed: ${expensesError?.message}`);
@@ -254,27 +305,28 @@ class SupabaseService {
     }
   }
 
-  async upsertTotalExpenses(expenses: TotalExpenses): Promise<void> {
+  async upsertTotalExpenses(month: string, expenses: TotalExpenses): Promise<void> {
     try {
-      await this.client.from('total_expenses').delete().neq('id', 0);
-      await this.client.from('total_expenses').insert([
+      const { error } = await this.client.from('total_expenses').upsert([
         {
+          month_key: month,
           total: expenses.total,
           adolfo_total: expenses.adolfo,
           kari_total: expenses.kari,
         },
-      ]);
+      ], { onConflict: 'month_key' });
+      if (error) throw error;
     } catch (error) {
       throw new Error(`Upsert total expense failed: ${error}`);
     }
   }
 
-  async getKariBalance(): Promise<number> {
+  async getKariBalance(month: string): Promise<number> {
     try {
       const { data: kariExpenseData, error: kariExpenseError } = await this.client
         .from('total_expenses')
         .select('kari_total')
-        .order('created_at', { ascending: false })
+        .eq('month_key', month)
         .limit(1)
         .single();
 
@@ -284,10 +336,13 @@ class SupabaseService {
 
       const kariTotal = kariExpenseData.kari_total || 0;
 
+      const { start, end } = getMonthRange(month);
       const { data: paidByKariData, error: paidByKariError } = await this.client
         .from('expenses')
         .select('amount')
-        .eq('isPaidByKari', true);
+        .eq('isPaidByKari', true)
+        .gte('date', start)
+        .lt('date', end);
 
       if (paidByKariError || !paidByKariData) {
         throw new Error(`Fetching paid by Kari expenses failed: ${paidByKariError?.message}`);
@@ -348,89 +403,82 @@ class SupabaseService {
     }
   }
 
-  async syncBalance(expenseDate?: Date): Promise<void> {
-    const expenses = await this.getTotalExpenses();
-    await this.upsertTotalExpenses(expenses);
-    const kariBalance = await this.getKariBalance();
-
-    const dateToUse = expenseDate ?? new Date();
-    const month = dateToUse.toLocaleString('en-US', { month: 'long' });
-
-    const currentMonth = new Date().toLocaleString('en-US', { month: 'long' });
-
-    const debtByMonth = await this.getDebtByMonth(month);
-    if (debtByMonth?.length) {
-      await this.updateDebt(debtByMonth[0], kariBalance);
-    } else if (month === currentMonth) {
-      await this.insertDebt(kariBalance, month);
-    }
+  async syncBalance(month: string = currentMonth()): Promise<void> {
+    const expenses = await this.getTotalExpenses(month);
+    await this.upsertTotalExpenses(month, expenses);
+    const kariBalance = await this.getKariBalance(month);
+    const debt = {
+      month,
+      month_key: month,
+      adolfo_debt: kariBalance < 0 ? Math.abs(kariBalance) : 0,
+      kari_debt: kariBalance > 0 ? kariBalance : 0,
+    };
+    const { error } = await this.client.from('debt').upsert([debt], { onConflict: 'month_key' });
+    if (error) throw new Error(`Syncing debt for ${month} failed: ${error.message}`);
   }
 
   async getTotalDebt(): Promise<TotalDebt> {
     try {
-      const { data } = await this.client.from('debt').select('adolfo_debt, kari_debt');
-
-      const totals = (data || []).reduce(
-        (acc, debt) => ({
-          adolfo: acc.adolfo + (debt.adolfo_debt || 0),
-          kari: acc.kari + (debt.kari_debt || 0),
-        }),
-        { adolfo: 0, kari: 0 },
-      );
-
-      // Compensate debts between Adolfo and Kari: the smaller debt is
-      // subtracted from the larger so one party always ends at 0.
-      let adolfoTotal = Number(totals.adolfo || 0);
-      let kariTotal = Number(totals.kari || 0);
-
-      if (adolfoTotal > kariTotal) {
-        adolfoTotal = roundToDecimals(adolfoTotal - kariTotal);
-        kariTotal = 0;
-      } else if (kariTotal > adolfoTotal) {
-        kariTotal = roundToDecimals(kariTotal - adolfoTotal);
-        adolfoTotal = 0;
-      } else {
-        // equal or both zero
-        adolfoTotal = 0;
-        kariTotal = 0;
-      }
-
-      return { adolfo: adolfoTotal, kari: kariTotal };
+      const { data, error } = await this.client.rpc('get_net_debt');
+      if (error) throw error;
+      const net = roundToDecimals(Number(data || 0));
+      return { adolfo: net > 0 ? net : 0, kari: net < 0 ? Math.abs(net) : 0 };
     } catch (error) {
       throw new Error(`Fetching all debt failed: ${error}`);
     }
   }
 
-  async resetMonth(): Promise<void> {
-    try {
-      const { data: expenses } = await this.client.from('expenses').select('*');
+  async getAllDebts(): Promise<Debt[]> {
+    const { data, error } = await this.client.from('debt').select('*').order('month_key', { ascending: false });
+    if (error) throw new Error(`Fetching monthly debts failed: ${error.message}`);
+    return (data || []) as Debt[];
+  }
 
-      if (!expenses) {
-        return;
-      }
+  async getDebtPayments(): Promise<DebtPayment[]> {
+    const { data, error } = await this.client.from('debt_payments').select('*').order('paid_at', { ascending: false });
+    if (error) throw new Error(`Fetching debt payments failed: ${error.message}`);
+    return (data || []) as DebtPayment[];
+  }
 
-      const defaultExpenses = expenses.filter((expense) => expense.is_default);
-      const nonDefaultExpenses = expenses.filter((expense) => !expense.is_default);
+  async recordDebtPayment(amount: number, note?: string): Promise<void> {
+    const { error } = await this.client.rpc('record_debt_payment', {
+      payment_amount: amount,
+      payment_note: note || null,
+    });
+    if (error) throw new Error(`Recording debt payment failed: ${error.message}`);
+  }
 
-      if (nonDefaultExpenses.length > 0) {
-        const idsToDelete = nonDefaultExpenses.map((expense) => expense.id);
+  async getIncomeSnapshots(): Promise<Income[]> {
+    await this.ensureMonthlyIncome(currentMonth());
+    const { data, error } = await this.client.from('income').select('*').order('month_key', { ascending: false });
+    if (error) throw new Error(`Fetching income snapshots failed: ${error.message}`);
+    return (data || []) as Income[];
+  }
 
-        await this.client.from('expenses').delete().in('id', idsToDelete);
-      }
+  async upsertIncomeSnapshot(month: string, kariIncome: number, adolfoIncome: number): Promise<void> {
+    const totalIncome = kariIncome + adolfoIncome;
+    if (kariIncome < 0 || adolfoIncome < 0 || totalIncome <= 0) throw new Error('Income values must be valid.');
+    const { error } = await this.client.from('income').upsert([{
+      month_key: month,
+      kari_income: kariIncome,
+      adolfo_income: adolfoIncome,
+      total_income: totalIncome,
+      kari_percentage: (kariIncome / totalIncome) * 100,
+      adolfo_percentage: (adolfoIncome / totalIncome) * 100,
+      total_percentage: 100,
+    }], { onConflict: 'month_key' });
+    if (error) throw new Error(`Saving income snapshot failed: ${error.message}`);
+    await this.syncBalance(month);
+  }
 
-      if (defaultExpenses.length > 0) {
-        for (const expense of defaultExpenses) {
-          const originalDate = parseISO(expense.date);
-          const newDate = addMonths(originalDate, 1);
-          const formattedDate = format(newDate, 'yyyy-MM-dd');
+  async deleteIncomeSnapshot(month: string): Promise<void> {
+    const { error } = await this.client.rpc('delete_income_snapshot', { target_month: month });
+    if (error) throw new Error(`Deleting income snapshot failed: ${error.message}`);
+  }
 
-          await this.client.from('expenses').update({ date: formattedDate }).eq('id', expense.id);
-        }
-      }
-      this.syncBalance();
-    } catch (error) {
-      throw new Error(`Reset month failed: ${error}`);
-    }
+  async deleteDebtPayment(paymentId: number): Promise<void> {
+    const { error } = await this.client.from('debt_payments').delete().eq('id', paymentId);
+    if (error) throw new Error(`Deleting debt payment failed: ${error.message}`);
   }
 
   async getAllSavings(): Promise<Saving[]> {

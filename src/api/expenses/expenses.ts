@@ -4,10 +4,10 @@ import { supabaseService } from '../../services/Supabase/SupabaseService';
 import { Expense } from '../../interfaces';
 import { useNotifications } from '../../context';
 
-export const useGetAllExpenses = () => {
+export const useGetAllExpenses = (month: string) => {
   return useQuery({
-    queryKey: [EXPENSES_QUERY_KEYS.EXPENSES],
-    queryFn: () => supabaseService.getAllExpenses(),
+    queryKey: [EXPENSES_QUERY_KEYS.EXPENSES, month],
+    queryFn: () => supabaseService.getExpensesByMonth(month),
   });
 };
 

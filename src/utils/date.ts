@@ -49,6 +49,16 @@ export const isValidDateString = (value: string, format: string = DATE_DISPLAY_F
 
 export const today = (): string => dayjs().format(DATE_DISPLAY_FORMAT);
 
+export const currentMonth = (): string => dayjs().format('YYYY-MM');
+
+export const getMonthRange = (month: string): { start: string; end: string } => {
+  const start = dayjs(`${month}-01`, DATE_DISPLAY_FORMAT, true);
+  if (!start.isValid()) throw new Error(`Invalid month: ${month}`);
+  return { start: start.format(DATE_DISPLAY_FORMAT), end: start.add(1, 'month').format(DATE_DISPLAY_FORMAT) };
+};
+
+export const monthFromDate = (value: DateLike): string => formatDate(value, 'YYYY-MM');
+
 export const getDateKey = (value: DateLike): { key: string; timestamp: number } => {
   const parsed = toDayjs(value);
   if (!parsed) {

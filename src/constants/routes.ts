@@ -4,5 +4,7 @@ export const ROUTES = {
   EXPENSE: '/expense/',
   SAVINGS: '/savings/',
   SAVINGS_ENTRY: '/savings/new/',
+  INCOME: '/income/',
+  DEBT: '/debt/',
   AUTH: '/',
 };

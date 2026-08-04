@@ -1,6 +1,7 @@
 export interface Income {
   id: number;
   created_at: string;
+  month_key: string;
   kari_income: number;
   adolfo_income: number;
   total_income: number;

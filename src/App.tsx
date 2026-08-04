@@ -9,6 +9,7 @@ import Expenses from './components/Expenses/Expenses';
 import Expense from './components/Expense/Expense';
 import Savings from './components/Savings/Savings';
 import SavingsEntry from './components/Savings/SavingsEntry';
+import Settlement from './components/Settlement/Settlement';
 import PrivateRoute from './routes/PrivateRoute/PrivateRoute';
 import { ROUTES } from './constants/routes';
 
@@ -29,6 +30,8 @@ function App() {
                   <Route path={ROUTES.EXPENSES} element={<Expenses />} />
                   <Route path={ROUTES.SAVINGS} element={<Savings />} />
                   <Route path={ROUTES.SAVINGS_ENTRY} element={<SavingsEntry />} />
+                  <Route path={ROUTES.INCOME} element={<Settlement section='income' />} />
+                  <Route path={ROUTES.DEBT} element={<Settlement section='debt' />} />
                   <Route path={ROUTES.EXPENSES + ':id?'} element={<Expense />} />
                   <Route path={ROUTES.EXPENSE} element={<Expense />} />
                 </Route>

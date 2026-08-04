@@ -15,6 +15,8 @@ const Navbar = () => {
     { label: 'Today', path: ROUTES.DASHBOARD },
     { label: 'Expenses', path: ROUTES.EXPENSES },
     { label: 'Savings', path: ROUTES.SAVINGS },
+    { label: 'Income', path: ROUTES.INCOME },
+    { label: 'Debt', path: ROUTES.DEBT },
   ];
 
   return (

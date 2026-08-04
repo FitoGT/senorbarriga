@@ -7,6 +7,8 @@
 
 # testing
 /coverage
+/build
+/db/backups/
 
 # misc
 .DS_Store

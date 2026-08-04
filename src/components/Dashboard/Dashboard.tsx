@@ -11,6 +11,7 @@ import { buildRatesMap } from '../../utils/currency';
 import { formatDecimal } from '../../utils/number';
 import { calculateSavingsSummary, getLatestSavingsGroup, groupSavingsByDate } from '../../utils/savings';
 import { ROUTES } from '../../constants/routes';
+import { currentMonth } from '../../utils/date';
 
 const money = (value: number) => `${formatDecimal(value)} €`;
 
@@ -29,8 +30,8 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const [nextIncome, nextExpenses, nextDebt, nextSavings] = await Promise.all([
-        supabaseService.getLatestIncome(),
-        supabaseService.getTotalExpenses(),
+        supabaseService.getIncomeForMonth(currentMonth()),
+        supabaseService.getTotalExpenses(currentMonth()),
         supabaseService.getTotalDebt(),
         supabaseService.getAllSavings(),
       ]);

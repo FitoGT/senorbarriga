@@ -7,24 +7,25 @@ import { Box, Button, CircularProgress, Container, Stack, TextField, Typography,
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import FullLoader from '../Loader/FullLoader';
 import { useNotifications } from '../../context';
-import { useGetAllSavings, useInsertSavingsMutation } from '../../api/savings/savings';
-import { Currencies, Saving, SavingInsert, SavingType, SavingUser } from '../../interfaces';
+import { useGetAllSavings, useSaveSavingsMutation } from '../../api/savings/savings';
+import { Currencies, SavingInsert, SavingType, SavingUser } from '../../interfaces';
 import { ROUTES } from '../../constants/routes';
 import { SAVING_TYPE_LABELS, SAVING_USER_LABELS } from '../../constants/savings';
 import { DATE_DISPLAY_FORMAT, formatDate, isValidDateString, parseForDateInput, today } from '../../utils/date';
 import { normalizeDecimalInput, parseDecimal, toFixedString } from '../../utils/number';
-import { getLatestSavingsGroup, groupSavingsByDate } from '../../utils/savings';
+import { getLatestSavingsByAccount } from '../../utils/savings';
 
 const DEFAULT_TIMESTAMP_HOUR = '12:00:00Z';
 
 type SavingsFieldName =
   | 'adolfoCash'
   | 'adolfoOceanBank'
-  | 'adolfoFacebank'
   | 'adolfoN26'
   | 'kariCash'
   | 'kariSabadell'
-  | 'kariWise';
+  | 'kariWise'
+  | 'kariDeelCard'
+  | 'kariOceanBank';
 
 type SavingsFormValues = {
   date: string;
@@ -45,11 +46,12 @@ type SavingsFieldState = SavingsFieldConfig & {
 const FIELD_CONFIGS: SavingsFieldConfig[] = [
   { name: 'adolfoCash', user: SavingUser.ADOLFO, type: SavingType.CASH, defaultCurrency: Currencies.USD },
   { name: 'adolfoOceanBank', user: SavingUser.ADOLFO, type: SavingType.OCEAN_BANK, defaultCurrency: Currencies.USD },
-  { name: 'adolfoFacebank', user: SavingUser.ADOLFO, type: SavingType.FACEBANK, defaultCurrency: Currencies.USD },
   { name: 'adolfoN26', user: SavingUser.ADOLFO, type: SavingType.N26, defaultCurrency: Currencies.EUR },
   { name: 'kariCash', user: SavingUser.KARI, type: SavingType.CASH, defaultCurrency: Currencies.USD },
   { name: 'kariSabadell', user: SavingUser.KARI, type: SavingType.SABADELL, defaultCurrency: Currencies.EUR },
   { name: 'kariWise', user: SavingUser.KARI, type: SavingType.WISE, defaultCurrency: Currencies.USD },
+  { name: 'kariDeelCard', user: SavingUser.KARI, type: SavingType.DEEL_CARD, defaultCurrency: Currencies.USD },
+  { name: 'kariOceanBank', user: SavingUser.KARI, type: SavingType.OCEAN_BANK, defaultCurrency: Currencies.USD },
 ];
 
 const amountSchema = z
@@ -85,47 +87,11 @@ const SavingsEntry = ({ embedded = false }: SavingsEntryProps) => {
   const theme = useTheme();
   const { showNotification } = useNotifications();
   const { data: savings, isLoading, error } = useGetAllSavings();
-  const { mutateAsync: saveSavingsSnapshot, isPending } = useInsertSavingsMutation();
-  const snapshotData = useMemo(() => {
-    const groups = groupSavingsByDate(savings ?? []);
-    const latestGroup = getLatestSavingsGroup(groups);
-    const dateKeys = new Set(groups.map((group) => group.dateKey));
-
-    return {
-      groups,
-      latestGroup,
-      dateKeys,
-    };
-  }, [savings]);
-
-  const { latestGroup, dateKeys } = snapshotData;
-
-  const fallbackDate = useMemo(() => today(), []);
-  const defaultDate = fallbackDate;
-
-  const duplicateDateKeys = useMemo(() => new Set(dateKeys), [dateKeys]);
-
-  const seedSavings = useMemo<Saving[]>(() => {
-    if (latestGroup?.savings?.length) {
-      return latestGroup.savings;
-    }
-    return [] as Saving[];
-  }, [latestGroup]);
+  const { mutateAsync: saveSavingsSnapshot, isPending } = useSaveSavingsMutation();
+  const defaultDate = useMemo(() => today(), []);
 
   const fieldsWithState = useMemo<SavingsFieldState[]>(() => {
-    const latestMap = new Map<string, { amount: number; currency: Currencies | null }>();
-
-    for (const saving of seedSavings) {
-      if (!saving.user || !saving.type) {
-        continue;
-      }
-
-      const key = `${saving.user}-${saving.type}`;
-      latestMap.set(key, {
-        amount: typeof saving.amount === 'number' ? saving.amount : Number(saving.amount ?? 0),
-        currency: saving.currency ?? null,
-      });
-    }
+    const latestMap = getLatestSavingsByAccount(savings ?? []);
 
     return FIELD_CONFIGS.map((field) => {
       const key = `${field.user}-${field.type}`;
@@ -138,7 +104,7 @@ const SavingsEntry = ({ embedded = false }: SavingsEntryProps) => {
         defaultAmount: latest ? (latest.amount ?? 0) : null,
       };
     });
-  }, [seedSavings]);
+  }, [savings]);
 
   const defaultValues = useMemo<SavingsFormValues>(() => {
     const base: Partial<SavingsFormValues> = { date: defaultDate };
@@ -156,7 +122,6 @@ const SavingsEntry = ({ embedded = false }: SavingsEntryProps) => {
     handleSubmit,
     reset,
     setValue,
-    setError,
     getValues,
     formState: { errors },
   } = useForm<SavingsFormValues>({
@@ -203,15 +168,6 @@ const SavingsEntry = ({ embedded = false }: SavingsEntryProps) => {
         return;
       }
 
-      if (duplicateDateKeys.has(formattedDate)) {
-        setError('date', {
-          type: 'manual',
-          message: 'A savings snapshot already exists for this date.',
-        });
-        showNotification('A savings snapshot already exists for this date.', 'error');
-        return;
-      }
-
       const sharedTimestamp = `${formattedDate}T${DEFAULT_TIMESTAMP_HOUR}`;
 
       const payload: SavingInsert[] = fieldsWithState.map((field) => {
@@ -239,7 +195,7 @@ const SavingsEntry = ({ embedded = false }: SavingsEntryProps) => {
         showNotification(`Error saving savings: ${message}`, 'error');
       }
     },
-    [duplicateDateKeys, embedded, fieldsWithState, navigate, saveSavingsSnapshot, setError, showNotification],
+    [embedded, fieldsWithState, navigate, saveSavingsSnapshot, showNotification],
   );
 
   const handleCancel = useCallback(() => {

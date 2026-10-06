@@ -4,6 +4,7 @@ export const SAVING_TYPE_LABELS: Record<SavingType, string> = {
   [SavingType.CASH]: 'Cash',
   [SavingType.OCEAN_BANK]: 'Ocean Bank',
   [SavingType.WISE]: 'Wise',
+  [SavingType.DEEL_CARD]: 'Deel Card',
   [SavingType.FACEBANK]: 'Facebank',
   [SavingType.SABADELL]: 'Sabadell',
   [SavingType.N26]: 'N26',

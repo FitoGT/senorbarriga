@@ -9,6 +9,7 @@ export enum SavingType {
   CASH = 'cash',
   OCEAN_BANK = 'ocean bank',
   WISE = 'wise',
+  DEEL_CARD = 'deel card',
   FACEBANK = 'facebank',
   SABADELL = 'sabadell',
   N26 = 'n26',

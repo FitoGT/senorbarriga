@@ -257,7 +257,10 @@ class SupabaseService {
 
       const { start, end } = getMonthRange(month);
       const { data: expensesData, error: expensesError } = await this.client
-        .from('expenses').select('amount, type').gte('date', start).lt('date', end);
+        .from('expenses')
+        .select('amount, type')
+        .gte('date', start)
+        .lt('date', end);
 
       if (expensesError || !expensesData) {
         throw new Error(`Fetching expenses failed: ${expensesError?.message}`);
@@ -307,14 +310,17 @@ class SupabaseService {
 
   async upsertTotalExpenses(month: string, expenses: TotalExpenses): Promise<void> {
     try {
-      const { error } = await this.client.from('total_expenses').upsert([
-        {
-          month_key: month,
-          total: expenses.total,
-          adolfo_total: expenses.adolfo,
-          kari_total: expenses.kari,
-        },
-      ], { onConflict: 'month_key' });
+      const { error } = await this.client.from('total_expenses').upsert(
+        [
+          {
+            month_key: month,
+            total: expenses.total,
+            adolfo_total: expenses.adolfo,
+            kari_total: expenses.kari,
+          },
+        ],
+        { onConflict: 'month_key' },
+      );
       if (error) throw error;
     } catch (error) {
       throw new Error(`Upsert total expense failed: ${error}`);
@@ -458,15 +464,20 @@ class SupabaseService {
   async upsertIncomeSnapshot(month: string, kariIncome: number, adolfoIncome: number): Promise<void> {
     const totalIncome = kariIncome + adolfoIncome;
     if (kariIncome < 0 || adolfoIncome < 0 || totalIncome <= 0) throw new Error('Income values must be valid.');
-    const { error } = await this.client.from('income').upsert([{
-      month_key: month,
-      kari_income: kariIncome,
-      adolfo_income: adolfoIncome,
-      total_income: totalIncome,
-      kari_percentage: (kariIncome / totalIncome) * 100,
-      adolfo_percentage: (adolfoIncome / totalIncome) * 100,
-      total_percentage: 100,
-    }], { onConflict: 'month_key' });
+    const { error } = await this.client.from('income').upsert(
+      [
+        {
+          month_key: month,
+          kari_income: kariIncome,
+          adolfo_income: adolfoIncome,
+          total_income: totalIncome,
+          kari_percentage: (kariIncome / totalIncome) * 100,
+          adolfo_percentage: (adolfoIncome / totalIncome) * 100,
+          total_percentage: 100,
+        },
+      ],
+      { onConflict: 'month_key' },
+    );
     if (error) throw new Error(`Saving income snapshot failed: ${error.message}`);
     await this.syncBalance(month);
   }
@@ -483,16 +494,17 @@ class SupabaseService {
 
   async getAllSavings(): Promise<Saving[]> {
     try {
-      const { data } = await this.client.from('savings').select('*').order('created_at', { ascending: false });
+      const { data, error } = await this.client.from('savings').select('*').order('created_at', { ascending: false });
+      if (error) throw new Error(error.message);
 
       return (data ?? []).map((saving) => {
         return {
           id: saving.id,
           created_at: saving.created_at,
-          user: saving.user as SavingUser,
-          type: saving.type as SavingType,
+          user: saving.user?.trim().toLowerCase() as SavingUser,
+          type: saving.type?.trim().toLowerCase() as SavingType,
           amount: typeof saving.amount === 'number' ? saving.amount : Number(saving.amount ?? 0),
-          currency: saving.currency as Currencies,
+          currency: saving.currency?.trim().toUpperCase() as Currencies,
         } satisfies Saving;
       });
     } catch (error) {
@@ -500,22 +512,52 @@ class SupabaseService {
     }
   }
 
-  async insertSavingsBatch(savings: SavingInsert[]): Promise<void> {
+  async saveSavingsSnapshot(savings: SavingInsert[]): Promise<void> {
     try {
       if (!savings.length) {
         throw new Error('Savings payload must include at least one entry.');
       }
 
-      await this.client.from('savings').insert(savings);
+      const date = savings[0].created_at.slice(0, 10);
+      const { start, end } = this.getDateRange(date);
+      if (savings.some((saving) => saving.created_at < start || saving.created_at >= end)) {
+        throw new Error('All savings entries must belong to the same date.');
+      }
+
+      const { data: existing, error: readError } = await this.client
+        .from('savings')
+        .select('id, user, type')
+        .gte('created_at', start)
+        .lt('created_at', end)
+        .order('id', { ascending: false });
+      if (readError) throw new Error(readError.message);
+
+      const existingIds = new Map<string, number>();
+      for (const saving of existing ?? []) {
+        const key = `${saving.user?.trim().toLowerCase()}-${saving.type?.trim().toLowerCase()}`;
+        if (!existingIds.has(key)) existingIds.set(key, saving.id);
+      }
+
+      const entries = savings.map((saving) => {
+        const id = existingIds.get(`${saving.user}-${saving.type}`);
+        return {
+          ...saving,
+          ...(id !== undefined ? { id } : {}),
+          currency: saving.currency.trim().toUpperCase(),
+        };
+      });
+      const { error } = await this.client.from('savings').upsert(entries, { onConflict: 'id', defaultToNull: false });
+      if (error) throw new Error(error.message);
     } catch (error) {
-      throw new Error(`Inserting savings failed: ${error}`);
+      throw new Error(`Saving savings snapshot failed: ${error}`);
     }
   }
 
   async deleteSavingsByDate(date: string): Promise<void> {
     try {
       const { start, end } = this.getDateRange(date);
-      await this.client.from('savings').delete().gte('created_at', start).lt('created_at', end);
+      const { error } = await this.client.from('savings').delete().gte('created_at', start).lt('created_at', end);
+      if (error) throw new Error(error.message);
     } catch (error) {
       throw new Error(`Deleting savings snapshot failed: ${error}`);
     }

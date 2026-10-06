@@ -19,7 +19,9 @@ const SettlementDeleteDialog = ({ open, label, loading, onClose, onConfirm, titl
       </DialogContentText>
     </DialogContent>
     <DialogActions>
-      <Button onClick={onClose} disabled={loading} color='inherit'>Cancel</Button>
+      <Button onClick={onClose} disabled={loading} color='inherit'>
+        Cancel
+      </Button>
       <Button onClick={onConfirm} disabled={loading} color='error' autoFocus>
         {loading ? 'Deleting…' : 'Delete'}
       </Button>

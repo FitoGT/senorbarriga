@@ -46,6 +46,23 @@ export const groupSavingsByDate = (savings: Saving[]): SavingsGroup[] => {
 export const getLatestSavingsGroup = (groups: SavingsGroup[]): SavingsGroup | null =>
   groups.length ? groups[0] : null;
 
+export const getLatestSavingsByAccount = (savings: Saving[]): Map<string, Saving> => {
+  const latestByAccount = new Map<string, Saving>();
+  const ordered = [...savings].sort((a, b) => {
+    const dateDifference = getDateKey(b.created_at).timestamp - getDateKey(a.created_at).timestamp;
+    return dateDifference || b.id - a.id;
+  });
+
+  for (const saving of ordered) {
+    const key = `${saving.user}-${saving.type}`;
+    if (!latestByAccount.has(key)) {
+      latestByAccount.set(key, saving);
+    }
+  }
+
+  return latestByAccount;
+};
+
 export const calculateSavingsSummary = (savings: Saving[], rates: CurrencyRateMap): SavingsSummary => {
   if (!savings.length) {
     return {

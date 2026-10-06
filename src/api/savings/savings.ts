@@ -15,16 +15,16 @@ export const useGetAllSavings = () => {
   });
 };
 
-export const useInsertSavingsMutation = () => {
+export const useSaveSavingsMutation = () => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotifications();
 
   return useMutation({
     mutationFn: async ({ entries }: SavingsMutationArgs) => {
-      return await supabaseService.insertSavingsBatch(entries);
+      return await supabaseService.saveSavingsSnapshot(entries);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [SAVINGS_QUERY_KEYS.SAVINGS] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: [SAVINGS_QUERY_KEYS.SAVINGS] });
       showNotification('Savings snapshot saved', 'success');
     },
   });
@@ -38,8 +38,8 @@ export const useDeleteSavingsGroupMutation = () => {
     mutationFn: async (dateKey: string) => {
       return await supabaseService.deleteSavingsByDate(dateKey);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [SAVINGS_QUERY_KEYS.SAVINGS] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: [SAVINGS_QUERY_KEYS.SAVINGS] });
       showNotification('Savings snapshot deleted', 'success');
     },
   });
